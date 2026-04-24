@@ -5,172 +5,308 @@ import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 
-function NFCCard3D() {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [flipped, setFlipped]   = useState(false);
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+const EDITIONS = [
+  {
+    key:         'midnight',
+    label:       'Midnight',
+    bg:          'linear-gradient(135deg, #0D0E14 0%, #181B26 100%)',
+    accent:      '#6366F1',
+    line:        'linear-gradient(90deg, #6366F1, #06B6D4)',
+    chip:        'linear-gradient(135deg, #F59E0B, #FBBF24)',
+    personName:  'Sophie Martin',
+    personTitle: 'CEO & Founder',
+  },
+  {
+    key:         'electric',
+    label:       'Electric',
+    bg:          'linear-gradient(135deg, #1e1b4b 0%, #4338CA 100%)',
+    accent:      '#818CF8',
+    line:        'linear-gradient(90deg, #818CF8, #C084FC)',
+    chip:        'linear-gradient(135deg, #C084FC, #818CF8)',
+    personName:  'Marcus Chen',
+    personTitle: 'Product Designer',
+  },
+  {
+    key:         'glass',
+    label:       'Glass',
+    bg:          'linear-gradient(135deg, #0c1a2e 0%, #0e2340 100%)',
+    accent:      '#06B6D4',
+    line:        'linear-gradient(90deg, #06B6D4, #3B82F6)',
+    chip:        'linear-gradient(135deg, #0EA5E9, #06B6D4)',
+    personName:  'Léa Dubois',
+    personTitle: 'Sales Director',
+  },
+  {
+    key:         'metal',
+    label:       'Métal',
+    bg:          'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)',
+    accent:      '#9CA3AF',
+    line:        'linear-gradient(90deg, #9CA3AF, #6B7280)',
+    chip:        'linear-gradient(135deg, #D1D5DB, #9CA3AF)',
+    personName:  'Alex Torres',
+    personTitle: 'CTO',
+  },
+];
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current || flipped) return;
-    const rect   = cardRef.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top  + rect.height / 2;
-    const rotX = ((e.clientY - centerY) / rect.height) * -20;
-    const rotY = ((e.clientX - centerX) / rect.width)  *  20;
-    setRotation({ x: rotX, y: rotY });
-  };
+const W = 340;
+const H = 215;
+const N = EDITIONS.length;
 
-  const handleMouseLeave = () => setRotation({ x: 0, y: 0 });
+function CardDeck() {
+  const [activeIdx, setActiveIdx]   = useState(0);
+  const [flipped, setFlipped]       = useState(false);
+  const [rotation, setRotation]     = useState({ x: 0, y: 0 });
+  const [exiting, setExiting]       = useState(false);
+  const cardRef   = useRef<HTMLDivElement>(null);
+  const touchX    = useRef(0);
+
+  function navigate(dir: 'prev' | 'next') {
+    if (exiting) return;
+    setExiting(true);
+    setFlipped(false);
+    setTimeout(() => {
+      setActiveIdx((i) => dir === 'next' ? (i + 1) % N : (i - 1 + N) % N);
+      setExiting(false);
+    }, 380);
+  }
+
+  function getOffset(idx: number) {
+    return ((idx - activeIdx) % N + N) % N;
+  }
+
+  function cardTransform(idx: number): React.CSSProperties {
+    const offset = getOffset(idx);
+
+    if (offset === 0) {
+      if (exiting) {
+        return {
+          zIndex: 10, opacity: 0,
+          transform: 'translateX(0px) scale(0.85)',
+          transition: 'all 0.38s cubic-bezier(0.23,1,0.32,1)',
+          pointerEvents: 'none',
+        };
+      }
+      return {
+        zIndex: 10, opacity: 1,
+        transform: flipped
+          ? 'rotateY(180deg)'
+          : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+        transition: flipped
+          ? 'transform 0.55s cubic-bezier(0.23,1,0.32,1)'
+          : exiting ? 'all 0.38s cubic-bezier(0.23,1,0.32,1)' : 'transform 0.15s ease-out',
+        cursor: 'pointer',
+      };
+    }
+
+    if (offset === 1) {
+      return {
+        zIndex: 6, opacity: 0.6,
+        transform: 'translateX(44px) translateY(14px) rotate(5deg) scale(0.88)',
+        transition: 'all 0.45s cubic-bezier(0.23,1,0.32,1)',
+        filter: 'blur(0.5px)',
+        cursor: 'default',
+      };
+    }
+
+    if (offset === N - 1) {
+      return {
+        zIndex: 6, opacity: 0.6,
+        transform: 'translateX(-44px) translateY(14px) rotate(-5deg) scale(0.88)',
+        transition: 'all 0.45s cubic-bezier(0.23,1,0.32,1)',
+        filter: 'blur(0.5px)',
+        cursor: 'default',
+      };
+    }
+
+    return {
+      zIndex: 1, opacity: 0,
+      transform: 'scale(0.75)',
+      transition: 'all 0.45s cubic-bezier(0.23,1,0.32,1)',
+      pointerEvents: 'none',
+    };
+  }
+
+  const active = EDITIONS[activeIdx];
 
   return (
-    <div
-      style={{ perspective: 1200, cursor: 'pointer' }}
-      onClick={() => setFlipped((f) => !f)}
-    >
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 28 }}>
+
+      {/* Deck */}
       <div
-        ref={cardRef}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{
-          width: 340,
-          height: 215,
-          position: 'relative',
-          transformStyle: 'preserve-3d',
-          transition: flipped
-            ? 'transform 0.6s cubic-bezier(0.23,1,0.32,1)'
-            : 'transform 0.15s ease-out',
-          transform: flipped
-            ? 'rotateY(180deg)'
-            : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+        style={{ position: 'relative', width: W, height: H + 30, perspective: 1200 }}
+        onMouseMove={(e) => {
+          if (!cardRef.current || flipped || exiting) return;
+          const r = cardRef.current.getBoundingClientRect();
+          setRotation({
+            x: ((e.clientY - r.top  - r.height / 2) / r.height) * -20,
+            y: ((e.clientX - r.left - r.width  / 2) / r.width)  *  20,
+          });
+        }}
+        onMouseLeave={() => setRotation({ x: 0, y: 0 })}
+        onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          const dx = e.changedTouches[0].clientX - touchX.current;
+          if (Math.abs(dx) > 50) navigate(dx < 0 ? 'next' : 'prev');
         }}
       >
-        {/* Front */}
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            backfaceVisibility: 'hidden',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, #0D0E14 0%, #181B26 100%)',
-            border: '1px solid rgba(99,102,241,0.2)',
-            padding: 28,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            boxShadow: '0 40px 80px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.15)',
-          }}
-        >
-          {/* NFC ring */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        {EDITIONS.map((ed, idx) => (
+          <div
+            key={ed.key}
+            ref={idx === activeIdx ? cardRef : undefined}
+            style={{
+              position: 'absolute',
+              top: 15,
+              left: 0,
+              width: W,
+              height: H,
+              transformStyle: 'preserve-3d',
+              ...cardTransform(idx),
+            }}
+            onClick={() => {
+              if (getOffset(idx) === 0 && !exiting) setFlipped((f) => !f);
+            }}
+          >
+            {/* ── FRONT ── */}
             <div style={{
-              width: 40, height: 28,
-              background: 'linear-gradient(135deg, #F59E0B, #FBBF24)',
-              borderRadius: 4,
-              opacity: 0.9,
-            }} />
-            <div style={{ position: 'relative', width: 36, height: 36 }}>
-              {[36, 26, 16].map((s, i) => (
-                <div key={i} style={{
-                  position: 'absolute',
-                  top: '50%', left: '50%',
-                  width: s, height: s,
-                  transform: 'translate(-50%,-50%)',
-                  borderRadius: '50%',
-                  border: `1.5px solid rgba(99,102,241,${0.6 - i * 0.15})`,
-                }} />
-              ))}
-              <div style={{
-                position: 'absolute', top: '50%', left: '50%',
-                width: 6, height: 6,
-                transform: 'translate(-50%,-50%)',
-                borderRadius: '50%',
-                background: '#6366F1',
-              }} />
-            </div>
-          </div>
-
-          <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: '#F8F9FC', marginBottom: 4 }}>
-              Sophie Martin
-            </p>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#9CA3AF', textTransform: 'uppercase' }}>
-              CEO & Founder
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
-              We Connect
-            </p>
-            <div style={{
-              padding: '4px 10px',
-              background: 'rgba(99,102,241,0.1)',
-              border: '1px solid rgba(99,102,241,0.2)',
-              borderRadius: 4,
+              position: 'absolute', inset: 0,
+              backfaceVisibility: 'hidden',
+              borderRadius: 16,
+              background: ed.bg,
+              border: `1px solid ${ed.accent}44`,
+              padding: 28,
+              display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+              boxShadow: getOffset(idx) === 0
+                ? `0 40px 80px rgba(0,0,0,0.6), 0 0 40px ${ed.accent}22`
+                : '0 16px 32px rgba(0,0,0,0.5)',
+              overflow: 'hidden',
             }}>
-              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#818CF8', letterSpacing: 2 }}>
-                ÉDITION ELECTRIC
-              </span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ width: 40, height: 28, background: ed.chip, borderRadius: 4, opacity: 0.9 }} />
+                <div style={{ position: 'relative', width: 36, height: 36 }}>
+                  {[36, 26, 16].map((s, i) => (
+                    <div key={i} style={{
+                      position: 'absolute', top: '50%', left: '50%',
+                      width: s, height: s, transform: 'translate(-50%,-50%)',
+                      borderRadius: '50%',
+                      border: `1.5px solid ${ed.accent}${Math.round((0.6 - i * 0.15) * 255).toString(16).padStart(2, '0')}`,
+                    }} />
+                  ))}
+                  <div style={{ position: 'absolute', top: '50%', left: '50%', width: 6, height: 6, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: ed.accent }} />
+                </div>
+              </div>
+
+              <div>
+                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: '#F8F9FC', marginBottom: 4 }}>
+                  {ed.personName}
+                </p>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#9CA3AF', textTransform: 'uppercase' }}>
+                  {ed.personTitle}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
+                  We Connect
+                </p>
+                <div style={{ padding: '4px 10px', background: `${ed.accent}22`, border: `1px solid ${ed.accent}44`, borderRadius: 4 }}>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: ed.accent, letterSpacing: 2 }}>
+                    ÉDITION {ed.label.toUpperCase()}
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: ed.line, borderRadius: '0 0 16px 16px' }} />
+            </div>
+
+            {/* ── BACK ── */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              borderRadius: 16,
+              background: '#0D0E14',
+              border: `1px solid ${ed.accent}44`,
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
+              boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
+            }}>
+              <div style={{
+                width: 110, height: 110,
+                background: 'repeating-linear-gradient(0deg, rgba(99,102,241,0.08) 0px, rgba(99,102,241,0.08) 1px, transparent 1px, transparent 8px), repeating-linear-gradient(90deg, rgba(99,102,241,0.08) 0px, rgba(99,102,241,0.08) 1px, transparent 1px, transparent 8px)',
+                border: `2px solid ${ed.accent}44`,
+                borderRadius: 8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <div style={{
+                  width: 60, height: 60,
+                  background: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='10' y='10' width='30' height='30' fill='%236366F1'/%3E%3Crect x='60' y='10' width='30' height='30' fill='%236366F1'/%3E%3Crect x='10' y='60' width='30' height='30' fill='%236366F1'/%3E%3Crect x='45' y='45' width='10' height='10' fill='%2306B6D4'/%3E%3Crect x='60' y='60' width='10' height='10' fill='%236366F1'/%3E%3C/svg%3E") center/contain no-repeat`,
+                }} />
+              </div>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
+                Scannez pour voir le profil
+              </p>
             </div>
           </div>
+        ))}
+      </div>
 
-          {/* Gradient accent */}
-          <div style={{
-            position: 'absolute', bottom: 0, left: 0, right: 0, height: 3,
-            background: 'linear-gradient(90deg, #6366F1, #06B6D4)',
-            borderRadius: '0 0 16px 16px',
-          }} />
-        </div>
-
-        {/* Back */}
-        <div
+      {/* Controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <button
+          onClick={() => navigate('prev')}
           style={{
-            position: 'absolute',
-            inset: 0,
-            backfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)',
-            borderRadius: 16,
-            background: '#0D0E14',
-            border: '1px solid rgba(6,182,212,0.2)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 16,
-            boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
+            width: 34, height: 34, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            cursor: 'pointer', color: '#9CA3AF', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#F8F9FC'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#9CA3AF'; }}
         >
-          {/* QR Code mockup */}
-          <div style={{
-            width: 110, height: 110,
-            background: 'repeating-linear-gradient(0deg, rgba(99,102,241,0.1) 0px, rgba(99,102,241,0.1) 1px, transparent 1px, transparent 8px), repeating-linear-gradient(90deg, rgba(99,102,241,0.1) 0px, rgba(99,102,241,0.1) 1px, transparent 1px, transparent 8px)',
-            border: '2px solid rgba(99,102,241,0.3)',
-            borderRadius: 8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-            <div style={{
-              width: 60, height: 60,
-              background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect x=\'10\' y=\'10\' width=\'30\' height=\'30\' fill=\'%236366F1\'/%3E%3Crect x=\'60\' y=\'10\' width=\'30\' height=\'30\' fill=\'%236366F1\'/%3E%3Crect x=\'10\' y=\'60\' width=\'30\' height=\'30\' fill=\'%236366F1\'/%3E%3Crect x=\'45\' y=\'45\' width=\'10\' height=\'10\' fill=\'%2306B6D4\'/%3E%3Crect x=\'60\' y=\'60\' width=\'10\' height=\'10\' fill=\'%236366F1\'/%3E%3C/svg%3E") center/contain no-repeat',
-            }} />
-          </div>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
-            Scannez pour voir le profil
-          </p>
+          ←
+        </button>
+
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {EDITIONS.map((ed, i) => (
+            <button
+              key={ed.key}
+              onClick={() => { setFlipped(false); setActiveIdx(i); }}
+              style={{
+                width: i === activeIdx ? 24 : 8,
+                height: 8,
+                borderRadius: 4,
+                background: i === activeIdx ? active.accent : 'rgba(255,255,255,0.15)',
+                border: 'none', cursor: 'pointer',
+                transition: 'all 0.35s cubic-bezier(0.23,1,0.32,1)',
+                padding: 0,
+              }}
+            />
+          ))}
         </div>
+
+        <button
+          onClick={() => navigate('next')}
+          style={{
+            width: 34, height: 34, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            cursor: 'pointer', color: '#9CA3AF', fontSize: 16,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#F8F9FC'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.color = '#9CA3AF'; }}
+        >
+          →
+        </button>
       </div>
 
       <p style={{
-        textAlign: 'center',
-        fontFamily: 'Space Mono, monospace',
-        fontSize: 9,
-        letterSpacing: 3,
-        color: '#6B7280',
-        marginTop: 16,
-        textTransform: 'uppercase',
+        fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2,
+        color: '#6B7280', textTransform: 'uppercase', textAlign: 'center',
       }}>
-        {flipped ? '← Cliquez pour revenir' : 'Cliquez pour révéler le QR Code'}
+        {flipped ? '← Cliquez pour revenir' : 'Cliquez · Glissez pour changer d\'édition'}
       </p>
     </div>
   );
@@ -188,9 +324,7 @@ export default function Hero() {
         paddingTop: 80,
       }}
     >
-      {/* Grid background */}
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
-      {/* Radial glow */}
       <div className="glow-electric" style={{ position: 'absolute', inset: 0 }} />
 
       <div style={{
@@ -258,7 +392,6 @@ export default function Hero() {
             </Link>
           </div>
 
-          {/* Social proof */}
           <div className="animate-fade-in-up delay-400" style={{ display: 'flex', gap: 32, marginTop: 48, flexWrap: 'wrap' }}>
             {[
               { value: '10k+', label: 'Cartes actives' },
@@ -267,12 +400,9 @@ export default function Hero() {
             ].map((stat) => (
               <div key={stat.label}>
                 <div style={{
-                  fontFamily: 'Syne, sans-serif',
-                  fontWeight: 800,
-                  fontSize: 28,
+                  fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28,
                   background: 'linear-gradient(135deg, #6366F1, #06B6D4)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 }}>
                   {stat.value}
                 </div>
@@ -284,9 +414,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right — 3D Card */}
+        {/* Right — Card Deck */}
         <div className="animate-fade-in-up delay-300" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <NFCCard3D />
+          <CardDeck />
         </div>
       </div>
     </section>
