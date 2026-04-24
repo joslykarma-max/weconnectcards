@@ -1,0 +1,187 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Space+Mono&display=swap');
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────────── */
+:root {
+  --black:          #08090C;
+  --deep:           #0D0E14;
+  --surface:        #12141C;
+  --card:           #181B26;
+  --border:         rgba(255,255,255,0.07);
+  --border-accent:  rgba(99,102,241,0.35);
+
+  --electric:       #6366F1;
+  --electric-light: #818CF8;
+  --electric-dark:  #4338CA;
+  --cyan:           #06B6D4;
+  --cyan-dark:      #0891B2;
+
+  --white:          #F8F9FC;
+  --grey:           #6B7280;
+  --grey-light:     #9CA3AF;
+
+  --gradient-signature: linear-gradient(135deg, #6366F1, #06B6D4);
+  --gradient-electric:  linear-gradient(135deg, #4338CA, #6366F1, #818CF8);
+  --gradient-dark:      linear-gradient(180deg, #0D0E14, #181B26);
+
+  --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+  --transition:    all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@theme inline {
+  --color-black:          #08090C;
+  --color-deep:           #0D0E14;
+  --color-surface:        #12141C;
+  --color-card:           #181B26;
+  --color-electric:       #6366F1;
+  --color-electric-light: #818CF8;
+  --color-electric-dark:  #4338CA;
+  --color-cyan:           #06B6D4;
+  --color-cyan-dark:      #0891B2;
+  --color-white:          #F8F9FC;
+  --color-grey:           #6B7280;
+  --color-grey-light:     #9CA3AF;
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --font-mono:    'Space Mono', monospace;
+}
+
+/* ─── Base ──────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--black);
+  color: var(--white);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+/* ─── Grid Background ────────────────────────────────────────────── */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─── Glows ──────────────────────────────────────────────────────── */
+.glow-electric {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 70%);
+}
+
+.glow-cyan {
+  background: radial-gradient(ellipse 60% 40% at 50% 100%, rgba(6,182,212,0.12) 0%, transparent 70%);
+}
+
+/* ─── Text Gradient ──────────────────────────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, #6366F1, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-electric {
+  background: linear-gradient(135deg, #4338CA, #6366F1, #818CF8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--deep); }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--electric); }
+
+::selection { background: rgba(99,102,241,0.3); color: var(--white); }
+:focus-visible { outline: 2px solid var(--electric); outline-offset: 2px; }
+
+/* ─── Animations ─────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(99,102,241,0.6), 0 0 80px rgba(99,102,241,0.2); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-12px) rotate(1deg); }
+}
+@keyframes scanLine {
+  0%   { top: -2px; opacity: 1; }
+  100% { top: calc(100% + 2px); opacity: 0; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fade-in-up   { animation: fadeInUp 0.6s cubic-bezier(0.23,1,0.32,1) both; }
+.animate-fade-in      { animation: fadeIn 0.4s ease both; }
+.animate-float        { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow   { animation: pulseGlow 2s ease-in-out infinite; }
+.animate-scan-line    { animation: scanLine 2s linear infinite; }
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+
+/* ─── NFC Card 3D ────────────────────────────────────────────────── */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+}
+
+/* ─── Sidebar items ─────────────────────────────────────────────── */
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 44px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--grey-light);
+  transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+  text-decoration: none;
+  border-right: 2px solid transparent;
+  position: relative;
+}
+
+.sidebar-item:hover {
+  background: rgba(255,255,255,0.03);
+  color: var(--white);
+}
+
+.sidebar-item.active {
+  background: rgba(99,102,241,0.1);
+  border-right-color: var(--electric);
+  color: var(--electric-light);
+}
+
+/* ─── Shimmer loading ────────────────────────────────────────────── */
+.shimmer {
+  background: linear-gradient(90deg, var(--surface) 25%, var(--card) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
