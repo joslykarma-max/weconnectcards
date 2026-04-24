@@ -6,6 +6,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard':           'Overview',
   '/dashboard/card':      'Ma carte',
   '/dashboard/profile':   'Mon profil',
+  '/dashboard/preview':   'Aperçu carte',
   '/dashboard/analytics': 'Analytics',
   '/dashboard/modules':   'Modules',
   '/dashboard/contacts':  'Contacts',

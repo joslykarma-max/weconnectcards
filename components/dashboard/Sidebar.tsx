@@ -36,6 +36,16 @@ const navItems = [
     ),
   },
   {
+    href:  '/dashboard/preview',
+    label: 'Aperçu carte',
+    icon:  (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+    ),
+  },
+  {
     href:  '/dashboard/analytics',
     label: 'Analytics',
     icon:  (
