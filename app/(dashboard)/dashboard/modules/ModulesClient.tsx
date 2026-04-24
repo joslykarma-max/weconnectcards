@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
 
 interface Module {
@@ -127,13 +128,13 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
 
               {isActive && !isLocked && (
                 <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <button style={{
-                    background: 'none', border: 'none', color: '#818CF8',
-                    fontFamily: 'Space Mono, monospace', fontSize: 9,
-                    letterSpacing: 2, textTransform: 'uppercase', cursor: 'pointer',
+                  <Link href={`/dashboard/modules/${mod.type}`} style={{
+                    color: '#818CF8', fontFamily: 'Space Mono, monospace',
+                    fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
+                    textDecoration: 'none',
                   }}>
                     Configurer →
-                  </button>
+                  </Link>
                 </div>
               )}
             </div>
