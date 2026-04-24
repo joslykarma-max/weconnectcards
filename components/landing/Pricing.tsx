@@ -6,9 +6,9 @@ import Button from '@/components/ui/Button';
 const plans = [
   {
     name: 'Essentiel',
-    price: '29',
+    price: '10 500',
     suffix: 'one-time',
-    sub: '+ 0€/mois',
+    sub: '+ 0 FCFA/mois',
     badge: null,
     color: '#9CA3AF',
     features: [
@@ -25,9 +25,9 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: '59',
+    price: '20 000',
     suffix: 'one-time',
-    sub: '+ 4.99€/mois',
+    sub: '+ 2 000 FCFA/mois',
     badge: 'Le plus populaire',
     color: '#6366F1',
     features: [
@@ -121,7 +121,10 @@ export default function Pricing() {
               {plan.suffix ? (
                 <>
                   <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 48, color: '#F8F9FC' }}>
-                    {plan.price}€
+                    {plan.price}
+                  </span>
+                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#6B7280', marginLeft: 6 }}>
+                    FCFA
                   </span>
                   <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', marginLeft: 8, letterSpacing: 2 }}>
                     {plan.suffix}

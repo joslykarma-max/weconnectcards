@@ -59,7 +59,7 @@ export default function SettingsClient({ user, subscription }: Props) {
 
         {subscription?.plan === 'essentiel' && (
           <Button variant="gradient" size="md">
-            Passer au plan Pro — 4.99€/mois
+            Passer au plan Pro — 20 000 FCFA + 2 000 FCFA/mois
           </Button>
         )}
       </Card>
