@@ -7,25 +7,33 @@ import type { ScanDoc, ProfileDoc } from '@/lib/types';
 async function getDashboardData(uid: string) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [scansSnap, profileSnap, contactsSnap, clicksSnap] = await Promise.all([
-    adminDb.collection('scans').where('userId', '==', uid).orderBy('scannedAt', 'desc').limit(50).get(),
-    adminDb.collection('profiles').doc(uid).get(),
-    adminDb.collection('savedContacts').where('profileId', '==', uid).count().get(),
-    adminDb.collection('linkClicks').where('profileId', '==', uid).where('clickedAt', '>=', thirtyDaysAgo).count().get(),
-  ]);
+  try {
+    const [scansSnap, profileSnap, contactsSnap, clicksSnap] = await Promise.all([
+      adminDb.collection('scans').where('userId', '==', uid).get(),
+      adminDb.collection('profiles').doc(uid).get(),
+      adminDb.collection('savedContacts').where('profileId', '==', uid).get(),
+      adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+    ]);
 
-  const allScans    = scansSnap.docs.map((d) => d.data() as ScanDoc);
-  const recentScans = allScans.filter((s) => s.scannedAt >= thirtyDaysAgo);
-  const profile     = profileSnap.exists ? profileSnap.data() as ProfileDoc : null;
+    const allScans     = scansSnap.docs.map((d) => d.data() as ScanDoc);
+    const recentScans  = allScans.filter((s) => s.scannedAt >= thirtyDaysAgo);
+    const recentClicks = clicksSnap.docs.filter((d) => (d.data() as { clickedAt: string }).clickedAt >= thirtyDaysAgo);
+    const profile      = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
 
-  return {
-    totalScans:     allScans.length,
-    recentScans:    recentScans.slice(0, 10),
-    recentAllScans: allScans.slice(0, 6),
-    totalContacts:  contactsSnap.data().count,
-    totalClicks:    clicksSnap.data().count,
-    profile,
-  };
+    const sortedScans  = [...allScans].sort((a, b) => b.scannedAt.localeCompare(a.scannedAt));
+
+    return {
+      totalScans:     allScans.length,
+      recentScans:    recentScans.slice(0, 10),
+      recentAllScans: sortedScans.slice(0, 6),
+      totalContacts:  contactsSnap.size,
+      totalClicks:    recentClicks.length,
+      profile,
+    };
+  } catch (err) {
+    console.error('[dashboard] data fetch error:', err);
+    return { totalScans: 0, recentScans: [], recentAllScans: [], totalContacts: 0, totalClicks: 0, profile: null };
+  }
 }
 
 export default async function DashboardPage() {

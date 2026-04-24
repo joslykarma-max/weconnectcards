@@ -8,10 +8,11 @@ export default async function ContactsPage() {
   const snap = await adminDb
     .collection('savedContacts')
     .where('profileId', '==', user.uid)
-    .orderBy('savedAt', 'desc')
     .get();
 
-  const contacts = snap.docs.map((d) => ({ id: d.id, ...(d.data() as SavedContactDoc) }));
+  const contacts = snap.docs
+    .map((d) => ({ id: d.id, ...(d.data() as SavedContactDoc) }))
+    .sort((a, b) => b.savedAt.localeCompare(a.savedAt));
 
   return (
     <div>
