@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import LogoSymbol from '@/components/logo/LogoSymbol';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -24,9 +25,27 @@ const STATUS_BADGE: Record<string, { variant: BadgeVariant; label: string }> = {
 };
 
 export default function CardPreview({ card, profile }: { card: Card; profile: Profile }) {
+  const router = useRouter();
   const [selectedEdition, setSelectedEdition] = useState(card?.edition ?? profile?.theme ?? 'midnight');
   const edition = EDITION_STYLES[selectedEdition] ?? EDITION_STYLES.midnight;
   const status  = STATUS_BADGE[card?.status ?? 'pending'] ?? STATUS_BADGE.pending;
+  const [nfcCode, setNfcCode]   = useState('');
+  const [activating, setActivating] = useState(false);
+  const [activateError, setActivateError] = useState('');
+
+  async function handleActivate() {
+    if (!nfcCode.trim()) { setActivateError('Entre ton code NFC.'); return; }
+    setActivating(true);
+    setActivateError('');
+    const res  = await fetch('/api/activate', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ nfcId: nfcCode }),
+    });
+    const data = await res.json() as { error?: string };
+    if (!res.ok) { setActivateError(data.error ?? 'Erreur.'); setActivating(false); return; }
+    router.refresh();
+  }
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 36, alignItems: 'start', maxWidth: 900 }}>
@@ -125,33 +144,49 @@ export default function CardPreview({ card, profile }: { card: Card; profile: Pr
             )}
           </div>
 
-          {!card && (
-            <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
-              Vous n&apos;avez pas encore de carte physique. Commandez-en une pour activer NFC.
-            </p>
-          )}
-
           {profile?.username && (
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: '12px 14px', marginBottom: 16 }}>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', marginBottom: 4 }}>
                 URL de votre profil
               </p>
               <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#818CF8' }}>
-                weconnect.io/{profile.username}
+                weconnect.cards/{profile.username}
               </p>
             </div>
           )}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Button variant="gradient" size="md" style={{ width: '100%' }}>
-              Commander une nouvelle carte
-            </Button>
-            {card?.status === 'active' && (
-              <Button variant="secondary" size="md" style={{ width: '100%' }}>
-                Télécharger QR Code
+          {!card && (
+            <div style={{ marginTop: 4 }}>
+              <p style={{ color: '#9CA3AF', fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>
+                Tu as reçu ta carte ? Entre le code NFC imprimé dans l&apos;emballage.
+              </p>
+              <input
+                value={nfcCode}
+                onChange={(e) => setNfcCode(e.target.value.toUpperCase())}
+                placeholder="WC-XXXXXX"
+                style={{
+                  width: '100%', marginBottom: 10,
+                  background: 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${activateError ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: 6, padding: '10px 14px',
+                  color: '#F8F9FC', fontFamily: 'Space Mono, monospace',
+                  fontSize: 13, letterSpacing: 3, outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+              {activateError && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10 }}>{activateError}</p>}
+              <Button variant="gradient" size="md" loading={activating} onClick={handleActivate} style={{ width: '100%' }}>
+                {activating ? 'Activation...' : 'Activer ma carte ⚡'}
               </Button>
-            )}
-          </div>
+            </div>
+          )}
+
+          {card?.status === 'active' && (
+            <a href="/dashboard/preview">
+              <Button variant="secondary" size="md" style={{ width: '100%', marginTop: 8 }}>
+                Voir l&apos;aperçu & QR Code →
+              </Button>
+            </a>
+          )}
         </div>
 
         {/* Specs */}

@@ -3,13 +3,15 @@
 import { useState, FormEvent } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function LoginPage() {
-  const router = useRouter();
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const redirect     = searchParams.get('redirect') ?? '/dashboard';
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [error, setError]       = useState('');
@@ -31,7 +33,7 @@ export default function LoginPage() {
       });
 
       if (!res.ok) throw new Error('session');
-      router.push('/dashboard');
+      router.push(redirect);
     } catch {
       setError('Email ou mot de passe incorrect.');
       setLoading(false);
