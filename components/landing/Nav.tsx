@@ -12,12 +12,20 @@ const navLinks = [
 ];
 
 export default function Nav() {
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]       = useState(false);
+  const [isLoggedIn, setIsLoggedIn]   = useState(false);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handler);
     return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.json())
+      .then((d) => { if (d.authenticated) setIsLoggedIn(true); })
+      .catch(() => {});
   }, []);
 
   return (
@@ -69,11 +77,19 @@ export default function Nav() {
         </div>
 
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          <Link href="/login">
-            <Button variant="ghost" size="sm">
-              Connexion
-            </Button>
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard">
+              <Button variant="ghost" size="sm">
+                Dashboard →
+              </Button>
+            </Link>
+          ) : (
+            <Link href="/login">
+              <Button variant="ghost" size="sm">
+                Connexion
+              </Button>
+            </Link>
+          )}
           <Link href="/register">
             <Button variant="gradient" size="sm">
               Commander ma carte
