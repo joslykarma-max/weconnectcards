@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import LogoStacked from '@/components/logo/LogoStacked';
+import LogoHorizontal from '@/components/logo/LogoHorizontal';
 
 const navItems = [
   {
@@ -119,7 +119,7 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
       {/* Logo */}
       <div style={{ marginBottom: 40, paddingLeft: 8 }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <LogoStacked symbolSize="sm" />
+          <LogoHorizontal symbolSize="sm" />
         </Link>
       </div>
 
