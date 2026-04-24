@@ -1,3 +1,5 @@
+'use client';
+
 interface KPICardProps {
   label: string;
   value: string | number;
