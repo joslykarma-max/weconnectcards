@@ -1,31 +1,67 @@
-import Badge from '@/components/ui/Badge';
-import Button from '@/components/ui/Button';
-import Link from 'next/link';
+import { requireAuth } from '@/lib/session';
+import { adminDb } from '@/lib/firebase-admin';
+import TeamClient from './TeamClient';
+import type { TeamDoc, TeamMemberDoc, UserDoc } from '@/lib/types';
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const user = await requireAuth();
+
+  const [userSnap, teamSnap, scansSnap, clicksSnap] = await Promise.all([
+    adminDb.collection('users').doc(user.uid).get(),
+    adminDb.collection('teams').doc(user.uid).get(),
+    adminDb.collection('scans').where('userId', '==', user.uid).get(),
+    adminDb.collection('linkClicks').where('profileId', '==', user.uid).get(),
+  ]);
+
+  const userData = userSnap.exists ? (userSnap.data() as UserDoc) : null;
+  const isPro    = userData?.plan === 'pro';
+
+  // Fetch team members
+  let members: Array<{ id: string } & TeamMemberDoc> = [];
+  let teamName = '';
+  let memberUids: string[] = [];
+
+  if (isPro && teamSnap.exists) {
+    const teamData = teamSnap.data() as TeamDoc;
+    teamName = teamData.name;
+
+    const membersSnap = await adminDb.collection('teams').doc(user.uid).collection('members').get();
+    members = membersSnap.docs.map((d) => ({ id: d.id, ...(d.data() as TeamMemberDoc) }));
+    memberUids = members.filter((m) => m.uid).map((m) => m.uid!);
+  }
+
+  // Aggregate scans + clicks for all team members
+  let totalScans  = scansSnap.size;
+  let totalClicks = clicksSnap.size;
+
+  if (memberUids.length > 0) {
+    await Promise.all(
+      memberUids.map(async (uid) => {
+        const [s, c] = await Promise.all([
+          adminDb.collection('scans').where('userId', '==', uid).get(),
+          adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+        ]);
+        totalScans  += s.size;
+        totalClicks += c.size;
+      }),
+    );
+  }
+
   return (
-    <div style={{ maxWidth: 640 }}>
-      <div style={{
-        background: '#12141C',
-        border: '1px solid rgba(99,102,241,0.2)',
-        borderRadius: 8,
-        padding: 48,
-        textAlign: 'center',
-      }}>
-        <Badge variant="electric" className="mb-6">PRO requis</Badge>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 16, marginTop: 16 }}>
-          Mode Équipe
-        </h2>
-        <p style={{ color: '#9CA3AF', fontSize: 16, lineHeight: 1.7, marginBottom: 32 }}>
-          Gérez plusieurs membres de votre équipe depuis un dashboard centralisé.
-          Branding unifié, facturation groupée, analytics par membre.
-        </p>
-        <Link href="/dashboard/settings?upgrade=equipe">
-          <Button variant="gradient" size="lg">
-            Passer au plan Équipe
-          </Button>
-        </Link>
-      </div>
-    </div>
+    <TeamClient
+      teamName={teamName || 'Mon équipe'}
+      members={members.map((m) => ({
+        id:          m.id,
+        email:       m.email,
+        displayName: m.displayName,
+        role:        m.role,
+        status:      m.status,
+        invitedAt:   m.invitedAt,
+        joinedAt:    m.joinedAt,
+      }))}
+      stats={{ totalScans, totalClicks, activeMembers: members.filter((m) => m.status === 'active').length }}
+      ownerEmail={user.email ?? ''}
+      isPro={isPro}
+    />
   );
 }

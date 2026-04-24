@@ -66,6 +66,24 @@ export interface CardDoc {
   activatedAt?: string;
 }
 
+// Collection: teams/{ownerUid}
+export interface TeamDoc {
+  name:      string;
+  ownerId:   string;
+  createdAt: string;
+}
+
+// Sub-collection: teams/{ownerUid}/members/{memberEmail}
+export interface TeamMemberDoc {
+  email:       string;
+  displayName?: string;
+  role:        'admin' | 'member';
+  status:      'pending' | 'active';
+  uid?:        string;
+  invitedAt:   string;
+  joinedAt?:   string;
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;
