@@ -6,9 +6,15 @@ if (!admin.apps.length) {
   const privateKey  = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
   if (projectId && clientEmail && privateKey) {
-    admin.initializeApp({
-      credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
-    });
+    try {
+      admin.initializeApp({
+        credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
+      });
+    } catch (err) {
+      console.error('[firebase-admin] initializeApp failed:', err);
+    }
+  } else {
+    console.warn('[firebase-admin] Missing credentials — SDK not initialized');
   }
 }
 
