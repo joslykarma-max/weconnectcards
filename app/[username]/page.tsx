@@ -43,16 +43,16 @@ export default async function ProfilePage({ params }: Props) {
 
   const [profileSnap, linksSnap] = await Promise.all([
     adminDb.collection('profiles').doc(uid).get(),
-    adminDb.collection('profiles').doc(uid).collection('links')
-      .where('isActive', '==', true)
-      .orderBy('order', 'asc')
-      .get(),
+    adminDb.collection('profiles').doc(uid).collection('links').get(),
   ]);
 
   const profileData = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
   if (!profileData?.isPublic) notFound();
 
-  const links = linksSnap.docs.map((d) => ({ ...(d.data() as LinkDoc), id: d.id }));
+  const links = linksSnap.docs
+    .map((d) => ({ ...(d.data() as LinkDoc), id: d.id }))
+    .filter((l) => l.isActive)
+    .sort((a, b) => a.order - b.order);
 
   // Log the visit (fire-and-forget)
   const headersList = await headers();
