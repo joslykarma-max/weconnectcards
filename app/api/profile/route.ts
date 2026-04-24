@@ -19,10 +19,24 @@ export async function GET() {
   return NextResponse.json({ ...profile, links });
 }
 
+function toSlug(raw: string): string {
+  return raw
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
 export async function PATCH(req: NextRequest) {
   const user = await requireAuth();
 
   const body = await req.json() as Partial<ProfileDoc>;
+
+  if (body.username) {
+    body.username = toSlug(body.username);
+  }
 
   // Check username uniqueness if changing
   if (body.username) {

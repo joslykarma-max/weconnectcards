@@ -54,8 +54,20 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   const [newLinkUrl, setNewLinkUrl]   = useState('');
   const [saved, setSaved] = useState(false);
 
-  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+  function toSlug(raw: string) {
+    return raw
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+  }
+
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = field === 'username' ? toSlug(e.target.value) : e.target.value;
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
 
   async function saveProfile() {
     setSaving(true);
@@ -100,7 +112,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
             <Input label="Titre / Poste" value={form.title} onChange={set('title')} placeholder="CEO & Founder" />
             <Input label="Entreprise" value={form.company} onChange={set('company')} placeholder="Acme Corp" />
             <Textarea label="Bio" value={form.bio} onChange={set('bio')} placeholder="Une courte présentation..." style={{ minHeight: 80 }} />
-            <Input label="Nom d'utilisateur" value={form.username} onChange={set('username')} hint={`weconnect.io/${form.username}`} />
+            <Input label="Nom d'utilisateur" value={form.username} onChange={set('username')} hint={`weconnect.cards/${form.username || '…'}`} />
           </div>
         </Card>
 
@@ -261,7 +273,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                 <polyline points="15 3 21 3 21 9"/>
                 <line x1="10" y1="14" x2="21" y2="3"/>
               </svg>
-              weconnect.io/{profile.username}
+              weconnect.cards/{profile.username}
             </a>
           </Card>
         )}
