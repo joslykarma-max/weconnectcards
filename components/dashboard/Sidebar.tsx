@@ -102,7 +102,7 @@ const navItems = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
   const pathname = usePathname();
 
   return (
@@ -160,19 +160,38 @@ export default function Sidebar() {
 
       {/* Bottom */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 20, marginTop: 20 }}>
-        <div style={{
-          padding: '12px 16px',
-          background: 'rgba(99,102,241,0.08)',
-          border: '1px solid rgba(99,102,241,0.15)',
-          borderRadius: 6,
-        }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6366F1', textTransform: 'uppercase', marginBottom: 6 }}>
-            Plan Essentiel
-          </p>
-          <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
-            Passez à Pro pour débloquer tous les modules.
-          </p>
-        </div>
+        {isPro ? (
+          <div style={{
+            padding: '12px 16px',
+            background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1))',
+            border: '1px solid rgba(99,102,241,0.3)',
+            borderRadius: 6,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+              <span style={{ fontSize: 12 }}>⚡</span>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase' }}>
+                Plan Pro
+              </p>
+            </div>
+            <p style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+              Tous les modules sont débloqués.
+            </p>
+          </div>
+        ) : (
+          <div style={{
+            padding: '12px 16px',
+            background: 'rgba(99,102,241,0.08)',
+            border: '1px solid rgba(99,102,241,0.15)',
+            borderRadius: 6,
+          }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6366F1', textTransform: 'uppercase', marginBottom: 6 }}>
+              Plan Essentiel
+            </p>
+            <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+              Passez à Pro pour débloquer tous les modules.
+            </p>
+          </div>
+        )}
       </div>
     </aside>
   );
