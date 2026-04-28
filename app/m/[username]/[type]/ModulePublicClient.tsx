@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import LogoStacked from '@/components/logo/LogoStacked';
 
@@ -492,56 +492,293 @@ function PortfolioModule({ config, username }: { config: Record<string, unknown>
 }
 
 // ─── EVENT ───────────────────────────────────────────────────────────────────
-function EventModule({ config, username }: { config: Record<string, unknown>; username: string }) {
+type EventTicket = { id: string; name: string; description?: string; price: number; capacity: number };
+type EventAgendaItem = { id: string; time: string; title: string; speaker?: string };
+
+function EventModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
+  type Phase = 'info' | 'register' | 'confirmed';
+
+  const [phase,         setPhase]         = useState<Phase>('info');
+  const [selectedTicket, setSelectedTicket] = useState<EventTicket | null>(null);
+  const [regCounts,     setRegCounts]     = useState<Record<string, number>>({});
+  const [countdown,     setCountdown]     = useState({ d: 0, h: 0, m: 0, s: 0, past: false, ready: false });
+  const [form,          setForm]          = useState({ name: '', phone: '', email: '' });
+  const [submitting,    setSubmitting]    = useState(false);
+  const [submitError,   setSubmitError]   = useState('');
+  const [confirmed,     setConfirmed]     = useState<{ name: string; ticketName: string } | null>(null);
+
+  const tickets:  EventTicket[]    = (config.tickets  as EventTicket[]    | undefined) ?? [];
+  const agenda:   EventAgendaItem[] = (config.agenda   as EventAgendaItem[] | undefined) ?? [];
+  const currency: string            = String(config.currency || 'FCFA');
+  const registrationEnabled         = config.registrationEnabled !== false;
+
+  useEffect(() => {
+    fetch(`/api/event?profileId=${encodeURIComponent(profileId)}`)
+      .then(r => r.json())
+      .then(d => setRegCounts(d.counts || {}))
+      .catch(() => {});
+  }, [profileId]);
+
+  useEffect(() => {
+    if (!config.date) return;
+    const eventDate = new Date(`${String(config.date)}T${String(config.time || '00:00')}`);
+    function tick() {
+      const diff = eventDate.getTime() - Date.now();
+      if (diff <= 0) { setCountdown({ d: 0, h: 0, m: 0, s: 0, past: true, ready: true }); return; }
+      setCountdown({
+        d: Math.floor(diff / 86400000),
+        h: Math.floor((diff % 86400000) / 3600000),
+        m: Math.floor((diff % 3600000) / 60000),
+        s: Math.floor((diff % 60000) / 1000),
+        past: false, ready: true,
+      });
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [config.date, config.time]);
+
+  async function register() {
+    if (!form.name || !form.phone || !selectedTicket) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch('/api/event/register', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ profileId, name: form.name, phone: form.phone, email: form.email, ticketTypeId: selectedTicket.id, ticketTypeName: selectedTicket.name, ticketPrice: selectedTicket.price }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setSubmitError(data.error || "Erreur lors de l'inscription"); return; }
+      setConfirmed({ name: form.name, ticketName: selectedTicket.name });
+      setPhase('confirmed');
+    } catch {
+      setSubmitError('Erreur réseau, veuillez réessayer');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const infoCardStyle: React.CSSProperties = { display: 'flex', gap: 14, padding: '14px 18px', background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8 };
   const dateStr = config.date
     ? new Date(String(config.date)).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
     : null;
 
-  return (
-    <Shell backHref={`/${username}`}>
-      <div style={{ marginBottom: 28 }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Événement</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 8 }}>
-          {String(config.eventName || 'Événement')}
-        </h1>
-        {!!config.organizer && <p style={{ color: '#9CA3AF', fontSize: 14 }}>Organisé par <strong style={{ color: '#F8F9FC' }}>{String(config.organizer)}</strong></p>}
-      </div>
+  // ── Phase: info ──
+  if (phase === 'info') {
+    return (
+      <Shell backHref={`/${username}`}>
+        {/* Header */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ fontSize: 56, marginBottom: 12 }}>{String(config.emoji || '🎟️')}</div>
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8, margin: '0 0 8px' }}>
+            {String(config.eventName || 'Événement')}
+          </h1>
+          {!!config.organizer && (
+            <p style={{ color: '#9CA3AF', fontSize: 14, margin: 0 }}>
+              par <strong style={{ color: '#F8F9FC' }}>{String(config.organizer)}</strong>
+            </p>
+          )}
+        </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
-        {dateStr && (
-          <div style={{ display: 'flex', gap: 14, padding: '14px 18px', background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8 }}>
-            <span style={{ fontSize: 20 }}>📅</span>
-            <div>
-              <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 600, fontFamily: 'Syne, sans-serif', textTransform: 'capitalize' }}>{dateStr}</p>
-              {!!config.time && <p style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>{String(config.time)}</p>}
+        {/* Countdown */}
+        {!!config.date && countdown.ready && !countdown.past && (
+          <div style={{ background: '#181B26', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 12, padding: 20, marginBottom: 24, textAlign: 'center' }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Compte à rebours</p>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
+              {[{ v: countdown.d, l: 'jours' }, { v: countdown.h, l: 'heures' }, { v: countdown.m, l: 'min' }, { v: countdown.s, l: 'sec' }].map(({ v, l }) => (
+                <div key={l} style={{ textAlign: 'center' }}>
+                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', minWidth: 44, background: 'rgba(99,102,241,0.1)', borderRadius: 8, padding: '6px 10px' }}>
+                    {String(v).padStart(2, '0')}
+                  </div>
+                  <div style={{ color: '#6B7280', fontSize: 9, fontFamily: 'Space Mono, monospace', marginTop: 4, textTransform: 'uppercase' }}>{l}</div>
+                </div>
+              ))}
             </div>
           </div>
         )}
-        {!!config.venue && (
-          <div style={{ display: 'flex', gap: 14, padding: '14px 18px', background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8 }}>
-            <span style={{ fontSize: 20 }}>📍</span>
-            <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>{String(config.venue)}</p>
+        {countdown.past && (
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: 12, textAlign: 'center', marginBottom: 24 }}>
+            <p style={{ color: '#EF4444', fontSize: 13, fontFamily: 'Space Mono, monospace', margin: 0 }}>Événement terminé</p>
           </div>
         )}
-        {!!config.price && (
-          <div style={{ display: 'flex', gap: 14, padding: '14px 18px', background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8 }}>
-            <span style={{ fontSize: 20 }}>🎟️</span>
-            <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>{String(config.price)} FCFA</p>
+
+        {/* Date + Venue */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+          {dateStr && (
+            <div style={infoCardStyle}>
+              <span style={{ fontSize: 18 }}>📅</span>
+              <div>
+                <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, fontFamily: 'Syne, sans-serif', textTransform: 'capitalize', margin: 0 }}>{dateStr}</p>
+                {!!config.time && <p style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Space Mono, monospace', margin: '2px 0 0' }}>{String(config.time)}</p>}
+              </div>
+            </div>
+          )}
+          {!!config.venue && (
+            <div style={infoCardStyle}>
+              <span style={{ fontSize: 18 }}>📍</span>
+              <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{String(config.venue)}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        {!!config.description && (
+          <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>{String(config.description)}</p>
+        )}
+
+        {/* Tickets */}
+        {tickets.length > 0 && registrationEnabled && !countdown.past && (
+          <div style={{ marginBottom: 28 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 14 }}>Billets disponibles</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {tickets.map(ticket => {
+                const sold      = regCounts[ticket.id] || 0;
+                const remaining = ticket.capacity - sold;
+                const isFull    = remaining <= 0;
+                return (
+                  <div key={ticket.id} style={{ background: '#181B26', border: `1px solid ${isFull ? 'rgba(239,68,68,0.25)' : 'rgba(99,102,241,0.25)'}`, borderRadius: 10, padding: 16 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                      <div>
+                        <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 15, fontFamily: 'Syne, sans-serif', margin: '0 0 2px' }}>{ticket.name}</p>
+                        {ticket.description && <p style={{ color: '#9CA3AF', fontSize: 12, margin: 0 }}>{ticket.description}</p>}
+                      </div>
+                      <p style={{ color: ticket.price === 0 ? '#10B981' : '#F8F9FC', fontWeight: 700, fontSize: 15, fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', marginLeft: 12, margin: '0 0 0 12px' }}>
+                        {ticket.price === 0 ? 'Gratuit' : `${ticket.price.toLocaleString('fr-FR')} ${currency}`}
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <p style={{ color: isFull ? '#EF4444' : '#6B7280', fontSize: 12, fontFamily: 'Space Mono, monospace', margin: 0 }}>
+                        {isFull ? '● Complet' : `${remaining} place${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}`}
+                      </p>
+                      <button onClick={() => { setSelectedTicket(ticket); setPhase('register'); }} disabled={isFull}
+                        style={{ background: isFull ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, #6366F1, #818CF8)', border: 'none', borderRadius: 6, padding: '8px 18px', color: isFull ? '#6B7280' : '#fff', fontSize: 13, fontFamily: 'Space Mono, monospace', cursor: isFull ? 'not-allowed' : 'pointer' }}>
+                        {isFull ? 'Complet' : "S'inscrire →"}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
+
+        {/* Registration closed */}
+        {tickets.length > 0 && (!registrationEnabled || countdown.past) && (
+          <div style={{ background: 'rgba(107,114,128,0.08)', border: '1px solid rgba(107,114,128,0.2)', borderRadius: 8, padding: 16, marginBottom: 24, textAlign: 'center' }}>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>
+              {countdown.past ? 'Événement terminé' : 'Inscriptions fermées'}
+            </p>
+          </div>
+        )}
+
+        {/* Agenda */}
+        {agenda.length > 0 && (
+          <div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 14 }}>Programme</p>
+            {[...agenda].sort((a, b) => a.time.localeCompare(b.time)).map(item => (
+              <div key={item.id} style={{ display: 'flex', gap: 16, padding: '13px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: '#6366F1', minWidth: 44, paddingTop: 2 }}>{item.time}</span>
+                <div>
+                  <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 500, margin: 0 }}>{item.title}</p>
+                  {item.speaker && <p style={{ color: '#9CA3AF', fontSize: 12, margin: '3px 0 0' }}>🎤 {item.speaker}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Shell>
+    );
+  }
+
+  // ── Phase: register ──
+  if (phase === 'register' && selectedTicket) {
+    return (
+      <Shell backHref={`/${username}`}>
+        <button onClick={() => setPhase('info')}
+          style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, padding: 0, fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour
+        </button>
+
+        <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(129,140,248,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 16, marginBottom: 28 }}>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 6 }}>Billet sélectionné</p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#F8F9FC', fontWeight: 600, fontFamily: 'Syne, sans-serif', margin: 0 }}>{selectedTicket.name}</p>
+            <p style={{ color: '#F8F9FC', fontWeight: 700, fontFamily: 'Space Mono, monospace', margin: 0 }}>
+              {selectedTicket.price === 0 ? 'Gratuit' : `${selectedTicket.price.toLocaleString('fr-FR')} ${currency}`}
+            </p>
+          </div>
+        </div>
+
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 20 }}>Vos informations</h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Nom complet *</p>
+            <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="Koffi Mensah"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '11px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Téléphone *</p>
+            <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} placeholder="+229 97 00 00 00" type="tel"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '11px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+          <div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Email (optionnel)</p>
+            <input value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} placeholder="koffi@email.com" type="email"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '11px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+        </div>
+
+        {submitError && (
+          <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '12px 16px', marginTop: 16 }}>
+            <p style={{ color: '#EF4444', fontSize: 13, margin: 0 }}>{submitError}</p>
+          </div>
+        )}
+
+        <button onClick={register} disabled={submitting || !form.name || !form.phone}
+          style={{ width: '100%', marginTop: 24, padding: '14px 0', background: submitting || !form.name || !form.phone ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #6366F1, #818CF8)', border: 'none', borderRadius: 8, color: submitting || !form.name || !form.phone ? '#6B7280' : '#fff', fontSize: 15, fontFamily: 'Space Mono, monospace', cursor: submitting || !form.name || !form.phone ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+          {submitting ? 'Inscription en cours...' : "Confirmer l'inscription →"}
+        </button>
+      </Shell>
+    );
+  }
+
+  // ── Phase: confirmed ──
+  return (
+    <Shell backHref={`/${username}`}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>
+          ✅
+        </div>
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Inscription confirmée !</h2>
+        <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 28 }}>Votre place est réservée</p>
+
+        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 20, textAlign: 'left', marginBottom: 24 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[
+              { label: 'Nom',        value: confirmed?.name },
+              { label: 'Événement',  value: String(config.eventName || '') },
+              { label: 'Billet',     value: confirmed?.ticketName },
+              { label: 'Lieu',       value: String(config.venue || '') },
+              { label: 'Date',       value: dateStr ?? '' },
+            ].filter(r => r.value).map(row => (
+              <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                <span style={{ color: '#6B7280', fontSize: 12, fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap' }}>{row.label}</span>
+                <span style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 500, textAlign: 'right', textTransform: row.label === 'Date' ? 'capitalize' : 'none' }}>{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'Space Mono, monospace', marginBottom: 24, letterSpacing: 1 }}>
+          Présentez cet écran à l&apos;entrée
+        </p>
+
+        <button onClick={() => setPhase('info')}
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 24px', color: '#9CA3AF', fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour à l&apos;événement
+        </button>
       </div>
-
-      {!!config.description && (
-        <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, marginBottom: 28 }}>
-          {String(config.description)}
-        </p>
-      )}
-
-      {!!config.capacity && (
-        <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'Space Mono, monospace', marginBottom: 20 }}>
-          Capacité : {String(config.capacity)} personnes
-        </p>
-      )}
     </Shell>
   );
 }
@@ -903,7 +1140,7 @@ export default function ModulePublicClient({
     case 'menu':        return <MenuModule         config={config} username={username} />;
     case 'review':      return <ReviewModule       config={config} username={username} />;
     case 'portfolio':   return <PortfolioModule    config={config} username={username} />;
-    case 'event':       return <EventModule        config={config} username={username} />;
+    case 'event':       return <EventModule        config={config} username={username} profileId={profileId} />;
     case 'certificate': return <CertificateModule  config={config} username={username} />;
     case 'member':      return <MemberModule       config={config} username={username} />;
     case 'access':      return <AccessModule       config={config} username={username} />;

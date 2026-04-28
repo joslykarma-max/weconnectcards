@@ -120,6 +120,34 @@ export interface MenuCategory {
   items: MenuItem[];
 }
 
+// Event module sub-types
+export interface TicketType {
+  id:           string;
+  name:         string;
+  description?: string;
+  price:        number;
+  capacity:     number;
+}
+
+export interface AgendaItem {
+  id:       string;
+  time:     string; // HH:mm
+  title:    string;
+  speaker?: string;
+}
+
+// Collection: eventRegistrations/{profileId}_{normalizedPhone}
+export interface EventRegistration {
+  profileId:      string;
+  name:           string;
+  email?:         string;
+  phone:          string;
+  ticketTypeId:   string;
+  ticketTypeName: string;
+  ticketPrice:    number;
+  registeredAt:   string;
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;
