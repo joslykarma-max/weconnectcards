@@ -54,6 +54,9 @@ export interface SavedContactDoc {
   profileId: string;
   device:    string;
   savedAt:   string;
+  name?:     string;
+  email?:    string;
+  phone?:    string;
 }
 
 // Collection: cards/{cardId}

@@ -22,8 +22,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    const now = new Date().toISOString();
+
     await adminDb.collection('users').doc(uid).set(
-      { plan, updatedAt: new Date().toISOString() },
+      { plan, updatedAt: now },
       { merge: true },
     );
 
@@ -31,8 +33,19 @@ export async function GET(req: NextRequest) {
       uid,
       plan,
       transactionId: transactionId ?? null,
-      paidAt:        new Date().toISOString(),
+      paidAt:        now,
     });
+
+    // Auto-create card order if user doesn't already have one
+    const existingCards = await adminDb.collection('cards').where('userId', '==', uid).limit(1).get();
+    if (existingCards.empty) {
+      await adminDb.collection('cards').add({
+        userId:    uid,
+        edition:   'midnight',
+        status:    'pending',
+        orderedAt: now,
+      });
+    }
 
     return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=success`);
   } catch (err) {

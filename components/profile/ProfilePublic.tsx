@@ -96,11 +96,13 @@ function logLinkClick(linkId: string) {
 }
 
 export default function ProfilePublic({ profile }: { profile: Profile }) {
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving]   = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '' });
   const theme = THEME_COLORS[profile.theme] ?? THEME_COLORS.midnight;
 
-  const handleSaveContact = () => {
-    setSaving(true);
+  const downloadVCard = () => {
     const vcard = generateVCard({
       displayName: profile.displayName,
       title:       profile.title,
@@ -116,13 +118,28 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
     a.download = `${profile.username}.vcf`;
     a.click();
     URL.revokeObjectURL(url);
-    setSaving(false);
+  };
 
+  const handleSaveContact = () => {
+    setSaving(true);
+    downloadVCard();
     fetch('/api/contacts/save', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ profileId: profile.id }),
     }).catch(() => {});
+    setSaving(false);
+    setShowForm(true);
+  };
+
+  const handleLeaveInfo = async () => {
+    if (!contactForm.name && !contactForm.email) return;
+    await fetch('/api/contacts/save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ profileId: profile.id, ...contactForm }),
+    }).catch(() => {});
+    setSubmitted(true);
   };
 
   return (
@@ -278,6 +295,86 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
           </svg>
           {saving ? 'Téléchargement...' : 'Enregistrer le contact'}
         </button>
+
+        {/* CRM: leave info form */}
+        {showForm && !submitted && (
+          <div style={{
+            marginTop: 16,
+            padding: 20,
+            background: 'rgba(99,102,241,0.06)',
+            border: `1px solid ${theme.border}`,
+            borderRadius: 8,
+          }}>
+            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 4 }}>
+              Laissez vos coordonnées
+            </p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF', marginBottom: 16 }}>
+              Partagez vos infos pour rester en contact.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {(['name', 'email', 'phone'] as const).map((field) => (
+                <input
+                  key={field}
+                  type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                  placeholder={field === 'name' ? 'Votre nom' : field === 'email' ? 'Votre e-mail' : 'Votre téléphone'}
+                  value={contactForm[field]}
+                  onChange={(e) => setContactForm((prev) => ({ ...prev, [field]: e.target.value }))}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${theme.border}`,
+                    borderRadius: 6,
+                    color: '#F8F9FC',
+                    fontFamily: 'DM Sans, sans-serif',
+                    fontSize: 14,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              ))}
+              <button
+                onClick={handleLeaveInfo}
+                disabled={!contactForm.name && !contactForm.email}
+                style={{
+                  marginTop: 4,
+                  padding: '12px',
+                  background: 'linear-gradient(135deg, #4338CA, #6366F1)',
+                  border: 'none',
+                  borderRadius: 6,
+                  color: '#fff',
+                  fontFamily: 'Syne, sans-serif',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  cursor: (!contactForm.name && !contactForm.email) ? 'not-allowed' : 'pointer',
+                  opacity: (!contactForm.name && !contactForm.email) ? 0.5 : 1,
+                }}
+              >
+                Envoyer
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* CRM: success */}
+        {submitted && (
+          <div style={{
+            marginTop: 16,
+            padding: 20,
+            background: 'rgba(16,185,129,0.08)',
+            border: '1px solid rgba(16,185,129,0.25)',
+            borderRadius: 8,
+            textAlign: 'center',
+          }}>
+            <span style={{ fontSize: 28, display: 'block', marginBottom: 8 }}>✅</span>
+            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#34D399', marginBottom: 4 }}>
+              Merci !
+            </p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF' }}>
+              Vos coordonnées ont été transmises.
+            </p>
+          </div>
+        )}
 
         {/* Powered by */}
         <div style={{ textAlign: 'center', marginTop: 32 }}>
