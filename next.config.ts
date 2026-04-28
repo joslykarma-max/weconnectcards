@@ -8,7 +8,16 @@ const nextConfig: NextConfig = {
     ],
   },
   experimental: {
-    serverActions: { allowedOrigins: ['localhost:3000'] },
+    serverActions: {
+      allowedOrigins: [
+        'localhost:3000',
+        'weconnect.cards',
+        'www.weconnect.cards',
+        ...(process.env.NEXT_PUBLIC_APP_URL
+          ? [new URL(process.env.NEXT_PUBLIC_APP_URL).host]
+          : []),
+      ],
+    },
   },
 };
 

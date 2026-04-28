@@ -44,10 +44,10 @@ export default async function DashboardPage() {
   const engagement = totalScans > 0 ? Math.round((totalClicks / totalScans) * 100) : 0;
 
   const kpis = [
-    { label: 'Scans totaux',         value: totalScans,     trend: 12, description: '30 derniers jours' },
-    { label: 'Liens cliqués',         value: totalClicks,    trend: 8,  description: '30 derniers jours' },
-    { label: 'Contacts sauvegardés', value: totalContacts,  trend: 5,  description: 'Total' },
-    { label: 'Taux engagement',       value: `${engagement}%`, trend: 3, description: 'Clics / Scans' },
+    { label: 'Scans totaux',         value: totalScans,        description: '30 derniers jours' },
+    { label: 'Liens cliqués',         value: totalClicks,       description: '30 derniers jours' },
+    { label: 'Contacts sauvegardés', value: totalContacts,     description: 'Total' },
+    { label: 'Taux engagement',       value: `${engagement}%`, description: 'Clics / Scans' },
   ];
 
   return (

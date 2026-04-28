@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import Image from 'next/image';
 import { Input, Textarea } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -47,12 +48,29 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
-  const [links, setLinks] = useState<Link[]>(profile?.links ?? []);
+  const [links, setLinks]          = useState<Link[]>(profile?.links ?? []);
+  const [avatar, setAvatar]        = useState<string | null>(profile?.avatar ?? null);
+  const [uploading, setUploading]  = useState(false);
+  const fileInputRef               = useRef<HTMLInputElement>(null);
   const [saving, setSaving]        = useState(false);
   const [newLinkType, setNewLinkType] = useState('phone');
   const [newLinkLabel, setNewLinkLabel] = useState('');
   const [newLinkUrl, setNewLinkUrl]   = useState('');
   const [saved, setSaved] = useState(false);
+
+  async function uploadAvatar(file: File) {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res  = await fetch('/api/profile/avatar', { method: 'POST', body: fd });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) setAvatar(data.url);
+      else alert(data.error ?? 'Erreur lors de l\'upload.');
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function toSlug(raw: string) {
     return raw
@@ -103,6 +121,38 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     <div style={{ maxWidth: 840, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
       {/* Profile form */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <Card padding="md">
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
+            Photo de profil
+          </h3>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 4 }}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #06B6D4)', padding: 2, flexShrink: 0 }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#12141C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {avatar ? (
+                  <Image src={avatar} alt="Avatar" width={72} height={72} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                    {form.displayName.charAt(0).toUpperCase() || '?'}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }}
+              />
+              <Button variant="secondary" size="sm" loading={uploading} onClick={() => fileInputRef.current?.click()}>
+                {uploading ? 'Upload...' : avatar ? 'Changer la photo' : 'Ajouter une photo'}
+              </Button>
+              <p style={{ color: '#6B7280', fontSize: 12, marginTop: 8 }}>JPG, PNG · Max 5 Mo</p>
+            </div>
+          </div>
+        </Card>
+
         <Card padding="md">
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
             Informations du profil

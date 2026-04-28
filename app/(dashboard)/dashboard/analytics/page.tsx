@@ -43,13 +43,26 @@ async function getAnalyticsData(uid: string) {
   });
   const topLinks = Object.values(linkCountMap).sort((a, b) => b.count - a.count).slice(0, 5);
 
+  const fortyFiveDaysAgo = new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString();
+  const recentScans  = scans.filter((s) => s.scannedAt >= fortyFiveDaysAgo);
+  const previousScans = scans.filter((s) => s.scannedAt < fortyFiveDaysAgo);
+  const recentClicks  = clicks.filter((c) => c.clickedAt >= fortyFiveDaysAgo);
+  const previousClicks = clicks.filter((c) => c.clickedAt < fortyFiveDaysAgo);
+
+  function trendPct(current: number, previous: number): number {
+    if (previous === 0) return current > 0 ? 100 : 0;
+    return Math.round(((current - previous) / previous) * 100);
+  }
+
   return {
     scansByDay,
     devices,
     topLinks,
-    totalScans:  scans.length,
-    totalClicks: clicks.length,
-    username:    profile?.username,
+    totalScans:   scans.length,
+    totalClicks:  clicks.length,
+    username:     profile?.username,
+    scansTrend:   trendPct(recentScans.length,  previousScans.length),
+    clicksTrend:  trendPct(recentClicks.length, previousClicks.length),
   };
 }
 

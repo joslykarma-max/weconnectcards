@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
+
 export default function PreviewClient({
   username,
   isPublic: initialPublic,
@@ -11,7 +13,7 @@ export default function PreviewClient({
   username:  string;
   isPublic:  boolean;
 }) {
-  const publicUrl   = `https://weconnect.cards/${username}`;
+  const publicUrl   = `${APP_URL}/${username}`;
   const [isPublic, setIsPublic] = useState(initialPublic);
   const [copied,   setCopied]   = useState(false);
   const [toggling, setToggling] = useState(false);
@@ -37,12 +39,12 @@ export default function PreviewClient({
 
   if (!username) {
     return (
-      <div style={{ maxWidth: 560, margin: '40px auto', textAlign: 'center', padding: 48, background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12 }}>
+      <div style={{ maxWidth: 560, margin: '40px auto', textAlign: 'center', padding: 48, background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 12 }}>
         <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>👤</span>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)', marginBottom: 8 }}>
           Aucun username défini
         </p>
-        <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 24 }}>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 14, marginBottom: 24 }}>
           Définis ton username dans le profil pour activer ta page publique.
         </p>
         <a href="/dashboard/profile">
@@ -57,11 +59,11 @@ export default function PreviewClient({
 
       {/* Header */}
       <div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 6 }}>
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)', marginBottom: 6 }}>
           Aperçu de ta carte NFC
         </h2>
-        <p style={{ color: '#6B7280', fontSize: 14 }}>
-          C'est exactement ce que verront tes prospects quand ils scannent ta carte.
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
+          C&apos;est exactement ce que verront tes prospects quand ils scannent ta carte.
         </p>
       </div>
 
@@ -73,7 +75,7 @@ export default function PreviewClient({
             <p style={{ color: isPublic ? '#10B981' : '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>
               {isPublic ? 'Profil public — visible par tous' : 'Profil privé — non visible'}
             </p>
-            <p style={{ color: '#6B7280', fontSize: 12 }}>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 12 }}>
               {isPublic ? 'Tes prospects peuvent accéder à ta page.' : 'Active le profil pour partager ta carte.'}
             </p>
           </div>
@@ -101,7 +103,7 @@ export default function PreviewClient({
         {/* QR Code + link */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 20 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 20 }}>
               QR Code — à imprimer ou partager
             </p>
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
@@ -111,11 +113,11 @@ export default function PreviewClient({
                 alt="QR Code"
                 width={220}
                 height={220}
-                style={{ borderRadius: 12, border: '1px solid rgba(255,255,255,0.07)' }}
+                style={{ borderRadius: 12, border: 'var(--t-border-full)' }}
               />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: '10px 14px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--t-row)', border: 'var(--t-border-full)', borderRadius: 6, padding: '10px 14px' }}>
                 <span style={{ color: '#818CF8', flex: 1, fontFamily: 'Space Mono, monospace', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {publicUrl}
                 </span>
@@ -136,7 +138,7 @@ export default function PreviewClient({
 
           {/* Share buttons */}
           <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 16 }}>
               Partager le lien
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -157,7 +159,7 @@ export default function PreviewClient({
         {/* Live preview */}
         <Card padding="sm">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
               Aperçu live
             </p>
             <a href={publicUrl} target="_blank" rel="noopener noreferrer"
@@ -165,7 +167,7 @@ export default function PreviewClient({
               Ouvrir ↗
             </a>
           </div>
-          <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)', background: '#0D0E14' }}>
+          <div style={{ borderRadius: 8, overflow: 'hidden', border: 'var(--t-border-full)', background: 'var(--t-sidebar)' }}>
             {isPublic ? (
               <iframe
                 src={publicUrl}
@@ -175,8 +177,8 @@ export default function PreviewClient({
             ) : (
               <div style={{ height: 520, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <span style={{ fontSize: 40 }}>🔒</span>
-                <p style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', maxWidth: 200 }}>
-                  Active le profil public pour voir l'aperçu
+                <p style={{ color: 'var(--t-text-muted)', fontSize: 14, textAlign: 'center', maxWidth: 200 }}>
+                  Active le profil public pour voir l&apos;aperçu
                 </p>
               </div>
             )}

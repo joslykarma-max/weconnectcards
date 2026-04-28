@@ -86,7 +86,13 @@ function LoginForm() {
           </Button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 24, borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 24 }}>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <Link href="/forgot-password" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+            Mot de passe oublié ?
+          </Link>
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: 20, borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 24 }}>
           <p style={{ color: '#6B7280', fontSize: 14 }}>
             Pas encore de compte ?{' '}
             <Link href="/register" style={{ color: '#818CF8', textDecoration: 'none' }}>

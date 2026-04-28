@@ -114,6 +114,12 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
     a.click();
     URL.revokeObjectURL(url);
     setSaving(false);
+
+    fetch('/api/contacts/save', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ profileId: profile.id }),
+    }).catch(() => {});
   };
 
   return (

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
-import type { TeamDoc, TeamMemberDoc, UserDoc } from '@/lib/types';
+import { Resend } from 'resend';
+import type { TeamDoc, TeamMemberDoc, UserDoc, ProfileDoc } from '@/lib/types';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // POST — invite a member
 export async function POST(req: NextRequest) {
@@ -59,6 +62,21 @@ export async function POST(req: NextRequest) {
   };
 
   await memberRef.set(member);
+
+  // Send invite email
+  try {
+    const profileSnap2   = await adminDb.collection('profiles').doc(user.uid).get();
+    const inviterProfile = profileSnap2.exists ? (profileSnap2.data() as ProfileDoc) : null;
+    const inviterName    = inviterProfile?.displayName ?? user.email ?? 'Votre équipe';
+    const appUrl         = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
+
+    await resend.emails.send({
+      from:    'We Connect <noreply@weconnect.cards>',
+      to:      normalizedEmail,
+      subject: `${inviterName} vous invite à rejoindre son équipe We Connect`,
+      text:    `Bonjour,\n\n${inviterName} vous invite à rejoindre son équipe We Connect en tant que ${role === 'admin' ? 'Administrateur' : 'Membre'}.\n\nCréez votre compte ici : ${appUrl}/register\n\nÀ bientôt !`,
+    });
+  } catch { /* email optional — don't block invite */ }
 
   return NextResponse.json({ success: true, member: { id: normalizedEmail, ...member } });
 }

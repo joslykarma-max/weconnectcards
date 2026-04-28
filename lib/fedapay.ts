@@ -61,7 +61,7 @@ export async function getTransaction(id: number): Promise<FedaPayTransaction> {
 }
 
 export const PLANS = {
-  essentiel: { amount: 29_000, currency: 'XOF', label: 'Plan Essentiel' },
-  pro:       { amount: 59_000, currency: 'XOF', label: 'Plan Pro' },
-  pro_sub:   { amount:  4_990, currency: 'XOF', label: 'Abonnement Pro mensuel' },
+  essentiel: { amount: 10_500, currency: 'XOF', label: 'Plan Essentiel' },
+  pro:       { amount: 20_000, currency: 'XOF', label: 'Plan Pro' },
+  pro_sub:   { amount:  2_000, currency: 'XOF', label: 'Abonnement Pro mensuel' },
 } as const;

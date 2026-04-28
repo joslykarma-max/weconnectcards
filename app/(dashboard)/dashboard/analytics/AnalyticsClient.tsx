@@ -4,12 +4,14 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 import KPICard from '@/components/dashboard/KPICard';
 
 interface AnalyticsData {
-  scansByDay: Record<string, number>;
-  devices: Record<string, number>;
-  topLinks: Array<{ label: string; type: string; count: number }>;
-  totalScans: number;
+  scansByDay:  Record<string, number>;
+  devices:     Record<string, number>;
+  topLinks:    Array<{ label: string; type: string; count: number }>;
+  totalScans:  number;
   totalClicks: number;
-  username?: string;
+  username?:   string;
+  scansTrend?:  number;
+  clicksTrend?: number;
 }
 
 const CHART_COLORS = ['#6366F1', '#06B6D4', '#818CF8', '#0891B2', '#4338CA'];
@@ -45,9 +47,9 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
   return (
     <div>
       <div className="dash-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 36 }}>
-        <KPICard label="Scans (90j)" value={data.totalScans} trend={12} />
-        <KPICard label="Clics (90j)" value={data.totalClicks} trend={8} />
-        <KPICard label="Engagement" value={`${engagement}%`} trend={3} />
+        <KPICard label="Scans (90j)" value={data.totalScans} trend={data.scansTrend} />
+        <KPICard label="Clics (90j)" value={data.totalClicks} trend={data.clicksTrend} />
+        <KPICard label="Engagement" value={`${engagement}%`} />
       </div>
 
       {/* Scans chart */}
