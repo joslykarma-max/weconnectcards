@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
 interface LogoSymbolProps {
   width?: number;
   height?: number;
@@ -15,14 +13,14 @@ export default function LogoSymbol({
   className = '',
 }: LogoSymbolProps) {
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src="/logo2.png"
       alt="We Connect"
       width={width}
       height={height}
       className={className}
-      style={{ objectFit: 'contain' }}
-      priority
+      style={{ width, height, objectFit: 'contain', display: 'block' }}
     />
   );
 }

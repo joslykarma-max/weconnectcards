@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
 interface LogoHorizontalProps {
   symbolSize?: 'sm' | 'md' | 'lg';
   showTagline?: boolean;
@@ -16,17 +14,15 @@ export default function LogoHorizontal({
   className = '',
 }: LogoHorizontalProps) {
   const h = heights[symbolSize];
-  const w = Math.round(h * 1.5); // 612/408 ≈ 1.5
 
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src="/logo2.png"
       alt="We Connect"
-      width={w}
       height={h}
       className={className}
-      style={{ objectFit: 'contain' }}
-      priority
+      style={{ height: h, width: 'auto', display: 'block' }}
     />
   );
 }

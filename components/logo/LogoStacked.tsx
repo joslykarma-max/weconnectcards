@@ -1,7 +1,5 @@
 'use client';
 
-import Image from 'next/image';
-
 interface LogoStackedProps {
   symbolSize?: 'sm' | 'md';
   variant?: 'dark' | 'light' | 'electric';
@@ -15,17 +13,15 @@ export default function LogoStacked({
   className = '',
 }: LogoStackedProps) {
   const h = heights[symbolSize];
-  const w = Math.round(h * 1.5);
 
   return (
-    <Image
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       src="/logo2.png"
       alt="We Connect"
-      width={w}
       height={h}
       className={className}
-      style={{ objectFit: 'contain' }}
-      priority
+      style={{ height: h, width: 'auto', display: 'block' }}
     />
   );
 }
