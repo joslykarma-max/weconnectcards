@@ -5,21 +5,32 @@ import { useRouter, usePathname } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
 
 const PAGE_TITLES: Record<string, string> = {
-  '/dashboard':           'Overview',
-  '/dashboard/card':      'Ma carte',
-  '/dashboard/profile':   'Mon profil',
-  '/dashboard/preview':   'Aperçu carte',
-  '/dashboard/analytics': 'Analytics',
-  '/dashboard/modules':   'Modules',
-  '/dashboard/contacts':  'Contacts',
-  '/dashboard/team':      'Équipe',
-  '/dashboard/settings':  'Paramètres',
+  '/dashboard':                    'Overview',
+  '/dashboard/card':               'Ma carte',
+  '/dashboard/profile':            'Mon profil',
+  '/dashboard/preview':            'Aperçu carte',
+  '/dashboard/analytics':          'Analytics',
+  '/dashboard/modules':            'Modules',
+  '/dashboard/modules/access':     'Clé d\'accès',
+  '/dashboard/modules/member':     'Carte membre',
+  '/dashboard/modules/loyalty':    'Fidélité',
+  '/dashboard/modules/event':      'Ticket événement',
+  '/dashboard/modules/menu':       'Menu digital',
+  '/dashboard/modules/portfolio':  'Portfolio',
+  '/dashboard/modules/review':     'Avis clients',
+  '/dashboard/modules/certificate':'Certificat',
+  '/dashboard/modules/medical':    'Dossier médical',
+  '/dashboard/contacts':           'Contacts',
+  '/dashboard/qrcode':             'QR Codes',
+  '/dashboard/team':               'Équipe',
+  '/dashboard/settings':           'Paramètres',
 };
 
 export default function Topbar({ userEmail }: { userEmail?: string }) {
   const router   = useRouter();
   const pathname = usePathname();
   const title    = PAGE_TITLES[pathname] ?? 'Dashboard';
+  const isSubPage = pathname.startsWith('/dashboard/modules/') && pathname !== '/dashboard/modules';
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -49,9 +60,28 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
       background: 'var(--t-sidebar)',
       flexShrink: 0,
     }}>
-      <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>
-        {title}
-      </h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {isSubPage && (
+          <button
+            onClick={() => router.back()}
+            className="topbar-back"
+            aria-label="Retour"
+            style={{
+              display: 'none',
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--t-text-muted)', padding: '4px 2px',
+              alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+        )}
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>
+          {title}
+        </h1>
+      </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* "Voir ma page" — hidden on mobile via CSS */}

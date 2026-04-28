@@ -65,7 +65,7 @@ export default function LoyaltyDashboard({ initialConfig, customers }: { initial
   return (
     <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 4 }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>←</button>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC' }}>🎯 Carte de fidélité</h2>
           <p style={{ color: '#6B7280', fontSize: 13 }}>Récompensez vos clients avec des tampons digitaux</p>

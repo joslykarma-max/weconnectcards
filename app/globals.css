@@ -221,6 +221,8 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
 /* Defaults (desktop) */
 .nav-hamburger  { display: none; }
 .bottom-nav     { display: none; }
+.topbar-back    { display: none; }
+.module-back-btn { display: flex; }
 
 @media (max-width: 768px) {
   /* Nav */
@@ -234,6 +236,9 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
   .dash-content     { padding-bottom: 84px !important; }
   .topbar-viewlink  { display: none !important; }
   .topbar-header    { padding: 0 16px !important; }
+  .topbar-back      { display: flex !important; }
+  .module-back-btn  { display: none !important; }
+  .module-3col      { grid-template-columns: 1fr !important; }
 
   /* Hero */
   .hero-grid {

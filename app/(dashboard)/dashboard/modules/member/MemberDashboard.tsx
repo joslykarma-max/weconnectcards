@@ -332,14 +332,14 @@ export default function MemberDashboard({
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>←</button>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>🎫 Carte Membre</h2>
           <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Adhésions multi-membres — 1 carte NFC par membre</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr 300px', gap: 24, alignItems: 'start' }}>
+      <div className="module-3col" style={{ display: 'grid', gridTemplateColumns: '260px 1fr 300px', gap: 24, alignItems: 'start' }}>
 
         {/* ── Col 1 : Club config ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -321,7 +321,7 @@ export default function MenuDashboard({
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>←</button>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC' }}>🍽️ Menu Restaurant</h2>
           <p style={{ color: '#6B7280', fontSize: 13 }}>
@@ -330,7 +330,7 @@ export default function MenuDashboard({
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 340px', gap: 24, alignItems: 'start' }}>
+      <div className="module-3col" style={{ display: 'grid', gridTemplateColumns: '280px 1fr 340px', gap: 24, alignItems: 'start' }}>
         {/* Col 1: info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
