@@ -156,8 +156,8 @@ export default function PreviewClient({
           </Card>
         </div>
 
-        {/* Live preview — hidden on mobile */}
-        <Card padding="sm" className="preview-iframe-col">
+        {/* Live preview */}
+        <Card padding="sm">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
               Aperçu live
@@ -171,11 +171,12 @@ export default function PreviewClient({
             {isPublic ? (
               <iframe
                 src={publicUrl}
+                className="preview-iframe"
                 style={{ width: '100%', height: 520, border: 'none', display: 'block' }}
                 title="Aperçu profil public"
               />
             ) : (
-              <div style={{ height: 520, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <div className="preview-iframe" style={{ height: 520, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
                 <span style={{ fontSize: 40 }}>🔒</span>
                 <p style={{ color: 'var(--t-text-muted)', fontSize: 14, textAlign: 'center', maxWidth: 200 }}>
                   Active le profil public pour voir l&apos;aperçu
