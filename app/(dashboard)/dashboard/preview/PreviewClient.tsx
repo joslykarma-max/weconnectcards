@@ -98,7 +98,7 @@ export default function PreviewClient({
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="preview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
 
         {/* QR Code + link */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -156,8 +156,8 @@ export default function PreviewClient({
           </Card>
         </div>
 
-        {/* Live preview */}
-        <Card padding="sm">
+        {/* Live preview — hidden on mobile */}
+        <Card padding="sm" className="preview-iframe-col">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
               Aperçu live

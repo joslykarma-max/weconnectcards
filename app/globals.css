@@ -284,6 +284,8 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
   .dash-analytics-grid { grid-template-columns: 1fr !important; }
   .dash-team-grid      { grid-template-columns: 1fr !important; }
   .dash-3col           { grid-template-columns: 1fr 1fr !important; }
+  .preview-grid        { grid-template-columns: 1fr !important; }
+  .preview-iframe-col  { display: none !important; }
 }
 
 @media (max-width: 480px) {

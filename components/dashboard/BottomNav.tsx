@@ -25,13 +25,14 @@ const items = [
     ),
   },
   {
-    href: '/dashboard/analytics',
-    label: 'Stats',
+    href: '/dashboard/modules',
+    label: 'Modules',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-        <line x1="18" y1="20" x2="18" y2="10"/>
-        <line x1="12" y1="20" x2="12" y2="4"/>
-        <line x1="6"  y1="20" x2="6"  y2="14"/>
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
       </svg>
     ),
   },
@@ -81,7 +82,7 @@ export default function BottomNav() {
         const isMore = item.isMore;
         const isActive = isMore
           ? (pathname.startsWith('/dashboard/settings') ||
-             pathname.startsWith('/dashboard/modules') ||
+             pathname.startsWith('/dashboard/analytics') ||
              pathname.startsWith('/dashboard/contacts') ||
              pathname.startsWith('/dashboard/team') ||
              pathname.startsWith('/dashboard/preview'))
