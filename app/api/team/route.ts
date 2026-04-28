@@ -93,15 +93,26 @@ export async function DELETE(req: NextRequest) {
   return NextResponse.json({ success: true });
 }
 
-// PATCH — update team name
+// PATCH — update team name OR member role
 export async function PATCH(req: NextRequest) {
   const user = await requireAuth();
-  const { name } = await req.json() as { name: string };
+  const body = await req.json() as { name?: string; email?: string; role?: 'admin' | 'member' };
 
-  if (!name?.trim()) return NextResponse.json({ error: 'Nom requis.' }, { status: 400 });
+  // Change member role
+  if (body.email && body.role) {
+    const email = body.email.trim().toLowerCase();
+    const memberRef = adminDb.collection('teams').doc(user.uid).collection('members').doc(email);
+    const snap = await memberRef.get();
+    if (!snap.exists) return NextResponse.json({ error: 'Membre introuvable.' }, { status: 404 });
+    await memberRef.update({ role: body.role });
+    return NextResponse.json({ success: true });
+  }
+
+  // Update team name
+  if (!body.name?.trim()) return NextResponse.json({ error: 'Nom requis.' }, { status: 400 });
 
   await adminDb.collection('teams').doc(user.uid).set(
-    { name: name.trim() },
+    { name: body.name.trim() },
     { merge: true },
   );
 

@@ -6,7 +6,7 @@ import type { TeamDoc, TeamMemberDoc, UserDoc } from '@/lib/types';
 export default async function TeamPage() {
   const user = await requireAuth();
 
-  const [userSnap, teamSnap, scansSnap, clicksSnap] = await Promise.all([
+  const [userSnap, teamSnap, ownerScansSnap, ownerClicksSnap] = await Promise.all([
     adminDb.collection('users').doc(user.uid).get(),
     adminDb.collection('teams').doc(user.uid).get(),
     adminDb.collection('scans').where('userId', '==', user.uid).get(),
@@ -16,36 +16,34 @@ export default async function TeamPage() {
   const userData = userSnap.exists ? (userSnap.data() as UserDoc) : null;
   const isPro    = userData?.plan === 'pro';
 
-  // Fetch team members
   let members: Array<{ id: string } & TeamMemberDoc> = [];
   let teamName = '';
-  let memberUids: string[] = [];
 
   if (isPro && teamSnap.exists) {
     const teamData = teamSnap.data() as TeamDoc;
     teamName = teamData.name;
-
     const membersSnap = await adminDb.collection('teams').doc(user.uid).collection('members').get();
     members = membersSnap.docs.map((d) => ({ id: d.id, ...(d.data() as TeamMemberDoc) }));
-    memberUids = members.filter((m) => m.uid).map((m) => m.uid!);
   }
 
-  // Aggregate scans + clicks for all team members
-  let totalScans  = scansSnap.size;
-  let totalClicks = clicksSnap.size;
+  // Per-member stats
+  const memberStats: Record<string, { scans: number; clicks: number }> = {};
+  const activeMembers = members.filter((m) => m.uid);
 
-  if (memberUids.length > 0) {
+  if (activeMembers.length > 0) {
     await Promise.all(
-      memberUids.map(async (uid) => {
+      activeMembers.map(async (m) => {
         const [s, c] = await Promise.all([
-          adminDb.collection('scans').where('userId', '==', uid).get(),
-          adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+          adminDb.collection('scans').where('userId', '==', m.uid!).get(),
+          adminDb.collection('linkClicks').where('profileId', '==', m.uid!).get(),
         ]);
-        totalScans  += s.size;
-        totalClicks += c.size;
+        memberStats[m.id] = { scans: s.size, clicks: c.size };
       }),
     );
   }
+
+  const totalScans  = ownerScansSnap.size  + Object.values(memberStats).reduce((a, s) => a + s.scans, 0);
+  const totalClicks = ownerClicksSnap.size + Object.values(memberStats).reduce((a, s) => a + s.clicks, 0);
 
   return (
     <TeamClient
@@ -58,8 +56,10 @@ export default async function TeamPage() {
         status:      m.status,
         invitedAt:   m.invitedAt,
         joinedAt:    m.joinedAt,
+        stats:       memberStats[m.id] ?? null,
       }))}
-      stats={{ totalScans, totalClicks, activeMembers: members.filter((m) => m.status === 'active').length }}
+      ownerStats={{ scans: ownerScansSnap.size, clicks: ownerClicksSnap.size }}
+      totalStats={{ scans: totalScans, clicks: totalClicks }}
       ownerEmail={user.email ?? ''}
       isPro={isPro}
     />
