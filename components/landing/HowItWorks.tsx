@@ -41,7 +41,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" style={{ padding: '100px 40px', background: '#0D0E14', position: 'relative', overflow: 'hidden' }}>
+    <section id="how-it-works" className="section-responsive" style={{ padding: '100px 40px', background: '#0D0E14', position: 'relative', overflow: 'hidden' }}>
       {/* Subtle grid */}
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
 
@@ -55,9 +55,9 @@ export default function HowItWorks() {
           </h2>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 48, position: 'relative' }}>
+        <div className="steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 48, position: 'relative' }}>
           {/* Connecting line */}
-          <div style={{
+          <div className="steps-connector" style={{
             position: 'absolute',
             top: 32,
             left: '16.66%',

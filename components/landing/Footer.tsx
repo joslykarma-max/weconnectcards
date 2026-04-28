@@ -9,8 +9,8 @@ export default function Footer() {
       background: '#0D0E14',
       padding: '60px 40px 40px',
     }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 60, marginBottom: 60 }}>
+      <div className="footer-main" style={{ maxWidth: 1280, margin: '0 auto' }}>
+        <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', gap: 60, marginBottom: 60 }}>
           {/* Brand */}
           <div>
             <LogoHorizontal symbolSize="sm" showTagline />

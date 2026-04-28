@@ -327,20 +327,23 @@ export default function Hero() {
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
       <div className="glow-electric" style={{ position: 'absolute', inset: 0 }} />
 
-      <div style={{
-        maxWidth: 1280,
-        margin: '0 auto',
-        padding: '80px 40px',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 80,
-        alignItems: 'center',
-        width: '100%',
-        position: 'relative',
-        zIndex: 1,
-      }}>
+      <div
+        className="hero-grid"
+        style={{
+          maxWidth: 1280,
+          margin: '0 auto',
+          padding: '80px 40px',
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 80,
+          alignItems: 'center',
+          width: '100%',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      >
         {/* Left */}
-        <div>
+        <div className="hero-text">
           <Badge variant="gradient" className="mb-6 animate-fade-in-up">
             Technologie NFC · Carte intelligente
           </Badge>
@@ -376,7 +379,7 @@ export default function Hero() {
             Partagez votre identité professionnelle en un geste.
           </p>
 
-          <div className="animate-fade-in-up delay-300" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+          <div className="animate-fade-in-up delay-300 hero-ctas" style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
             <Link href="/register">
               <Button variant="gradient" size="lg">
                 Commander ma carte
@@ -392,7 +395,7 @@ export default function Hero() {
             </Link>
           </div>
 
-          <div className="animate-fade-in-up delay-400" style={{ display: 'flex', gap: 32, marginTop: 48, flexWrap: 'wrap' }}>
+          <div className="animate-fade-in-up delay-400 hero-stats" style={{ display: 'flex', gap: 32, marginTop: 48, flexWrap: 'wrap' }}>
             {[
               { value: '10k+', label: 'Cartes actives' },
               { value: '3s',   label: 'Pour partager' },
@@ -416,7 +419,11 @@ export default function Hero() {
 
         {/* Right — Card Deck */}
         <div className="animate-fade-in-up delay-300" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <CardDeck />
+          <div className="card-deck-wrapper">
+            <div className="card-deck-scale">
+              <CardDeck />
+            </div>
+          </div>
         </div>
       </div>
     </section>

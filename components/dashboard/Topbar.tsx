@@ -25,7 +25,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
   }
 
   return (
-    <header style={{
+    <header className="topbar-header" style={{
       height: 64,
       borderBottom: '1px solid rgba(255,255,255,0.07)',
       display: 'flex',
@@ -43,6 +43,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
         {/* Quick links */}
         <a
           href="/dashboard/profile"
+          className="topbar-viewlink"
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '8px 14px',

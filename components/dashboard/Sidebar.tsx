@@ -106,7 +106,7 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
   const pathname = usePathname();
 
   return (
-    <aside style={{
+    <aside className="sidebar" style={{
       width: 240,
       minHeight: '100vh',
       background: '#0D0E14',

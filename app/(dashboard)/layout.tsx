@@ -3,6 +3,7 @@ import { getSession } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import Sidebar from '@/components/dashboard/Sidebar';
 import Topbar from '@/components/dashboard/Topbar';
+import BottomNav from '@/components/dashboard/BottomNav';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -16,10 +17,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Sidebar isPro={isPro} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Topbar userEmail={session.email ?? undefined} />
-        <main style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
+        <main className="dash-content" style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

@@ -67,7 +67,7 @@ const plans = [
 
 export default function Pricing() {
   return (
-    <section id="pricing" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
+    <section id="pricing" className="section-responsive" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: 64 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>
           Tarifs

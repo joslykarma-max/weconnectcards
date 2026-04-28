@@ -44,7 +44,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
   return (
     <div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 36 }}>
+      <div className="dash-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 36 }}>
         <KPICard label="Scans (90j)" value={data.totalScans} trend={12} />
         <KPICard label="Clics (90j)" value={data.totalClicks} trend={8} />
         <KPICard label="Engagement" value={`${engagement}%`} trend={3} />
@@ -71,7 +71,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="dash-analytics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Top links */}
         <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28 }}>
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 24 }}>Top liens cliqués</h3>

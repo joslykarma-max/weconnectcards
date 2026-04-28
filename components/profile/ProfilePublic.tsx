@@ -117,7 +117,7 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: theme.bg, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '40px 16px 80px' }}>
+    <div style={{ minHeight: '100vh', background: theme.bg, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '48px 16px 100px' }}>
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Avatar */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
@@ -169,7 +169,7 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 14,
-                padding: '14px 20px',
+                padding: '16px 20px',
                 background: 'rgba(255,255,255,0.04)',
                 border: `1px solid ${theme.border}`,
                 borderRadius: 8,
@@ -214,7 +214,7 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
             color: '#fff',
             fontFamily: 'Syne, sans-serif',
             fontWeight: 700,
-            fontSize: 15,
+            fontSize: 16,
             cursor: saving ? 'not-allowed' : 'pointer',
             display: 'flex',
             alignItems: 'center',

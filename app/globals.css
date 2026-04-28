@@ -185,3 +185,80 @@ body {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
+
+/* ─── Responsive — Mobile ───────────────────────────────────────── */
+
+/* Defaults (desktop) */
+.nav-hamburger  { display: none; }
+.bottom-nav     { display: none; }
+
+@media (max-width: 768px) {
+  /* Nav */
+  .nav-links-desktop   { display: none !important; }
+  .nav-actions-desktop { display: none !important; }
+  .nav-hamburger       { display: flex !important; }
+
+  /* Dashboard sidebar ↔ bottom nav */
+  .sidebar          { display: none !important; }
+  .bottom-nav       { display: flex !important; }
+  .dash-content     { padding-bottom: 84px !important; }
+  .topbar-viewlink  { display: none !important; }
+  .topbar-header    { padding: 0 16px !important; }
+
+  /* Hero */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    padding: 52px 20px 56px !important;
+    gap: 44px !important;
+    text-align: center;
+  }
+  .hero-text  { text-align: center !important; }
+  .hero-ctas  { justify-content: center !important; }
+  .hero-stats { justify-content: center !important; }
+
+  /* Card deck — scale to fit mobile width */
+  .card-deck-wrapper {
+    width: 100%;
+    overflow: hidden;
+    display: flex !important;
+    justify-content: center;
+    align-items: flex-start;
+    height: 230px;
+  }
+  .card-deck-scale {
+    transform: scale(0.84);
+    transform-origin: top center;
+    flex-shrink: 0;
+  }
+
+  /* Steps grid (HowItWorks) */
+  .steps-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .steps-connector { display: none !important; }
+
+  /* Section padding */
+  .section-responsive { padding: 64px 20px !important; }
+
+  /* Footer */
+  .footer-main { padding: 48px 20px 32px !important; }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 40px 24px !important;
+  }
+
+  /* Dashboard grids */
+  .dash-kpis           { grid-template-columns: 1fr 1fr !important; }
+  .dash-overview-grid  { grid-template-columns: 1fr !important; }
+  .dash-analytics-grid { grid-template-columns: 1fr !important; }
+  .dash-team-grid      { grid-template-columns: 1fr !important; }
+  .dash-3col           { grid-template-columns: 1fr 1fr !important; }
+}
+
+@media (max-width: 480px) {
+  .footer-grid     { grid-template-columns: 1fr !important; }
+  .card-deck-scale { transform: scale(0.74); }
+  .card-deck-wrapper { height: 204px; }
+  .dash-kpis       { grid-template-columns: 1fr 1fr !important; }
+}

@@ -64,7 +64,7 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
+    <section id="features" className="section-responsive" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: 64 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>
           Pourquoi We Connect

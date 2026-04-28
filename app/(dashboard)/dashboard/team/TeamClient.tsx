@@ -173,7 +173,7 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
       </div>
 
       {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+      <div className="dash-3col" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
         {[
           { label: 'Membres actifs',   value: activeCount + 1, icon: '👥' },
           { label: 'Scans total équipe', value: stats.totalScans, icon: '📡' },
@@ -194,7 +194,7 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
+      <div className="dash-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 24, alignItems: 'start' }}>
 
         {/* Members list */}
         <Card padding="md">
