@@ -246,7 +246,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
 }
 
 // ─── MENU ────────────────────────────────────────────────────────────────────
-type PubMenuItem = { id: string; name: string; description: string; price: number; emoji: string; available: boolean };
+type PubMenuItem = { id: string; name: string; description: string; price: number; emoji: string; available: boolean; imageUrl?: string };
 type PubMenuCat  = { id: string; name: string; emoji: string; items: PubMenuItem[] };
 
 function MenuModule({ config, username }: { config: Record<string, unknown>; username: string }) {
@@ -346,8 +346,15 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
                     {cat.items.filter(i => i.available !== false).map(item => {
                       const qty = cart[item.id] || 0;
                       return (
-                        <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, transition: 'border-color 0.2s' }}>
-                          <span style={{ fontSize: 32, flexShrink: 0 }}>{item.emoji}</span>
+                        <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: item.imageUrl ? '12px 16px' : '14px 16px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, transition: 'border-color 0.2s' }}>
+                          {item.imageUrl ? (
+                            <div style={{ width: 72, height: 72, borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: 32, flexShrink: 0 }}>{item.emoji}</span>
+                          )}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>{item.name}</p>
                             {item.description && <p style={{ color: '#6B7280', fontSize: 12, marginTop: 2 }}>{item.description}</p>}

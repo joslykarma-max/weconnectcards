@@ -110,6 +110,7 @@ export interface MenuItem {
   price:       number;
   emoji:       string;
   available:   boolean;
+  imageUrl?:   string;
 }
 
 export interface MenuCategory {

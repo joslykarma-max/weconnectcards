@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -23,6 +24,25 @@ function uid() {
 const FOOD_EMOJIS = ['🍽️','🥗','🍗','🍔','🍕','🐟','🍜','🥘','🥩','🍱','🌮','🥙','🧆','🍤','🥚','🥤','🍺','🍷','☕','🍰','🧁','🍦','🍫','🧃','🫕'];
 const CAT_EMOJIS  = ['🥗','🍗','🍔','🐟','🥤','🍰','🌮','🥙','🍕','🥩','☕','🍺','🍜','🥘','🧁'];
 
+// Shared image upload helper
+async function uploadImageFile(file: File): Promise<string | null> {
+  if (!file.type.startsWith('image/')) return null;
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('/api/upload', { method: 'POST', body: fd });
+  if (!res.ok) return null;
+  const { url } = await res.json() as { url: string };
+  return url;
+}
+
+function ItemImage({ src, size = 40 }: { src: string; size?: number }) {
+  return (
+    <div style={{ width: size, height: size, borderRadius: 6, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
+      <Image src={src} alt="" fill sizes={`${size}px`} style={{ objectFit: 'cover' }} />
+    </div>
+  );
+}
+
 export default function MenuDashboard({
   initialInfo,
   initialCategories,
@@ -36,12 +56,18 @@ export default function MenuDashboard({
   const [saving, setSaving]         = useState(false);
   const [saved,  setSaved]          = useState(false);
 
-  const [openCatIds,    setOpenCatIds]    = useState<Set<string>>(new Set(initialCategories.map(c => c.id)));
-  const [addingCat,     setAddingCat]     = useState(false);
-  const [newCatName,    setNewCatName]    = useState('');
-  const [newCatEmoji,   setNewCatEmoji]   = useState('🍽️');
-  const [addingItemTo,  setAddingItemTo]  = useState<string | null>(null);
-  const [newItem,       setNewItem]       = useState({ emoji: '🍽️', name: '', description: '', price: '' });
+  const [openCatIds,   setOpenCatIds]   = useState<Set<string>>(new Set(initialCategories.map(c => c.id)));
+  const [addingCat,    setAddingCat]    = useState(false);
+  const [newCatName,   setNewCatName]   = useState('');
+  const [newCatEmoji,  setNewCatEmoji]  = useState('🍽️');
+  const [addingItemTo, setAddingItemTo] = useState<string | null>(null);
+  const [newItem, setNewItem] = useState({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' });
+  const [uploading, setUploading] = useState(false);
+
+  // Ref for hidden file inputs
+  const newItemFileRef = useRef<HTMLInputElement>(null);
+  const updateImageRef = useRef<HTMLInputElement>(null);
+  const [updatingImageFor, setUpdatingImageFor] = useState<string | null>(null); // itemId
 
   const setInfoField = (k: keyof Info) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setInfo(p => ({ ...p, [k]: e.target.value }));
@@ -77,9 +103,10 @@ export default function MenuDashboard({
       price:       Number(newItem.price) || 0,
       emoji:       newItem.emoji,
       available:   true,
+      imageUrl:    newItem.imageUrl || undefined,
     };
     setCategories(p => p.map(c => c.id === catId ? { ...c, items: [...c.items, item] } : c));
-    setNewItem({ emoji: '🍽️', name: '', description: '', price: '' });
+    setNewItem({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' });
     setAddingItemTo(null);
   }
 
@@ -92,6 +119,34 @@ export default function MenuDashboard({
       ? { ...c, items: c.items.map(i => i.id === itemId ? { ...i, available: !i.available } : i) }
       : c
     ));
+  }
+
+  function updateItemImage(itemId: string, url: string) {
+    setCategories(p => p.map(c => ({
+      ...c,
+      items: c.items.map(i => i.id === itemId ? { ...i, imageUrl: url } : i),
+    })));
+  }
+
+  async function handleNewItemImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadImageFile(file);
+    setUploading(false);
+    if (url) setNewItem(p => ({ ...p, imageUrl: url }));
+    e.target.value = '';
+  }
+
+  async function handleUpdateItemImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !updatingImageFor) return;
+    setUploading(true);
+    const url = await uploadImageFile(file);
+    setUploading(false);
+    if (url) updateItemImage(updatingImageFor, url);
+    setUpdatingImageFor(null);
+    e.target.value = '';
   }
 
   async function save() {
@@ -108,6 +163,10 @@ export default function MenuDashboard({
 
   return (
     <div style={{ maxWidth: 920, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      {/* Hidden file inputs */}
+      <input ref={newItemFileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleNewItemImage} />
+      <input ref={updateImageRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleUpdateItemImage} />
+
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>←</button>
@@ -183,9 +242,7 @@ export default function MenuDashboard({
                   Créer
                 </button>
                 <button onClick={() => { setAddingCat(false); setNewCatName(''); }}
-                  style={{ padding: '10px 12px', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, color: '#6B7280', cursor: 'pointer' }}>
-                  ×
-                </button>
+                  style={{ padding: '10px 12px', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, color: '#6B7280', cursor: 'pointer' }}>×</button>
               </div>
             </div>
           )}
@@ -206,21 +263,16 @@ export default function MenuDashboard({
             return (
               <div key={cat.id} style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
                 {/* Category header */}
-                <div
-                  onClick={() => toggleCat(cat.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', userSelect: 'none' }}
-                >
+                <div onClick={() => toggleCat(cat.id)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', userSelect: 'none' }}>
                   <span style={{ fontSize: 20 }}>{cat.emoji}</span>
                   <span style={{ flex: 1, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>{cat.name}</span>
                   <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#6B7280' }}>
                     {cat.items.length} plat{cat.items.length !== 1 ? 's' : ''}
                   </span>
-                  <button
-                    onClick={e => { e.stopPropagation(); removeCategory(cat.id); }}
+                  <button onClick={e => { e.stopPropagation(); removeCategory(cat.id); }}
                     title="Supprimer la catégorie"
-                    style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', borderRadius: 4, lineHeight: 1 }}>
-                    ×
-                  </button>
+                    style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', lineHeight: 1 }}>×</button>
                   <span style={{ color: '#6B7280', fontSize: 11, transform: isOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', display: 'inline-block' }}>▶</span>
                 </div>
 
@@ -235,27 +287,48 @@ export default function MenuDashboard({
 
                     {cat.items.map(item => (
                       <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', opacity: item.available ? 1 : 0.45 }}>
-                        <span style={{ fontSize: 20, flexShrink: 0 }}>{item.emoji}</span>
+                        {/* Thumbnail or emoji — click to replace */}
+                        <button
+                          title="Changer la photo"
+                          onClick={() => {
+                            setUpdatingImageFor(item.id);
+                            updateImageRef.current?.click();
+                          }}
+                          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', flexShrink: 0 }}>
+                          {item.imageUrl ? (
+                            <div style={{ position: 'relative' }}>
+                              <ItemImage src={item.imageUrl} size={40} />
+                              <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
+                                onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                                onMouseLeave={e => (e.currentTarget.style.opacity = '0')}>
+                                <span style={{ background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: '2px 4px', fontSize: 10, color: '#fff' }}>📷</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}
+                              title="Ajouter une photo">
+                              {uploading && updatingImageFor === item.id ? '⏳' : item.emoji}
+                            </div>
+                          )}
+                        </button>
+
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>{item.name}</p>
                           {item.description && (
                             <p style={{ color: '#6B7280', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>
                           )}
                         </div>
+
                         <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: '#818CF8', flexShrink: 0 }}>
                           {item.price.toLocaleString('fr-FR')} {info.currency}
                         </span>
-                        <button
-                          onClick={() => toggleAvailable(cat.id, item.id)}
+                        <button onClick={() => toggleAvailable(cat.id, item.id)}
                           title={item.available ? 'Marquer épuisé' : 'Marquer disponible'}
                           style={{ padding: '4px 8px', borderRadius: 4, background: item.available ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${item.available ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.25)'}`, color: item.available ? '#10B981' : '#EF4444', fontSize: 10, cursor: 'pointer', fontFamily: 'Space Mono, monospace', flexShrink: 0 }}>
                           {item.available ? 'Dispo' : 'Épuisé'}
                         </button>
-                        <button
-                          onClick={() => removeItem(cat.id, item.id)}
-                          style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', flexShrink: 0, lineHeight: 1 }}>
-                          ×
-                        </button>
+                        <button onClick={() => removeItem(cat.id, item.id)}
+                          style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', flexShrink: 0, lineHeight: 1 }}>×</button>
                       </div>
                     ))}
 
@@ -271,44 +344,60 @@ export default function MenuDashboard({
                             </button>
                           ))}
                         </div>
+
                         {/* Name + price */}
                         <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                          <input
-                            autoFocus type="text" value={newItem.name}
+                          <input autoFocus type="text" value={newItem.name}
                             onChange={e => setNewItem(p => ({ ...p, name: e.target.value }))}
                             placeholder="Nom du plat *"
                             style={{ flex: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}
                           />
-                          <input
-                            type="number" value={newItem.price}
+                          <input type="number" value={newItem.price}
                             onChange={e => setNewItem(p => ({ ...p, price: e.target.value }))}
                             placeholder={`Prix ${info.currency}`}
                             style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 10px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none' }}
                           />
                         </div>
+
                         {/* Description */}
-                        <input
-                          type="text" value={newItem.description}
+                        <input type="text" value={newItem.description}
                           onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))}
                           placeholder="Description courte (optionnel)"
                           onKeyDown={e => { if (e.key === 'Enter') addItem(cat.id); }}
                           style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
                         />
+
+                        {/* Image upload */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          {newItem.imageUrl ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <ItemImage src={newItem.imageUrl} size={44} />
+                              <button onClick={() => setNewItem(p => ({ ...p, imageUrl: '' }))}
+                                style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>
+                                Supprimer
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => newItemFileRef.current?.click()}
+                              disabled={uploading}
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 6, color: '#6B7280', cursor: uploading ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                              {uploading ? '⏳ Upload...' : '📸 Ajouter une photo'}
+                            </button>
+                          )}
+                        </div>
+
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <button
-                            onClick={() => addItem(cat.id)} disabled={!newItem.name.trim()}
+                          <button onClick={() => addItem(cat.id)} disabled={!newItem.name.trim()}
                             style={{ flex: 1, padding: '10px', background: newItem.name.trim() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${newItem.name.trim() ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 6, color: newItem.name.trim() ? '#818CF8' : '#6B7280', cursor: newItem.name.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13 }}>
                             Ajouter au menu
                           </button>
-                          <button onClick={() => { setAddingItemTo(null); setNewItem({ emoji: '🍽️', name: '', description: '', price: '' }); }}
-                            style={{ padding: '10px 14px', background: 'none', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 6, color: '#6B7280', cursor: 'pointer', fontSize: 16 }}>
-                            ×
-                          </button>
+                          <button onClick={() => { setAddingItemTo(null); setNewItem({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' }); }}
+                            style={{ padding: '10px 14px', background: 'none', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 6, color: '#6B7280', cursor: 'pointer', fontSize: 16 }}>×</button>
                         </div>
                       </div>
                     ) : (
-                      <button
-                        onClick={() => { setAddingItemTo(cat.id); setNewItem({ emoji: '🍽️', name: '', description: '', price: '' }); }}
+                      <button onClick={() => { setAddingItemTo(cat.id); setNewItem({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' }); }}
                         style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', color: '#6366F1', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, textAlign: 'left' }}>
                         + Ajouter un plat
                       </button>
