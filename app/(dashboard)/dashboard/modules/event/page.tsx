@@ -28,8 +28,9 @@ export default async function EventPage() {
         whatsapp:            String(config.whatsapp            ?? ''),
         registrationEnabled: config.registrationEnabled !== false,
       }}
-      initialTickets={(config.tickets as TicketType[] | undefined) ?? []}
-      initialAgenda={(config.agenda  as AgendaItem[]  | undefined) ?? []}
+      initialTickets={(config.tickets  as TicketType[] | undefined) ?? []}
+      initialAgenda={(config.agenda    as AgendaItem[]  | undefined) ?? []}
+      initialPosters={(config.posters  as string[]      | undefined) ?? []}
       initialRegistrations={registrations}
     />
   );

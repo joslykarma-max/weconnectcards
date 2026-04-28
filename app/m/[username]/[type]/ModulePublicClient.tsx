@@ -517,6 +517,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
 
   const tickets:  EventTicket[]    = (config.tickets  as EventTicket[]    | undefined) ?? [];
   const agenda:   EventAgendaItem[] = (config.agenda   as EventAgendaItem[] | undefined) ?? [];
+  const posters:  string[]          = (config.posters  as string[]          | undefined) ?? [];
   const currency: string            = String(config.currency || 'FCFA');
   const registrationEnabled         = config.registrationEnabled !== false;
 
@@ -589,9 +590,29 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
   if (phase === 'info') {
     return (
       <Shell backHref={`/${username}`}>
+        {/* Affiches */}
+        {posters.length > 0 && (
+          <div style={{ marginBottom: 28, marginLeft: -16, marginRight: -16 }}>
+            {posters.length === 1 ? (
+              // Une seule affiche : pleine largeur
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={posters[0]} alt="Affiche" style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 12 }} />
+            ) : (
+              // Plusieurs : scroll horizontal
+              <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
+                {posters.map((url, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={i} src={url} alt={`Affiche ${i + 1}`}
+                    style={{ width: 220, height: 300, objectFit: 'cover', borderRadius: 10, flexShrink: 0, scrollSnapAlign: 'start' }} />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 56, marginBottom: 12 }}>{String(config.emoji || '🎟️')}</div>
+          {posters.length === 0 && <div style={{ fontSize: 56, marginBottom: 12 }}>{String(config.emoji || '🎟️')}</div>}
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8, margin: '0 0 8px' }}>
             {String(config.eventName || 'Événement')}
           </h1>

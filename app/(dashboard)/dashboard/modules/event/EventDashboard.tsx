@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -36,19 +36,24 @@ export default function EventDashboard({
   initialTickets,
   initialAgenda,
   initialRegistrations,
+  initialPosters,
 }: {
   initialInfo:          EventInfo;
   initialTickets:       TicketType[];
   initialAgenda:        AgendaItem[];
   initialRegistrations: EventRegistration[];
+  initialPosters:       string[];
 }) {
   const router = useRouter();
   const [info,    setInfo]    = useState<EventInfo>(initialInfo);
   const [tickets, setTickets] = useState<TicketType[]>(initialTickets);
   const [agenda,  setAgenda]  = useState<AgendaItem[]>(initialAgenda);
   const [regs]                = useState<EventRegistration[]>(initialRegistrations);
+  const [posters, setPosters] = useState<string[]>(initialPosters);
   const [saving,  setSaving]  = useState(false);
   const [saved,   setSaved]   = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const posterInputRef = useRef<HTMLInputElement>(null);
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showNewTicket,   setShowNewTicket]   = useState(false);
@@ -58,6 +63,17 @@ export default function EventDashboard({
 
   const setField = <K extends keyof EventInfo>(k: K, v: EventInfo[K]) =>
     setInfo(p => ({ ...p, [k]: v }));
+
+  async function uploadPoster(file: File) {
+    if (posters.length >= 3) return;
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/upload?folder=eventImages', { method: 'POST', body: fd });
+    const data = await res.json() as { url?: string };
+    if (data.url) setPosters(p => [...p, data.url!]);
+    setUploading(false);
+  }
 
   const countsByTicket: Record<string, number> = {};
   regs.forEach(r => { countsByTicket[r.ticketTypeId] = (countsByTicket[r.ticketTypeId] || 0) + 1; });
@@ -90,7 +106,7 @@ export default function EventDashboard({
     await fetch('/api/modules', {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ type: 'event', config: { ...info, tickets, agenda } }),
+      body:    JSON.stringify({ type: 'event', config: { ...info, tickets, agenda, posters } }),
     });
     setSaving(false);
     setSaved(true);
@@ -195,8 +211,40 @@ export default function EventDashboard({
           </Button>
         </div>
 
-        {/* ─── Col 2: Tickets + Agenda ─── */}
+        {/* ─── Col 2: Affiches + Tickets + Agenda ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Affiches */}
+          <Card padding="md">
+            <h3 style={{ ...sectionHead, marginBottom: 6 }}>Affiches de l&apos;événement</h3>
+            <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 16 }}>Max 3 images · Format portrait recommandé</p>
+            <input ref={posterInputRef} type="file" accept="image/*" style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) { uploadPoster(f); e.target.value = ''; } }} />
+            <div style={{ display: 'flex', gap: 12 }}>
+              {posters.map((url, i) => (
+                <div key={i} style={{ position: 'relative', width: 100, height: 140, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Affiche ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <button onClick={() => setPosters(p => p.filter((_, j) => j !== i))}
+                    style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
+                    ×
+                  </button>
+                </div>
+              ))}
+              {posters.length < 3 && (
+                <button onClick={() => posterInputRef.current?.click()} disabled={uploading}
+                  style={{ width: 100, height: 140, borderRadius: 8, border: '2px dashed rgba(99,102,241,0.35)', background: 'rgba(99,102,241,0.05)', color: uploading ? '#6B7280' : '#818CF8', cursor: uploading ? 'wait' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, flexShrink: 0 }}>
+                  <span style={{ fontSize: 24 }}>{uploading ? '⏳' : '+'}</span>
+                  <span style={{ fontSize: 11, fontFamily: 'Space Mono, monospace' }}>{uploading ? 'Upload...' : 'Ajouter'}</span>
+                </button>
+              )}
+              {/* Slots vides pour montrer les emplacements restants */}
+              {Array.from({ length: Math.max(0, 2 - posters.length) }).map((_, i) => (
+                <div key={`empty-${i}`} style={{ width: 100, height: 140, borderRadius: 8, border: '1px dashed rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.02)', flexShrink: 0 }} />
+              ))}
+            </div>
+          </Card>
+
           <Card padding="md">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={sectionHead}>Types de billets</h3>

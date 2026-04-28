@@ -15,9 +15,11 @@ export async function POST(req: NextRequest) {
   if (!file.type.startsWith('image/')) return NextResponse.json({ error: 'Format non supporté (image uniquement)' }, { status: 400 });
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'Fichier trop volumineux (max 5 Mo)' }, { status: 400 });
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext    = file.name.split('.').pop()?.replace(/[^a-z0-9]/gi, '') || 'jpg';
-  const path   = `menuImages/${session.uid}/${Date.now()}.${ext}`;
+  const buffer     = Buffer.from(await file.arrayBuffer());
+  const ext        = file.name.split('.').pop()?.replace(/[^a-z0-9]/gi, '') || 'jpg';
+  const rawFolder  = req.nextUrl.searchParams.get('folder') ?? 'menuImages';
+  const safeFolder = rawFolder.replace(/[^a-zA-Z0-9_-]/g, '');
+  const path       = `${safeFolder}/${session.uid}/${Date.now()}.${ext}`;
 
   const bucket  = admin.storage().bucket();
   const fileRef = bucket.file(path);
