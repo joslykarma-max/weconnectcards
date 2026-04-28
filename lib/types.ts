@@ -148,6 +148,34 @@ export interface EventRegistration {
   registeredAt:   string;
 }
 
+// Access module sub-types
+export interface AccessZone {
+  id:                  string;
+  name:                string;
+  emoji:               string;
+  accessType:          'libre' | 'pin' | 'whatsapp';
+  pinHash?:            string; // SHA-256 of PIN, never raw
+  whatsapp?:           string;
+  schedule: {
+    days:      string[]; // ['lun','mar',...]
+    startTime: string;   // 'HH:mm'
+    endTime:   string;
+    allDay:    boolean;
+  };
+  afterAccessMessage?: string;
+  emergencyContact?:   string;
+}
+
+// Collection: accessLogs/{autoId}
+export interface AccessLog {
+  profileId: string;
+  zoneId:    string;
+  zoneName:  string;
+  status:    'granted' | 'denied';
+  device:    string;
+  timestamp: string;
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;

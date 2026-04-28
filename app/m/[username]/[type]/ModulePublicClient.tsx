@@ -938,65 +938,268 @@ function MemberModule({ config, username }: { config: Record<string, unknown>; u
 }
 
 // ─── ACCESS ──────────────────────────────────────────────────────────────────
-function AccessModule({ config, username }: { config: Record<string, unknown>; username: string }) {
-  const [pin, setPin]         = useState('');
-  const [granted, setGranted] = useState(false);
-  const [denied, setDenied]   = useState(false);
-  const storedPin = String(config.pin || '');
-  const days      = (config.days as string[]) ?? [];
+// ─── ACCESS HELPERS ──────────────────────────────────────────────────────────
+type AZone = { id: string; name: string; emoji: string; accessType: 'libre' | 'pin' | 'whatsapp'; pinHash?: string; whatsapp?: string; schedule: { days: string[]; startTime: string; endTime: string; allDay: boolean }; afterAccessMessage?: string; emergencyContact?: string };
+const DAY_MAP: Record<number, string> = { 1: 'lun', 2: 'mar', 3: 'mer', 4: 'jeu', 5: 'ven', 6: 'sam', 0: 'dim' };
 
-  function checkPin() {
-    if (pin === storedPin) { setGranted(true); setDenied(false); }
-    else                   { setDenied(true); setGranted(false); setPin(''); }
+function zoneIsOpen(z: AZone): boolean {
+  if (z.schedule.allDay) return true;
+  const now   = new Date();
+  const today = DAY_MAP[now.getDay()];
+  if (!z.schedule.days.includes(today)) return false;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const [sh, sm] = z.schedule.startTime.split(':').map(Number);
+  const [eh, em] = z.schedule.endTime.split(':').map(Number);
+  return cur >= sh * 60 + sm && cur <= eh * 60 + em;
+}
+
+function AccessModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
+  type Phase = 'badge' | 'pin' | 'whatsapp' | 'granted';
+
+  const [phase,       setPhase]       = useState<Phase>('badge');
+  const [activeZone,  setActiveZone]  = useState<AZone | null>(null);
+  const [pinInput,    setPinInput]    = useState('');
+  const [pinError,    setPinError]    = useState('');
+  const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
+  const [blocked,     setBlocked]     = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState('');
+  const [checking,    setChecking]    = useState(false);
+  const [grantMsg,    setGrantMsg]    = useState('');
+
+  const zones: AZone[] = (config.zones as AZone[] | undefined) ?? [];
+  const holderPhoto    = String(config.holderPhoto || '');
+  const holderName     = String(config.holderName  || '');
+  const holderRole     = String(config.holderRole  || '');
+  const badgeTitle     = String(config.title        || 'Badge d\'accès');
+  const device         = typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 80) : 'unknown';
+
+  async function requestAccess(zone: AZone) {
+    setActiveZone(zone);
+    setPinError('');
+    setPinInput('');
+    setBlocked(false);
+
+    if (!zoneIsOpen(zone)) return; // stay on badge page, shown as closed
+
+    if (zone.accessType === 'libre') {
+      setChecking(true);
+      const res = await fetch('/api/access/check', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId, zoneId: zone.id, device }),
+      });
+      const data = await res.json();
+      setChecking(false);
+      setGrantMsg(data.message || '');
+      setPhase('granted');
+    } else if (zone.accessType === 'pin') {
+      setPhase('pin');
+    } else {
+      setPhase('whatsapp');
+    }
   }
 
+  async function submitPin() {
+    if (!pinInput || !activeZone) return;
+    setChecking(true);
+    setPinError('');
+    const res  = await fetch('/api/access/check', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, zoneId: activeZone.id, pin: pinInput, device }),
+    });
+    const data = await res.json();
+    setChecking(false);
+    setPinInput('');
+
+    if (data.granted) {
+      setGrantMsg(data.message || '');
+      setPhase('granted');
+    } else if (data.blocked) {
+      setBlocked(true);
+      setBlockedUntil(data.blockedUntil || '');
+      setPinError(data.error || 'Accès bloqué');
+    } else {
+      const left = data.attemptsLeft ?? null;
+      setAttemptsLeft(left);
+      setPinError(left !== null && left <= 2
+        ? `PIN incorrect — ${left} tentative${left > 1 ? 's' : ''} restante${left > 1 ? 's' : ''}`
+        : 'PIN incorrect');
+    }
+  }
+
+  function addKey(k: string) {
+    if (pinInput.length >= 8) return;
+    setPinInput(p => p + k);
+    setPinError('');
+  }
+
+  // ── Badge phase ──
+  if (phase === 'badge') {
+    return (
+      <Shell backHref={`/${username}`}>
+        {/* Badge card */}
+        <div style={{ background: 'linear-gradient(135deg, #0D0E14, #1a1d2e)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 14, padding: 24, marginBottom: 28 }}>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>{badgeTitle}</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '2px solid rgba(99,102,241,0.3)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {holderPhoto
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                : <span style={{ fontSize: 26 }}>👤</span>
+              }
+            </div>
+            <div>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', margin: '0 0 3px' }}>{holderName || 'Porteur'}</p>
+              {holderRole && <p style={{ color: '#818CF8', fontSize: 13, margin: 0 }}>{holderRole}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Zones */}
+        {zones.length === 0 ? (
+          <p style={{ color: '#6B7280', textAlign: 'center', fontSize: 14 }}>Aucune zone configurée</p>
+        ) : (
+          <>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 14 }}>Zones d&apos;accès</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {zones.map(zone => {
+                const open = zoneIsOpen(zone);
+                return (
+                  <div key={zone.id} style={{ background: '#181B26', border: `1px solid ${open ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: 22, flexShrink: 0 }}>{zone.emoji}</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 14, fontFamily: 'Syne, sans-serif', margin: '0 0 3px' }}>{zone.name}</p>
+                      <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', margin: 0 }}>
+                        {zone.schedule.allDay ? 'Toute la journée' : `${zone.schedule.startTime} – ${zone.schedule.endTime}`}
+                      </p>
+                    </div>
+                    {open ? (
+                      <button onClick={() => requestAccess(zone)} disabled={checking}
+                        style={{ background: 'linear-gradient(135deg, #6366F1, #818CF8)', border: 'none', borderRadius: 7, padding: '9px 16px', color: '#fff', fontSize: 13, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                        {zone.accessType === 'pin' ? '🔑 PIN' : zone.accessType === 'whatsapp' ? '💬' : '→ Entrer'}
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: 12, color: '#EF4444', fontFamily: 'Space Mono, monospace', background: 'rgba(239,68,68,0.1)', borderRadius: 5, padding: '5px 10px', whiteSpace: 'nowrap' }}>🔒 Fermé</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </Shell>
+    );
+  }
+
+  // ── PIN phase ──
+  if (phase === 'pin' && activeZone) {
+    const blockedTime = blockedUntil ? new Date(blockedUntil).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+    return (
+      <Shell backHref={`/${username}`}>
+        <button onClick={() => { setPhase('badge'); setPinInput(''); setPinError(''); setBlocked(false); }}
+          style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, padding: 0, fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour
+        </button>
+
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <span style={{ fontSize: 40 }}>{activeZone.emoji}</span>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 4px' }}>{activeZone.name}</h2>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontFamily: 'Space Mono, monospace' }}>Entrez votre code PIN</p>
+        </div>
+
+        {/* PIN display */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 24 }}>
+          {Array.from({ length: Math.max(4, pinInput.length) }).map((_, i) => (
+            <div key={i} style={{ width: 14, height: 14, borderRadius: '50%', background: i < pinInput.length ? '#6366F1' : 'rgba(255,255,255,0.12)', transition: 'background 0.1s' }} />
+          ))}
+        </div>
+
+        {/* Keypad */}
+        {blocked ? (
+          <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: 24, textAlign: 'center' }}>
+            <span style={{ fontSize: 40, display: 'block', marginBottom: 12 }}>🔒</span>
+            <p style={{ color: '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, margin: '0 0 8px' }}>Accès temporairement bloqué</p>
+            <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0 }}>Réessayez à {blockedTime}</p>
+            {activeZone.emergencyContact && (
+              <p style={{ color: '#6B7280', fontSize: 12, marginTop: 16, fontFamily: 'Space Mono, monospace' }}>📞 {activeZone.emergencyContact}</p>
+            )}
+          </div>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, maxWidth: 280, margin: '0 auto 20px' }}>
+              {['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => (
+                <button key={k} onClick={() => k === '⌫' ? setPinInput(p => p.slice(0, -1)) : k === '✓' ? submitPin() : addKey(k)}
+                  disabled={checking || (k === '✓' && !pinInput)}
+                  style={{ height: 62, borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: k === '✓' ? (pinInput ? 'linear-gradient(135deg, #6366F1, #818CF8)' : 'rgba(255,255,255,0.04)') : k === '⌫' ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.04)', color: k === '✓' && pinInput ? '#fff' : '#F8F9FC', fontSize: k === '⌫' || k === '✓' ? 20 : 22, fontFamily: 'Syne, sans-serif', fontWeight: 600, cursor: (k === '✓' && !pinInput) ? 'not-allowed' : 'pointer', transition: 'background 0.15s' }}
+                  onMouseOver={ev => { if (k !== '✓') ev.currentTarget.style.background = 'rgba(99,102,241,0.15)'; }}
+                  onMouseOut={ev => { ev.currentTarget.style.background = k === '✓' ? (pinInput ? 'linear-gradient(135deg, #6366F1, #818CF8)' : 'rgba(255,255,255,0.04)') : 'rgba(255,255,255,0.04)'; }}>
+                  {checking && k === '✓' ? '⏳' : k}
+                </button>
+              ))}
+            </div>
+            {pinError && (
+              <p style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', fontFamily: 'DM Sans, sans-serif', marginTop: 8 }}>{pinError}</p>
+            )}
+            {activeZone.emergencyContact && (
+              <p style={{ color: '#6B7280', fontSize: 11, textAlign: 'center', fontFamily: 'Space Mono, monospace', marginTop: 16 }}>📞 {activeZone.emergencyContact}</p>
+            )}
+          </>
+        )}
+      </Shell>
+    );
+  }
+
+  // ── WhatsApp phase ──
+  if (phase === 'whatsapp' && activeZone) {
+    const wa = activeZone.whatsapp?.replace(/\D/g, '') || '';
+    const msg = encodeURIComponent(`Bonjour, je souhaite accéder à la zone "${activeZone.name}". Merci de m'ouvrir.`);
+    return (
+      <Shell backHref={`/${username}`}>
+        <button onClick={() => setPhase('badge')}
+          style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, padding: 0, fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour
+        </button>
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <span style={{ fontSize: 40 }}>{activeZone.emoji}</span>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 6px' }}>{activeZone.name}</h2>
+          <p style={{ color: '#9CA3AF', fontSize: 14, margin: 0 }}>Contactez le responsable pour ouvrir</p>
+        </div>
+        <a href={`https://wa.me/${wa}?text=${msg}`} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', padding: '16px 0', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 16 }}>
+          💬 Contacter le responsable
+        </a>
+        {activeZone.emergencyContact && (
+          <p style={{ color: '#6B7280', fontSize: 12, textAlign: 'center', fontFamily: 'Space Mono, monospace' }}>📞 {activeZone.emergencyContact}</p>
+        )}
+      </Shell>
+    );
+  }
+
+  // ── Granted phase ──
   return (
     <Shell backHref={`/${username}`}>
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Contrôle d'accès</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8 }}>
-          {String(config.zoneName || 'Zone sécurisée')}
-        </h1>
-        {!!config.description && <p style={{ color: '#9CA3AF', fontSize: 14 }}>{String(config.description)}</p>}
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, margin: '0 auto 20px' }}>
+          🔓
+        </div>
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#10B981', marginBottom: 6 }}>Accès accordé</h2>
+        <p style={{ color: '#9CA3AF', fontSize: 15, marginBottom: 28 }}>{activeZone?.name}</p>
+
+        {grantMsg && (
+          <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 18, marginBottom: 24, textAlign: 'left' }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Instructions</p>
+            <p style={{ color: '#F8F9FC', fontSize: 14, margin: 0 }}>{grantMsg}</p>
+          </div>
+        )}
+
+        <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', marginBottom: 28 }}>
+          {new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} · {activeZone?.name}
+        </p>
+
+        <button onClick={() => { setPhase('badge'); setActiveZone(null); setGrantMsg(''); }}
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 24px', color: '#9CA3AF', fontSize: 13, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour au badge
+        </button>
       </div>
-
-      {!!(config.startTime && config.endTime) && (
-        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '14px 20px', marginBottom: 24, textAlign: 'center' }}>
-          <p style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
-            Accès autorisé : <strong style={{ color: '#F8F9FC' }}>{`${String(config.startTime)} – ${String(config.endTime)}`}</strong>
-          </p>
-          {days.length > 0 && (
-            <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 6 }}>
-              {days.join(' · ').toUpperCase()}
-            </p>
-          )}
-        </div>
-      )}
-
-      {granted ? (
-        <div style={{ textAlign: 'center', padding: 32, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 12 }}>
-          <span style={{ fontSize: 56, display: 'block', marginBottom: 12 }}>🔓</span>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#10B981' }}>Accès accordé</p>
-        </div>
-      ) : (
-        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 28 }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>Entrez votre PIN</p>
-          <input
-            type="password"
-            inputMode="numeric"
-            maxLength={8}
-            value={pin}
-            onChange={e => setPin(e.target.value)}
-            placeholder="••••"
-            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${denied ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '14px 20px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 24, textAlign: 'center', outline: 'none', letterSpacing: 8, boxSizing: 'border-box', marginBottom: 14 }}
-            onKeyDown={e => { if (e.key === 'Enter') checkPin(); }}
-          />
-          {denied && <p style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 14 }}>PIN incorrect. Réessayez.</p>}
-          <button onClick={checkPin} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
-            Vérifier
-          </button>
-        </div>
-      )}
     </Shell>
   );
 }
@@ -1198,7 +1401,7 @@ export default function ModulePublicClient({
     case 'event':       return <EventModule        config={config} username={username} profileId={profileId} />;
     case 'certificate': return <CertificateModule  config={config} username={username} />;
     case 'member':      return <MemberModule       config={config} username={username} />;
-    case 'access':      return <AccessModule       config={config} username={username} />;
+    case 'access':      return <AccessModule       config={config} username={username} profileId={profileId} />;
     case 'medical':     return <MedicalModule      config={config} username={username} />;
     default:            return null;
   }
