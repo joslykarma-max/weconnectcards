@@ -102,6 +102,23 @@ export interface LoyaltyCardDoc {
   lastStampAt?: string;
 }
 
+// Menu module sub-types
+export interface MenuItem {
+  id:          string;
+  name:        string;
+  description: string;
+  price:       number;
+  emoji:       string;
+  available:   boolean;
+}
+
+export interface MenuCategory {
+  id:    string;
+  name:  string;
+  emoji: string;
+  items: MenuItem[];
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;

@@ -246,33 +246,164 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
 }
 
 // ─── MENU ────────────────────────────────────────────────────────────────────
+type PubMenuItem = { id: string; name: string; description: string; price: number; emoji: string; available: boolean };
+type PubMenuCat  = { id: string; name: string; emoji: string; items: PubMenuItem[] };
+
 function MenuModule({ config, username }: { config: Record<string, unknown>; username: string }) {
+  const categories  = (config.categories as PubMenuCat[] | undefined) ?? [];
+  const currency    = String(config.currency || 'FCFA');
+  const whatsapp    = String(config.whatsapp || '').replace(/\D/g, '');
+
+  const [selectedCat, setSelectedCat] = useState<string>('all');
+  const [cart, setCart]               = useState<Record<string, number>>({});
+
+  const allItems  = categories.flatMap(c => c.items.filter(i => i.available !== false));
+  const displayedCats = selectedCat === 'all' ? categories : categories.filter(c => c.id === selectedCat);
+
+  const cartItems = Object.entries(cart)
+    .filter(([, q]) => q > 0)
+    .flatMap(([id, qty]) => {
+      const item = allItems.find(i => i.id === id);
+      return item ? [{ item, qty }] : [];
+    });
+  const cartTotal = cartItems.reduce((s, { item, qty }) => s + item.price * qty, 0);
+  const cartCount = cartItems.reduce((s, { qty }) => s + qty, 0);
+
+  function add(id: string) { setCart(p => ({ ...p, [id]: (p[id] || 0) + 1 })); }
+  function sub(id: string) {
+    setCart(p => {
+      const n = (p[id] || 0) - 1;
+      if (n <= 0) { const { [id]: _removed, ...rest } = p; return rest; }
+      return { ...p, [id]: n };
+    });
+  }
+
+  function orderOnWhatsApp() {
+    const lines   = cartItems.map(({ item, qty }) => `• ${qty}x ${item.name} — ${(qty * item.price).toLocaleString('fr-FR')} ${currency}`).join('\n');
+    const message = `Bonjour ! Je souhaite commander :\n\n${lines}\n\nTOTAL : ${cartTotal.toLocaleString('fr-FR')} ${currency}\n\nMerci 🙏`;
+    window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
+  }
+
   return (
     <Shell backHref={`/${username}`}>
-      <div style={{ textAlign: 'center', marginBottom: 28 }}>
+      {/* Header */}
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Menu</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 6 }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
           {String(config.restaurantName || 'Notre Restaurant')}
         </h1>
-        {!!config.address && <p style={{ color: '#9CA3AF', fontSize: 14 }}>📍 {String(config.address)}</p>}
-        {!!config.openHours && <p style={{ color: '#6B7280', fontSize: 13, marginTop: 4, fontFamily: 'Space Mono, monospace' }}>🕐 {String(config.openHours)}</p>}
+        {!!config.address   && <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>📍 {String(config.address)}</p>}
+        {!!config.openHours && <p style={{ color: '#6B7280', fontSize: 13, fontFamily: 'Space Mono, monospace' }}>🕐 {String(config.openHours)}</p>}
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {!!config.menuUrl && (
-          <a href={String(config.menuUrl)} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17 }}>
-            🍽️ Voir le menu
-          </a>
-        )}
-        {!!config.whatsapp && (
-          <a href={`https://wa.me/${String(config.whatsapp).replace(/\D/g, '')}?text=Bonjour, je souhaite passer une commande`}
-            target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, textDecoration: 'none', color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>
-            💬 Commander sur WhatsApp
-          </a>
-        )}
-      </div>
+      {categories.length === 0 ? (
+        /* Legacy view — no categories configured yet */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {!!config.menuUrl && (
+            <a href={String(config.menuUrl)} target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17 }}>
+              📋 Voir le menu
+            </a>
+          )}
+          {!!config.whatsapp && (
+            <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Bonjour, je souhaite passer une commande')}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, textDecoration: 'none', color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>
+              💬 Commander sur WhatsApp
+            </a>
+          )}
+          {!config.menuUrl && !config.whatsapp && (
+            <p style={{ color: '#6B7280', fontSize: 14, textAlign: 'center', marginTop: 20 }}>Menu en cours de configuration.</p>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Category tabs */}
+          <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20, msOverflowStyle: 'none', scrollbarWidth: 'none' } as React.CSSProperties}>
+            <button onClick={() => setSelectedCat('all')}
+              style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === 'all' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === 'all' ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === 'all' ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
+              Tout
+            </button>
+            {categories.map(cat => (
+              <button key={cat.id} onClick={() => setSelectedCat(cat.id)}
+                style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === cat.id ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === cat.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === cat.id ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
+                {cat.emoji} {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Items by category */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: cartCount > 0 ? 104 : 0 }}>
+            {displayedCats
+              .filter(cat => cat.items.some(i => i.available !== false))
+              .map(cat => (
+                <div key={cat.id}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                    <span style={{ fontSize: 20 }}>{cat.emoji}</span>
+                    <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC' }}>{cat.name}</h2>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {cat.items.filter(i => i.available !== false).map(item => {
+                      const qty = cart[item.id] || 0;
+                      return (
+                        <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, transition: 'border-color 0.2s' }}>
+                          <span style={{ fontSize: 32, flexShrink: 0 }}>{item.emoji}</span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>{item.name}</p>
+                            {item.description && <p style={{ color: '#6B7280', fontSize: 12, marginTop: 2 }}>{item.description}</p>}
+                            <p style={{ color: '#818CF8', fontSize: 13, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>
+                              {item.price.toLocaleString('fr-FR')} {currency}
+                            </p>
+                          </div>
+                          {qty === 0 ? (
+                            <button onClick={() => add(item.id)}
+                              style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#818CF8', fontSize: 24, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, lineHeight: 1 }}>
+                              +
+                            </button>
+                          ) : (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                              <button onClick={() => sub(item.id)}
+                                style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>−</button>
+                              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, color: '#F8F9FC', minWidth: 18, textAlign: 'center' }}>{qty}</span>
+                              <button onClick={() => add(item.id)}
+                                style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#818CF8', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>+</button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* Fixed cart bar */}
+          {cartCount > 0 && (
+            <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, padding: '14px 16px 28px', background: 'rgba(8,9,12,0.97)', backdropFilter: 'blur(12px)', borderTop: '1px solid rgba(99,102,241,0.2)', zIndex: 100 }}>
+              <div style={{ maxWidth: 440, margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                    {cartCount} article{cartCount > 1 ? 's' : ''}
+                  </span>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 14, color: '#818CF8', fontWeight: 600 }}>
+                    {cartTotal.toLocaleString('fr-FR')} {currency}
+                  </span>
+                </div>
+                {whatsapp ? (
+                  <button onClick={orderOnWhatsApp}
+                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    💬 Envoyer la commande
+                  </button>
+                ) : (
+                  <p style={{ color: '#6B7280', fontSize: 12, textAlign: 'center', fontFamily: 'Space Mono, monospace' }}>
+                    Configurez un WhatsApp dans le dashboard.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </Shell>
   );
 }
