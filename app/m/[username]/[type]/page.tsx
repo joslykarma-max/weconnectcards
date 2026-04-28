@@ -45,6 +45,7 @@ export default async function ModulePublicPage({ params }: Props) {
     <ModulePublicClient
       type={type}
       username={username}
+      profileId={uid}
       config={moduleData.config ?? {}}
     />
   );

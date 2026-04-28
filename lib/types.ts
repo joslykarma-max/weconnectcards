@@ -87,6 +87,15 @@ export interface TeamMemberDoc {
   joinedAt?:   string;
 }
 
+// Collection: loyaltyCards/{profileId}_{phone}
+export interface LoyaltyCardDoc {
+  profileId:    string;
+  phone:        string;
+  stamps:       number;
+  createdAt:    string;
+  lastStampAt?: string;
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;

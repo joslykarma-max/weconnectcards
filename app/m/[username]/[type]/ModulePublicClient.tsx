@@ -27,48 +27,175 @@ function Shell({ children, backHref }: { children: React.ReactNode; backHref: st
 }
 
 // ─── LOYALTY ────────────────────────────────────────────────────────────────
-function LoyaltyModule({ config, username }: { config: Record<string, unknown>; username: string }) {
-  const stampGoal = Number(config.stampGoal) || 10;
-  const stamps    = Array.from({ length: stampGoal });
+function LoyaltyModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
+  const [phase, setPhase]       = useState<'phone' | 'card' | 'rewarded'>('phone');
+  const [phone, setPhone]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const [card, setCard]         = useState<{ stamps: number; goal: number; reward: string; emoji: string } | null>(null);
+  const [stampCode, setStampCode] = useState('');
+  const [stamping,  setStamping]  = useState(false);
+  const [stampError, setStampError] = useState('');
+  const [justStamped, setJustStamped] = useState(false);
+
+  async function loadCard() {
+    if (!phone.trim()) return;
+    setLoading(true);
+    const res  = await fetch(`/api/loyalty?profileId=${encodeURIComponent(profileId)}&phone=${encodeURIComponent(phone.trim())}`);
+    const data = await res.json() as { stamps: number; goal: number; reward: string; emoji: string; error?: string };
+    setLoading(false);
+    if (!res.ok) { return; }
+    setCard(data);
+    setPhase('card');
+  }
+
+  async function addStamp() {
+    if (!stampCode.trim() || !card) return;
+    setStamping(true);
+    setStampError('');
+    const res  = await fetch('/api/loyalty/stamp', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, phone: phone.trim(), code: stampCode.trim() }),
+    });
+    const data = await res.json() as { stamps: number; goal: number; completed: boolean; reward: string; error?: string };
+    setStamping(false);
+    if (!res.ok) { setStampError(data.error ?? 'Code incorrect.'); return; }
+    if (data.completed) {
+      setPhase('rewarded');
+      setCard({ ...card, stamps: 0 });
+    } else {
+      setCard({ ...card, stamps: data.stamps });
+      setJustStamped(true);
+      setStampCode('');
+      setTimeout(() => setJustStamped(false), 2000);
+    }
+  }
+
+  const stampGoal = card?.goal ?? (Number(config.stampGoal) || 10);
+  const emoji     = card?.emoji ?? (String(config.stampEmoji) || '⭐');
 
   return (
     <Shell backHref={`/${username}`}>
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Carte de fidélité</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 6 }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
           {String(config.businessName || 'Mon Commerce')}
         </h1>
-        <p style={{ color: '#9CA3AF', fontSize: 15 }}>
-          Collectez {stampGoal} tampons et gagnez : <strong style={{ color: '#F8F9FC' }}>{String(config.reward || 'une récompense')}</strong>
+        <p style={{ color: '#9CA3AF', fontSize: 14 }}>
+          {stampGoal} tampons = <strong style={{ color: '#F8F9FC' }}>{card?.reward ?? String(config.reward || 'une récompense')}</strong>
         </p>
       </div>
 
-      <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 28, marginBottom: 24 }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 20, textAlign: 'center' }}>
-          Votre carte
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
-          {stamps.map((_, i) => (
-            <div key={i} style={{ aspectRatio: '1', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, opacity: 0.3 }}>
-              {String(config.stampEmoji || '⭐')}
-            </div>
-          ))}
+      {/* Phase 1 — Saisie téléphone */}
+      {phase === 'phone' && (
+        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 28 }}>
+          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 6 }}>Accéder à ma carte</p>
+          <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 20 }}>Entrez votre numéro pour voir ou créer votre carte de fidélité.</p>
+          <input
+            type="tel"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
+            placeholder="+229 97 00 00 00"
+            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '14px 16px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 16, outline: 'none', boxSizing: 'border-box', marginBottom: 14 }}
+            onKeyDown={e => { if (e.key === 'Enter') loadCard(); }}
+          />
+          <button
+            onClick={loadCard}
+            disabled={loading || !phone.trim()}
+            style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: (!phone.trim() || loading) ? 0.6 : 1 }}
+          >
+            {loading ? 'Chargement...' : 'Voir ma carte →'}
+          </button>
         </div>
-        <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 12, marginTop: 20, fontFamily: 'DM Sans, sans-serif' }}>
-          Présentez cette carte à chaque visite pour obtenir votre tampon
-        </p>
-      </div>
+      )}
 
-      <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '16px 20px', textAlign: 'center' }}>
-        <p style={{ color: '#818CF8', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
-          🎁 Récompense après {stampGoal} tampons : <strong>{String(config.reward || 'récompense')}</strong>
-        </p>
-        {!!config.expiryDays && (
-          <p style={{ color: '#6B7280', fontSize: 12, marginTop: 6, fontFamily: 'Space Mono, monospace' }}>
-            Valable {String(config.expiryDays)} jours
+      {/* Phase 2 — Carte personnelle */}
+      {phase === 'card' && card && (
+        <>
+          {/* Grille tampons */}
+          <div style={{ background: '#181B26', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 24, marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>Ma carte</p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#818CF8' }}>{card.stamps} / {card.goal}</p>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 16 }}>
+              {Array.from({ length: card.goal }).map((_, i) => (
+                <div key={i} style={{
+                  aspectRatio: '1', borderRadius: 8,
+                  background: i < card.stamps ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${i < card.stamps ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20,
+                  opacity: i < card.stamps ? 1 : 0.3,
+                  transition: 'all 0.3s',
+                }}>
+                  {i < card.stamps ? emoji : ''}
+                </div>
+              ))}
+            </div>
+            {/* Progress bar */}
+            <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${(card.stamps / card.goal) * 100}%`, background: 'linear-gradient(90deg, #6366F1, #818CF8)', transition: 'width 0.5s', borderRadius: 2 }} />
+            </div>
+            <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 12, marginTop: 10 }}>
+              {card.goal - card.stamps} tampon{card.goal - card.stamps > 1 ? 's' : ''} restant{card.goal - card.stamps > 1 ? 's' : ''} pour votre récompense
+            </p>
+          </div>
+
+          {/* Saisie code tampon */}
+          <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 20 }}>
+            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 4 }}>Ajouter un tampon</p>
+            <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 14 }}>Demandez le code du jour au gérant après votre achat.</p>
+            {justStamped && (
+              <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: '#818CF8', fontSize: 14, textAlign: 'center' }}>
+                {emoji} Tampon ajouté !
+              </div>
+            )}
+            <input
+              type="text"
+              value={stampCode}
+              onChange={e => { setStampCode(e.target.value); setStampError(''); }}
+              placeholder="Code donné par le gérant"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${stampError ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '12px 14px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 15, outline: 'none', letterSpacing: 3, boxSizing: 'border-box', marginBottom: 10, textAlign: 'center' }}
+              onKeyDown={e => { if (e.key === 'Enter') addStamp(); }}
+            />
+            {stampError && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10, textAlign: 'center' }}>{stampError}</p>}
+            <button
+              onClick={addStamp}
+              disabled={stamping || !stampCode.trim()}
+              style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', opacity: (!stampCode.trim() || stamping) ? 0.6 : 1 }}
+            >
+              {stamping ? 'Validation...' : 'Valider le tampon'}
+            </button>
+          </div>
+
+          <button onClick={() => { setPhase('phone'); setPhone(''); setCard(null); }}
+            style={{ marginTop: 12, background: 'none', border: 'none', color: '#6B7280', fontSize: 12, cursor: 'pointer', width: '100%', fontFamily: 'Space Mono, monospace' }}>
+            ← Changer de numéro
+          </button>
+        </>
+      )}
+
+      {/* Phase 3 — Récompense débloquée */}
+      {phase === 'rewarded' && (
+        <div style={{ textAlign: 'center', padding: '40px 24px', background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 12 }}>
+          <span style={{ fontSize: 56, display: 'block', marginBottom: 16 }}>🎁</span>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>
+            Félicitations !
+          </h2>
+          <p style={{ color: '#818CF8', fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
+            {card?.reward ?? String(config.reward || 'votre récompense')}
           </p>
-        )}
-      </div>
+          <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 24 }}>
+            Montrez cet écran au gérant pour obtenir votre récompense. Votre carte repart à zéro.
+          </p>
+          <button
+            onClick={() => { setPhase('card'); setJustStamped(false); }}
+            style={{ padding: '12px 24px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+          >
+            Continuer à collecter →
+          </button>
+        </div>
+      )}
     </Shell>
   );
 }
@@ -581,14 +708,15 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
 
 // ─── ROUTER ──────────────────────────────────────────────────────────────────
 export default function ModulePublicClient({
-  type, username, config,
+  type, username, profileId = '', config,
 }: {
-  type:     string;
-  username: string;
-  config:   Record<string, unknown>;
+  type:       string;
+  username:   string;
+  profileId?: string;
+  config:     Record<string, unknown>;
 }) {
   switch (type) {
-    case 'loyalty':     return <LoyaltyModule     config={config} username={username} />;
+    case 'loyalty':     return <LoyaltyModule     config={config} username={username} profileId={profileId} />;
     case 'menu':        return <MenuModule         config={config} username={username} />;
     case 'review':      return <ReviewModule       config={config} username={username} />;
     case 'portfolio':   return <PortfolioModule    config={config} username={username} />;
