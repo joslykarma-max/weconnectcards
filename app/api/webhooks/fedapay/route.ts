@@ -36,16 +36,13 @@ export async function GET(req: NextRequest) {
       paidAt:        now,
     });
 
-    // Auto-create card order if user doesn't already have one
-    const existingCards = await adminDb.collection('cards').where('userId', '==', uid).limit(1).get();
-    if (existingCards.empty) {
-      await adminDb.collection('cards').add({
-        userId:    uid,
-        edition:   'midnight',
-        status:    'pending',
-        orderedAt: now,
-      });
-    }
+    // Create a new card order for each successful payment
+    await adminDb.collection('cards').add({
+      userId:    uid,
+      edition:   'midnight',
+      status:    'pending',
+      orderedAt: now,
+    });
 
     return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=success`);
   } catch (err) {
