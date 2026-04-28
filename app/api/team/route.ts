@@ -4,8 +4,6 @@ import { adminDb } from '@/lib/firebase-admin';
 import * as postmark from 'postmark';
 import type { TeamDoc, TeamMemberDoc, UserDoc, ProfileDoc } from '@/lib/types';
 
-const mailer = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN ?? '');
-
 // POST — invite a member
 export async function POST(req: NextRequest) {
   const user = await requireAuth();
@@ -70,6 +68,7 @@ export async function POST(req: NextRequest) {
     const inviterName    = inviterProfile?.displayName ?? user.email ?? 'Votre équipe';
     const appUrl         = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
 
+    const mailer = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN ?? '');
     await mailer.sendEmail({
       From:     'We Connect <service@weconnect.cards>',
       To:       normalizedEmail,
