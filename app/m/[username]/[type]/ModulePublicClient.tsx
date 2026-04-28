@@ -498,14 +498,22 @@ type EventAgendaItem = { id: string; time: string; title: string; speaker?: stri
 function EventModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
   type Phase = 'info' | 'register' | 'confirmed';
 
-  const [phase,         setPhase]         = useState<Phase>('info');
+  // Lire les params URL côté client (retour FedaPay)
+  const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const initPhase: Phase = urlParams?.get('confirmed') === '1' ? 'confirmed' : 'info';
+  const initConfirmed = urlParams?.get('confirmed') === '1'
+    ? { name: urlParams.get('name') || '', ticketName: urlParams.get('ticket') || '' }
+    : null;
+
+  const [phase,          setPhase]         = useState<Phase>(initPhase);
   const [selectedTicket, setSelectedTicket] = useState<EventTicket | null>(null);
-  const [regCounts,     setRegCounts]     = useState<Record<string, number>>({});
-  const [countdown,     setCountdown]     = useState({ d: 0, h: 0, m: 0, s: 0, past: false, ready: false });
-  const [form,          setForm]          = useState({ name: '', phone: '', email: '' });
-  const [submitting,    setSubmitting]    = useState(false);
-  const [submitError,   setSubmitError]   = useState('');
-  const [confirmed,     setConfirmed]     = useState<{ name: string; ticketName: string } | null>(null);
+  const [regCounts,      setRegCounts]     = useState<Record<string, number>>({});
+  const [countdown,      setCountdown]     = useState({ d: 0, h: 0, m: 0, s: 0, past: false, ready: false });
+  const [form,           setForm]          = useState({ name: '', phone: '', email: '' });
+  const [submitting,     setSubmitting]    = useState(false);
+  const [submitError,    setSubmitError]   = useState('');
+  const [confirmed,      setConfirmed]     = useState<{ name: string; ticketName: string } | null>(initConfirmed);
+  const [paymentCancelled, setPaymentCancelled] = useState(urlParams?.get('payment') === 'cancelled');
 
   const tickets:  EventTicket[]    = (config.tickets  as EventTicket[]    | undefined) ?? [];
   const agenda:   EventAgendaItem[] = (config.agenda   as EventAgendaItem[] | undefined) ?? [];
@@ -543,15 +551,28 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
     setSubmitting(true);
     setSubmitError('');
     try {
-      const res = await fetch('/api/event/register', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ profileId, name: form.name, phone: form.phone, email: form.email, ticketTypeId: selectedTicket.id, ticketTypeName: selectedTicket.name, ticketPrice: selectedTicket.price }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setSubmitError(data.error || "Erreur lors de l'inscription"); return; }
-      setConfirmed({ name: form.name, ticketName: selectedTicket.name });
-      setPhase('confirmed');
+      if (selectedTicket.price > 0) {
+        // Billet payant → FedaPay
+        const res = await fetch('/api/event/pay', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ profileId, username, name: form.name, phone: form.phone, email: form.email, ticketTypeId: selectedTicket.id, ticketTypeName: selectedTicket.name, ticketPrice: selectedTicket.price, currency }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setSubmitError(data.error || 'Erreur lors du paiement'); return; }
+        window.location.href = data.payment_url; // redirige vers FedaPay
+      } else {
+        // Billet gratuit → inscription directe
+        const res = await fetch('/api/event/register', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ profileId, name: form.name, phone: form.phone, email: form.email, ticketTypeId: selectedTicket.id, ticketTypeName: selectedTicket.name, ticketPrice: 0 }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setSubmitError(data.error || "Erreur lors de l'inscription"); return; }
+        setConfirmed({ name: form.name, ticketName: selectedTicket.name });
+        setPhase('confirmed');
+      }
     } catch {
       setSubmitError('Erreur réseau, veuillez réessayer');
     } finally {
@@ -663,6 +684,14 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
           </div>
         )}
 
+        {/* Paiement annulé */}
+        {paymentCancelled && (
+          <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: 8, padding: '12px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <p style={{ color: '#F59E0B', fontSize: 13, margin: 0 }}>Paiement annulé — vous pouvez réessayer</p>
+            <button onClick={() => setPaymentCancelled(false)} style={{ background: 'none', border: 'none', color: '#F59E0B', fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 0 }}>×</button>
+          </div>
+        )}
+
         {/* Registration closed */}
         {tickets.length > 0 && (!registrationEnabled || countdown.past) && (
           <div style={{ background: 'rgba(107,114,128,0.08)', border: '1px solid rgba(107,114,128,0.2)', borderRadius: 8, padding: 16, marginBottom: 24, textAlign: 'center' }}>
@@ -736,8 +765,13 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
         )}
 
         <button onClick={register} disabled={submitting || !form.name || !form.phone}
-          style={{ width: '100%', marginTop: 24, padding: '14px 0', background: submitting || !form.name || !form.phone ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #6366F1, #818CF8)', border: 'none', borderRadius: 8, color: submitting || !form.name || !form.phone ? '#6B7280' : '#fff', fontSize: 15, fontFamily: 'Space Mono, monospace', cursor: submitting || !form.name || !form.phone ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
-          {submitting ? 'Inscription en cours...' : "Confirmer l'inscription →"}
+          style={{ width: '100%', marginTop: 24, padding: '14px 0', background: submitting || !form.name || !form.phone ? 'rgba(255,255,255,0.06)' : selectedTicket.price > 0 ? 'linear-gradient(135deg, #059669, #10B981)' : 'linear-gradient(135deg, #6366F1, #818CF8)', border: 'none', borderRadius: 8, color: submitting || !form.name || !form.phone ? '#6B7280' : '#fff', fontSize: 15, fontFamily: 'Space Mono, monospace', cursor: submitting || !form.name || !form.phone ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+          {submitting
+            ? (selectedTicket.price > 0 ? 'Redirection vers le paiement...' : 'Inscription en cours...')
+            : selectedTicket.price > 0
+              ? `💳 Payer ${selectedTicket.price.toLocaleString('fr-FR')} ${currency} →`
+              : "Confirmer l'inscription →"
+          }
         </button>
       </Shell>
     );
