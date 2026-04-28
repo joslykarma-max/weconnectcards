@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await client.sendEmail({
-      From:     'We Connect <noreply@weconnect.cards>',
+      From:     'We Connect <service@weconnect.cards>',
       To:       'contact@weconnect.cards',
       ReplyTo:  email,
       Subject:  `[Contact Équipe] ${name}${company ? ` — ${company}` : ''}`,

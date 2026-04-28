@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
     const appUrl         = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
 
     await mailer.sendEmail({
-      From:     'We Connect <noreply@weconnect.cards>',
+      From:     'We Connect <service@weconnect.cards>',
       To:       normalizedEmail,
       Subject:  `${inviterName} vous invite à rejoindre son équipe We Connect`,
       TextBody: `Bonjour,\n\n${inviterName} vous invite à rejoindre son équipe We Connect en tant que ${role === 'admin' ? 'Administrateur' : 'Membre'}.\n\nCréez votre compte ici : ${appUrl}/register\n\nÀ bientôt !`,
