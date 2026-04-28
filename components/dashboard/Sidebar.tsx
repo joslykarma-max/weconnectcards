@@ -109,8 +109,8 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
     <aside className="sidebar" style={{
       width: 240,
       minHeight: '100vh',
-      background: '#0D0E14',
-      borderRight: '1px solid rgba(255,255,255,0.07)',
+      background: 'var(--t-sidebar)',
+      borderRight: 'var(--t-border-full)',
       display: 'flex',
       flexDirection: 'column',
       padding: '24px 16px',
@@ -159,7 +159,7 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
       </nav>
 
       {/* Bottom */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 20, marginTop: 20 }}>
+      <div style={{ borderTop: 'var(--t-border-full)', paddingTop: 20, marginTop: 20 }}>
         {isPro ? (
           <div style={{
             padding: '12px 16px',
@@ -173,7 +173,7 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
                 Plan Pro
               </p>
             </div>
-            <p style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+            <p style={{ color: 'var(--t-text-sub)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
               Tous les modules sont débloqués.
             </p>
           </div>
@@ -187,7 +187,7 @@ export default function Sidebar({ isPro = false }: { isPro?: boolean }) {
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6366F1', textTransform: 'uppercase', marginBottom: 6 }}>
               Plan Essentiel
             </p>
-            <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
               Passez à Pro pour débloquer tous les modules.
             </p>
           </div>

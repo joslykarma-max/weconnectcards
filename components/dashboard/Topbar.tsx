@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
+import ThemeToggle from './ThemeToggle';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard':           'Overview',
@@ -27,20 +28,20 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
   return (
     <header className="topbar-header" style={{
       height: 64,
-      borderBottom: '1px solid rgba(255,255,255,0.07)',
+      borderBottom: 'var(--t-border-full)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0 32px',
-      background: '#08090C',
+      background: 'var(--t-sidebar)',
       flexShrink: 0,
     }}>
-      <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC' }}>
+      <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>
         {title}
       </h1>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        {/* Quick links */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Quick link — hidden on mobile via CSS */}
         <a
           href="/dashboard/profile"
           className="topbar-viewlink"
@@ -65,8 +66,11 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
           Voir ma page
         </a>
 
+        {/* Theme toggle */}
+        <ThemeToggle />
+
         {/* User */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36,
             borderRadius: '50%',
@@ -78,6 +82,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
             fontWeight: 700,
             color: '#fff',
             fontFamily: 'Syne, sans-serif',
+            flexShrink: 0,
           }}>
             {userEmail?.charAt(0).toUpperCase() ?? 'U'}
           </div>
@@ -85,17 +90,23 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
             onClick={handleSignOut}
             style={{
               background: 'none',
-              border: '1px solid rgba(255,255,255,0.07)',
+              border: 'var(--t-border-full)',
               borderRadius: 6,
               padding: '8px 12px',
-              color: '#6B7280',
+              color: 'var(--t-text-muted)',
               fontSize: 13,
               fontFamily: 'DM Sans, sans-serif',
               cursor: 'pointer',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = '#F8F9FC'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = '#6B7280'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'var(--t-text)';
+              e.currentTarget.style.borderColor = 'var(--t-text-sub)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'var(--t-text-muted)';
+              e.currentTarget.style.borderColor = 'var(--t-border)';
+            }}
           >
             Déconnexion
           </button>

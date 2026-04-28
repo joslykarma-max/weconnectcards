@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const isPro = userSnap.exists ? ((userSnap.data() as { plan?: string }).plan === 'pro') : false;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#08090C' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--t-bg)' }}>
       <Sidebar isPro={isPro} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <Topbar userEmail={session.email ?? undefined} />

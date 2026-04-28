@@ -53,10 +53,10 @@ export default async function DashboardPage() {
   return (
     <div>
       <div style={{ marginBottom: 36 }}>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 6 }}>
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 6 }}>
           Bonjour, {profile?.displayName?.split(' ')[0] ?? 'là'} 👋
         </h2>
-        <p style={{ color: '#6B7280', fontSize: 14 }}>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
           Voici ce qui se passe avec votre profil{profile?.username ? ` weconnect.io/${profile.username}` : ''}.
         </p>
       </div>
@@ -67,27 +67,27 @@ export default async function DashboardPage() {
 
       <div className="dash-overview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Recent Scans */}
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28 }}>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC' }}>Activité récente</h3>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)' }}>Activité récente</h3>
             <Link href="/dashboard/analytics" style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase' }}>
               Voir tout →
             </Link>
           </div>
           {recentAllScans.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <p style={{ color: '#6B7280', fontSize: 14 }}>Pas encore de scans.</p>
+              <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>Pas encore de scans.</p>
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {recentAllScans.map((scan, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: 6 }}>
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--t-row)', borderRadius: 6 }}>
                   <div style={{ width: 32, height: 32, borderRadius: '50%', background: scan.device === 'iOS' ? 'rgba(99,102,241,0.15)' : 'rgba(6,182,212,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>
                     {scan.device === 'iOS' ? '🍎' : scan.device === 'Android' ? '🤖' : '💻'}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ color: '#F8F9FC', fontSize: 13 }}>{scan.device ?? 'Appareil inconnu'}</p>
-                    <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 1 }}>
+                    <p style={{ color: 'var(--t-text)', fontSize: 13 }}>{scan.device ?? 'Appareil inconnu'}</p>
+                    <p style={{ color: 'var(--t-text-muted)', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 1 }}>
                       {new Date(scan.scannedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -98,8 +98,8 @@ export default async function DashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>Actions rapides</h3>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 20 }}>Actions rapides</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
               { href: '/dashboard/profile', icon: '✏️', label: 'Modifier mon profil',   desc: 'Photo, liens, bio' },
@@ -107,11 +107,11 @@ export default async function DashboardPage() {
               { href: '/dashboard/card',    icon: '💳', label: 'Gérer ma carte',        desc: 'NFC, QR code, activation' },
               { href: '/dashboard/analytics', icon: '📊', label: 'Voir les analytics',  desc: 'Stats détaillées' },
             ].map((action) => (
-              <Link key={action.label} href={action.href} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 6, textDecoration: 'none', transition: 'all 0.2s' }}>
+              <Link key={action.label} href={action.href} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: 'var(--t-row)', border: 'var(--t-border-full)', borderRadius: 6, textDecoration: 'none', transition: 'all 0.2s' }}>
                 <span style={{ fontSize: 20 }}>{action.icon}</span>
                 <div>
-                  <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 500 }}>{action.label}</p>
-                  <p style={{ color: '#6B7280', fontSize: 12 }}>{action.desc}</p>
+                  <p style={{ color: 'var(--t-text)', fontSize: 14, fontWeight: 500 }}>{action.label}</p>
+                  <p style={{ color: 'var(--t-text-muted)', fontSize: 12 }}>{action.desc}</p>
                 </div>
               </Link>
             ))}

@@ -14,10 +14,21 @@ export const metadata: Metadata = {
   },
 };
 
+const themeInitScript = `
+try {
+  if (localStorage.getItem('wc-theme') === 'light') {
+    document.documentElement.classList.add('light');
+  }
+} catch(e) {}
+`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className="h-full">
-      <body className="min-h-full antialiased" style={{ background: '#08090C', color: '#F8F9FC' }}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="min-h-full antialiased">
         {children}
       </body>
     </html>

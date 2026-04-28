@@ -18,8 +18,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
   if (!active || !payload?.length) return null;
   return (
     <div style={{
-      background: '#181B26',
-      border: '1px solid rgba(255,255,255,0.1)',
+      background: 'var(--t-card)',
+      border: 'var(--t-border-full)',
       borderRadius: 6,
       padding: '10px 14px',
     }}>
@@ -51,9 +51,9 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
       </div>
 
       {/* Scans chart */}
-      <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28, marginBottom: 24 }}>
+      <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC' }}>Scans — 30 derniers jours</h3>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)' }}>Scans — 30 derniers jours</h3>
         </div>
         {lineData.length > 0 ? (
           <ResponsiveContainer width="100%" height={240}>
@@ -66,15 +66,15 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
           </ResponsiveContainer>
         ) : (
           <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: '#6B7280', fontSize: 14 }}>Pas encore de données. Partagez votre carte NFC pour commencer.</p>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>Pas encore de données. Partagez votre carte NFC pour commencer.</p>
           </div>
         )}
       </div>
 
       <div className="dash-analytics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         {/* Top links */}
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 24 }}>Top liens cliqués</h3>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 24 }}>Top liens cliqués</h3>
           {barData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={barData} layout="vertical">
@@ -85,13 +85,13 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <p style={{ color: '#6B7280', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de clics.</p>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de clics.</p>
           )}
         </div>
 
         {/* Device breakdown */}
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: 28 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 24 }}>Appareils</h3>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 24 }}>Appareils</h3>
           {deviceData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -101,12 +101,12 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
                   ))}
                 </Pie>
                 <Legend
-                  formatter={(value) => <span style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{value}</span>}
+                  formatter={(value) => <span style={{ color: 'var(--t-text-sub)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <p style={{ color: '#6B7280', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de données.</p>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de données.</p>
           )}
         </div>
       </div>
