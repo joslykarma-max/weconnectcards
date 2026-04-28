@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import * as postmark from 'postmark';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const client = new postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN ?? '');
 
 export async function POST(req: NextRequest) {
   const { name, email, company, message } = await req.json() as {
@@ -13,12 +13,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await resend.emails.send({
-      from:    'We Connect <noreply@weconnect.cards>',
-      to:      'contact@weconnect.cards',
-      replyTo: email,
-      subject: `[Contact Équipe] ${name}${company ? ` — ${company}` : ''}`,
-      text:    `De: ${name} (${email})\nEntreprise: ${company ?? 'N/A'}\n\n${message}`,
+    await client.sendEmail({
+      From:     'We Connect <noreply@weconnect.cards>',
+      To:       'contact@weconnect.cards',
+      ReplyTo:  email,
+      Subject:  `[Contact Équipe] ${name}${company ? ` — ${company}` : ''}`,
+      TextBody: `De: ${name} (${email})\nEntreprise: ${company ?? 'N/A'}\n\n${message}`,
     });
 
     return NextResponse.json({ ok: true });
