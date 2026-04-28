@@ -4,7 +4,19 @@ import { adminDb } from '@/lib/firebase-admin';
 import ProfilePublic from '@/components/profile/ProfilePublic';
 import { getDeviceFromUA } from '@/lib/utils';
 import { headers } from 'next/headers';
-import type { ProfileDoc, LinkDoc } from '@/lib/types';
+import type { ProfileDoc, LinkDoc, ModuleDoc } from '@/lib/types';
+
+const MODULE_META: Record<string, { emoji: string; name: string }> = {
+  loyalty:     { emoji: '🎯', name: 'Carte de fidélité'       },
+  menu:        { emoji: '🍽️', name: 'Menu'                    },
+  review:      { emoji: '⭐', name: 'Laisser un avis'         },
+  portfolio:   { emoji: '🎵', name: 'Portfolio'               },
+  event:       { emoji: '🎟️', name: 'Événement'              },
+  certificate: { emoji: '🦋', name: "Certificat d'authenticité" },
+  member:      { emoji: '🎫', name: 'Carte Membre'            },
+  access:      { emoji: '🔑', name: "Clé d'accès"             },
+  medical:     { emoji: '🩺', name: 'Carte Médicale'          },
+};
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -41,9 +53,10 @@ export default async function ProfilePage({ params }: Props) {
 
   const { uid } = usernameSnap.data() as { uid: string };
 
-  const [profileSnap, linksSnap] = await Promise.all([
+  const [profileSnap, linksSnap, modulesSnap] = await Promise.all([
     adminDb.collection('profiles').doc(uid).get(),
     adminDb.collection('profiles').doc(uid).collection('links').get(),
+    adminDb.collection('modules').where('profileId', '==', uid).where('isActive', '==', true).get(),
   ]);
 
   const profileData = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
@@ -53,6 +66,11 @@ export default async function ProfilePage({ params }: Props) {
     .map((d) => ({ ...(d.data() as LinkDoc), id: d.id }))
     .filter((l) => l.isActive)
     .sort((a, b) => a.order - b.order);
+
+  const modules = modulesSnap.docs
+    .map((d) => (d.data() as ModuleDoc).type)
+    .filter((t) => MODULE_META[t])
+    .map((t) => ({ type: t, ...MODULE_META[t] }));
 
   // Log the visit (fire-and-forget)
   const headersList = await headers();
@@ -76,6 +94,7 @@ export default async function ProfilePage({ params }: Props) {
     avatar:      profileData.avatar  ?? null,
     theme:       profileData.theme,
     links,
+    modules,
     user:        { name: profileData.displayName },
   };
 

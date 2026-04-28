@@ -13,6 +13,8 @@ type Link = {
   icon?: string | null;
 };
 
+type ActiveModule = { type: string; emoji: string; name: string };
+
 type Profile = {
   id: string;
   username: string;
@@ -23,6 +25,7 @@ type Profile = {
   avatar?: string | null;
   theme: string;
   links: Link[];
+  modules: ActiveModule[];
   user: { name: string | null };
 };
 
@@ -206,6 +209,42 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
             </a>
           ))}
         </div>
+
+        {/* Active modules */}
+        {profile.modules.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+            {profile.modules.map((mod) => (
+              <a
+                key={mod.type}
+                href={`/m/${profile.username}/${mod.type}`}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  padding: '16px 20px',
+                  background: 'rgba(99,102,241,0.06)',
+                  border: `1px solid ${theme.border}`,
+                  borderRadius: 8, textDecoration: 'none', color: '#F8F9FC',
+                  transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = `rgba(99,102,241,0.12)`;
+                  e.currentTarget.style.borderColor = theme.accent;
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(99,102,241,0.06)';
+                  e.currentTarget.style.borderColor = theme.border;
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }}
+              >
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{mod.emoji}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, fontWeight: 500 }}>{mod.name}</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ marginLeft: 'auto', color: '#6B7280', flexShrink: 0 }}>
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            ))}
+          </div>
+        )}
 
         {/* Save Contact */}
         <button
