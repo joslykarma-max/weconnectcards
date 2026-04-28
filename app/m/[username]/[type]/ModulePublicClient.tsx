@@ -401,9 +401,10 @@ function AccessModule({ config, username }: { config: Record<string, unknown>; u
 
 // ─── MEDICAL ─────────────────────────────────────────────────────────────────
 function MedicalModule({ config, username }: { config: Record<string, unknown>; username: string }) {
-  const [pin, setPin]         = useState('');
+  const [pin, setPin]           = useState('');
+  const [showPin, setShowPin]   = useState(false);
   const [unlocked, setUnlocked] = useState(false);
-  const [denied, setDenied]   = useState(false);
+  const [denied, setDenied]     = useState(false);
   const storedPin = String(config.pin || '');
   const hasPin    = storedPin.length > 0;
 
@@ -412,78 +413,168 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
     else                   { setDenied(true); setPin(''); }
   }
 
-  const rows = [
-    { label: 'Groupe sanguin', value: config.bloodType,   icon: '🩸', urgent: true  },
-    { label: 'Allergies',      value: config.allergies,   icon: '⚠️', urgent: true  },
-    { label: 'Pathologies',    value: config.conditions,  icon: '🏥', urgent: false },
-    { label: 'Médicaments',    value: config.medications, icon: '💊', urgent: false },
-    { label: 'Médecin',        value: config.doctorName,  icon: '👨‍⚕️', urgent: false },
-    { label: 'Tél. médecin',   value: config.doctorPhone, icon: '📞', urgent: false },
-  ].filter(r => r.value);
+  const birthDate = config.birthDate
+    ? new Date(String(config.birthDate)).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null;
 
-  if (hasPin && !unlocked) {
-    return (
-      <Shell backHref={`/${username}`}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <span style={{ fontSize: 56, display: 'block', marginBottom: 16 }}>🩺</span>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8 }}>Carte Médicale</h1>
-          <p style={{ color: '#9CA3AF', fontSize: 14 }}>Informations médicales sécurisées</p>
-        </div>
-        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 28 }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>PIN médical requis</p>
-          <input
-            type="password" inputMode="numeric" maxLength={8} value={pin}
-            onChange={e => setPin(e.target.value)} placeholder="••••"
-            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${denied ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '14px 20px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 24, textAlign: 'center', outline: 'none', letterSpacing: 8, boxSizing: 'border-box', marginBottom: 14 }}
-            onKeyDown={e => { if (e.key === 'Enter') checkPin(); }}
-          />
-          {denied && <p style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 14 }}>PIN incorrect.</p>}
-          <button onClick={checkPin} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #DC2626, #EF4444)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer' }}>
-            Accéder aux infos médicales
-          </button>
-        </div>
-      </Shell>
-    );
-  }
+  const showExtra = !hasPin || unlocked;
 
   return (
     <Shell backHref={`/${username}`}>
-      <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '12px 20px', marginBottom: 24, display: 'flex', gap: 10, alignItems: 'center' }}>
+      {/* Header urgence */}
+      <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '12px 18px', marginBottom: 20, display: 'flex', gap: 10, alignItems: 'center' }}>
         <span style={{ fontSize: 18 }}>🚨</span>
-        <p style={{ color: '#EF4444', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Informations médicales d'urgence</p>
+        <p style={{ color: '#EF4444', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Informations médicales d&apos;urgence</p>
       </div>
 
-      {!!config.fullName && (
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC' }}>{String(config.fullName)}</h1>
-        </div>
-      )}
+      {/* ─── SECTION CRITIQUE : toujours visible ─── */}
+      <div style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, padding: 20, marginBottom: 16 }}>
+        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 14 }}>Infos critiques · Toujours visibles</p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-        {rows.map(row => (
-          <div key={row.label} style={{ display: 'flex', gap: 14, padding: '14px 18px', background: row.urgent ? 'rgba(239,68,68,0.06)' : '#181B26', border: `1px solid ${row.urgent ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8 }}>
-            <span style={{ fontSize: 18, flexShrink: 0 }}>{row.icon}</span>
-            <div>
-              <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', marginBottom: 2 }}>{row.label}</p>
-              <p style={{ color: row.urgent ? '#FCA5A5' : '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>{String(row.value)}</p>
-            </div>
-          </div>
-        ))}
-      </div>
+        {!!config.fullName && (
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 4 }}>{String(config.fullName)}</h1>
+        )}
+        {!!birthDate && <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 12 }}>Né(e) le {birthDate}</p>}
 
-      {!!(config.emergencyName || config.emergencyPhone) && (
-        <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: 20 }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#818CF8', textTransform: 'uppercase', marginBottom: 12 }}>Contact d'urgence</p>
-          {!!config.emergencyName && <p style={{ color: '#F8F9FC', fontSize: 16, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>{String(config.emergencyName)}</p>}
-          {!!config.emergencyRel && <p style={{ color: '#9CA3AF', fontSize: 13 }}>{String(config.emergencyRel)}</p>}
-          {!!config.emergencyPhone && (
-            <a href={`tel:${String(config.emergencyPhone)}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 12, padding: '10px 20px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, textDecoration: 'none', color: '#818CF8', fontSize: 15, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-              📞 {String(config.emergencyPhone)}
-            </a>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+          {!!config.bloodType && (
+            <span style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '6px 12px', color: '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>
+              🩸 {String(config.bloodType)}
+            </span>
+          )}
+          {!!config.weight && (
+            <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 12px', color: '#9CA3AF', fontSize: 13 }}>
+              ⚖️ {String(config.weight)} kg
+            </span>
+          )}
+          {!!config.height && (
+            <span style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '6px 12px', color: '#9CA3AF', fontSize: 13 }}>
+              📏 {String(config.height)} cm
+            </span>
+          )}
+          {config.organDonor === 'Oui' && (
+            <span style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 6, padding: '6px 12px', color: '#10B981', fontSize: 12 }}>
+              Don d&apos;organes ✓
+            </span>
+          )}
+          {String(config.dnr || '').includes('Oui') && (
+            <span style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '6px 12px', color: '#EF4444', fontSize: 12, fontWeight: 600 }}>
+              ⛔ DNR
+            </span>
           )}
         </div>
-      )}
+
+        {!!config.allergies && (
+          <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 8, padding: '12px 14px', marginBottom: 12 }}>
+            <p style={{ color: '#F59E0B', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 4 }}>⚠️ ALLERGIES</p>
+            <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>{String(config.allergies)}</p>
+          </div>
+        )}
+
+        {!!(config.emergencyName || config.emergencyPhone) && (
+          <div style={{ borderTop: '1px solid rgba(239,68,68,0.15)', paddingTop: 14 }}>
+            <p style={{ color: '#EF4444', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 8 }}>📞 CONTACT D&apos;URGENCE</p>
+            {!!config.emergencyName && (
+              <p style={{ color: '#F8F9FC', fontSize: 15, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                {String(config.emergencyName)}{!!config.emergencyRel && <span style={{ color: '#9CA3AF', fontWeight: 400, fontSize: 13 }}> — {String(config.emergencyRel)}</span>}
+              </p>
+            )}
+            {!!config.emergencyPhone && (
+              <a href={`tel:${String(config.emergencyPhone)}`}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '10px 18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, textDecoration: 'none', color: '#FCA5A5', fontSize: 15, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                📞 {String(config.emergencyPhone)}
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ─── SECTION COMPLÉMENTAIRE ─── */}
+      <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 20 }}>
+        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#818CF8', textTransform: 'uppercase', marginBottom: 14 }}>
+          🔒 Infos complémentaires {hasPin && !unlocked ? '· Code requis' : ''}
+        </p>
+
+        {!showExtra ? (
+          /* PIN form */
+          <div>
+            <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 16 }}>Ces informations sont protégées. Entrez le code pour y accéder.</p>
+            <div style={{ position: 'relative', marginBottom: 10 }}>
+              <input
+                type={showPin ? 'text' : 'password'}
+                inputMode="numeric"
+                maxLength={8}
+                value={pin}
+                onChange={e => setPin(e.target.value)}
+                placeholder="••••"
+                style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: `1px solid ${denied ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '14px 48px 14px 20px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 22, textAlign: 'center', outline: 'none', letterSpacing: 8, boxSizing: 'border-box' }}
+                onKeyDown={e => { if (e.key === 'Enter') checkPin(); }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPin(v => !v)}
+                style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', padding: 4 }}
+              >
+                {showPin ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                )}
+              </button>
+            </div>
+            {denied && <p style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12 }}>Code incorrect. Réessayez.</p>}
+            <button onClick={checkPin} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
+              Déverrouiller
+            </button>
+          </div>
+        ) : (
+          /* Infos déverrouillées */
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[
+              { label: 'Conditions chroniques', value: config.conditions,     icon: '🏥' },
+              { label: 'Médicaments',           value: config.medications,    icon: '💊' },
+              { label: 'Vaccinations',           value: config.vaccinations,   icon: '💉' },
+              { label: 'Médecin traitant',       value: config.doctorName,     icon: '👨‍⚕️' },
+              { label: 'Tél. médecin',           value: config.doctorPhone,    icon: '📞' },
+              { label: 'Hôpital de référence',  value: config.hospital,       icon: '🏨' },
+              { label: 'N° assuré',              value: config.insuranceNumber,icon: '📋' },
+              { label: 'Notes',                  value: config.notes,          icon: '📝' },
+            ].filter(r => r.value).map(row => (
+              <div key={row.label} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
+                <div>
+                  <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', marginBottom: 2 }}>{row.label}</p>
+                  <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>{String(row.value)}</p>
+                </div>
+              </div>
+            ))}
+
+            {!!(config.emergency2Name || config.emergency2Phone) && (
+              <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '12px 14px' }}>
+                <p style={{ color: '#818CF8', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 8 }}>2ÈME CONTACT</p>
+                {!!config.emergency2Name && (
+                  <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 600 }}>
+                    {String(config.emergency2Name)}{!!config.emergency2Rel && <span style={{ color: '#9CA3AF', fontWeight: 400 }}> — {String(config.emergency2Rel)}</span>}
+                  </p>
+                )}
+                {!!config.emergency2Phone && (
+                  <a href={`tel:${String(config.emergency2Phone)}`}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 14px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, textDecoration: 'none', color: '#818CF8', fontSize: 14, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                    📞 {String(config.emergency2Phone)}
+                  </a>
+                )}
+              </div>
+            )}
+
+            {hasPin && (
+              <button onClick={() => { setUnlocked(false); setPin(''); }}
+                style={{ marginTop: 4, background: 'none', border: 'none', color: '#6B7280', fontSize: 12, cursor: 'pointer', fontFamily: 'Space Mono, monospace' }}>
+                🔒 Reverrouiller
+              </button>
+            )}
+          </div>
+        )}
+      </div>
     </Shell>
   );
 }
