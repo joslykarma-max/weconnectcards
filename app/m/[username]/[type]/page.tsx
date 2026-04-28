@@ -2,10 +2,11 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase-admin';
 import ModulePublicClient from './ModulePublicClient';
-import type { ModuleDoc } from '@/lib/types';
+import type { ModuleDoc, AccessCardDoc } from '@/lib/types';
 
 interface Props {
-  params: Promise<{ username: string; type: string }>;
+  params:      Promise<{ username: string; type: string }>;
+  searchParams: Promise<{ card?: string }>;
 }
 
 const MODULE_TITLES: Record<string, string> = {
@@ -27,8 +28,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ModulePublicPage({ params }: Props) {
+export default async function ModulePublicPage({ params, searchParams }: Props) {
   const { username, type } = await params;
+  const { card: cardId }   = await searchParams;
 
   const usernameSnap = await adminDb.collection('usernames').doc(username).get();
   if (!usernameSnap.exists) notFound();
@@ -41,12 +43,22 @@ export default async function ModulePublicPage({ params }: Props) {
   const moduleData = moduleSnap.data() as ModuleDoc;
   if (!moduleData.isActive) notFound();
 
+  // For access module, load the specific card if ?card= is provided
+  let holderCard: AccessCardDoc | null = null;
+  if (type === 'access' && cardId) {
+    const cardSnap = await adminDb.collection('accessCards').doc(`${uid}_${cardId}`).get();
+    if (cardSnap.exists) {
+      holderCard = cardSnap.data() as AccessCardDoc;
+    }
+  }
+
   return (
     <ModulePublicClient
       type={type}
       username={username}
       profileId={uid}
       config={moduleData.config ?? {}}
+      holderCard={holderCard}
     />
   );
 }

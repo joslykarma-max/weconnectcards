@@ -953,7 +953,15 @@ function zoneIsOpen(z: AZone): boolean {
   return cur >= sh * 60 + sm && cur <= eh * 60 + em;
 }
 
-function AccessModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
+interface HolderCardProp {
+  id:          string;
+  holderTitle: string;
+  holderName:  string;
+  holderRole:  string;
+  holderPhoto: string;
+}
+
+function AccessModule({ config, username, profileId, holderCard }: { config: Record<string, unknown>; username: string; profileId: string; holderCard?: HolderCardProp | null }) {
   type Phase = 'badge' | 'pin' | 'whatsapp' | 'granted';
 
   const [phase,       setPhase]       = useState<Phase>('badge');
@@ -967,10 +975,10 @@ function AccessModule({ config, username, profileId }: { config: Record<string, 
   const [grantMsg,    setGrantMsg]    = useState('');
 
   const zones: AZone[] = (config.zones as AZone[] | undefined) ?? [];
-  const holderPhoto    = String(config.holderPhoto || '');
-  const holderName     = String(config.holderName  || '');
-  const holderRole     = String(config.holderRole  || '');
-  const badgeTitle     = String(config.title        || 'Badge d\'accès');
+  const holderPhoto = holderCard?.holderPhoto || '';
+  const holderName  = holderCard?.holderName  || '';
+  const holderRole  = holderCard?.holderRole  || '';
+  const badgeTitle  = holderCard?.holderTitle  || "Badge d'accès";
   const device         = typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 80) : 'unknown';
 
   async function requestAccess(zone: AZone) {
@@ -985,7 +993,7 @@ function AccessModule({ config, username, profileId }: { config: Record<string, 
       setChecking(true);
       const res = await fetch('/api/access/check', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profileId, zoneId: zone.id, device }),
+        body: JSON.stringify({ profileId, zoneId: zone.id, device, cardId: holderCard?.id, holderName }),
       });
       const data = await res.json();
       setChecking(false);
@@ -1004,7 +1012,7 @@ function AccessModule({ config, username, profileId }: { config: Record<string, 
     setPinError('');
     const res  = await fetch('/api/access/check', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ profileId, zoneId: activeZone.id, pin: pinInput, device }),
+      body: JSON.stringify({ profileId, zoneId: activeZone.id, pin: pinInput, device, cardId: holderCard?.id, holderName }),
     });
     const data = await res.json();
     setChecking(false);
@@ -1385,13 +1393,22 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
 }
 
 // ─── ROUTER ──────────────────────────────────────────────────────────────────
+interface HolderCard {
+  id:          string;
+  holderTitle: string;
+  holderName:  string;
+  holderRole:  string;
+  holderPhoto: string;
+}
+
 export default function ModulePublicClient({
-  type, username, profileId = '', config,
+  type, username, profileId = '', config, holderCard = null,
 }: {
-  type:       string;
-  username:   string;
-  profileId?: string;
-  config:     Record<string, unknown>;
+  type:        string;
+  username:    string;
+  profileId?:  string;
+  config:      Record<string, unknown>;
+  holderCard?: HolderCard | null;
 }) {
   switch (type) {
     case 'loyalty':     return <LoyaltyModule     config={config} username={username} profileId={profileId} />;
@@ -1401,7 +1418,7 @@ export default function ModulePublicClient({
     case 'event':       return <EventModule        config={config} username={username} profileId={profileId} />;
     case 'certificate': return <CertificateModule  config={config} username={username} />;
     case 'member':      return <MemberModule       config={config} username={username} />;
-    case 'access':      return <AccessModule       config={config} username={username} profileId={profileId} />;
+    case 'access':      return <AccessModule       config={config} username={username} profileId={profileId} holderCard={holderCard} />;
     case 'medical':     return <MedicalModule      config={config} username={username} />;
     default:            return null;
   }

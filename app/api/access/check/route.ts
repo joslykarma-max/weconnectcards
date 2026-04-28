@@ -12,8 +12,8 @@ function sha256(s: string) {
 }
 
 export async function POST(req: NextRequest) {
-  const { profileId, zoneId, pin, device } = await req.json() as {
-    profileId: string; zoneId: string; pin?: string; device?: string;
+  const { profileId, zoneId, pin, device, cardId, holderName } = await req.json() as {
+    profileId: string; zoneId: string; pin?: string; device?: string; cardId?: string; holderName?: string;
   };
 
   if (!profileId || !zoneId) {
@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
     profileId, zoneId, zoneName: zone.name,
     device: device || 'unknown',
     timestamp: new Date().toISOString(),
+    ...(cardId     ? { cardId }     : {}),
+    ...(holderName ? { holderName } : {}),
   };
 
   // ── Libre ────────────────────────────────────────────────────────────────────

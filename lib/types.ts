@@ -166,14 +166,28 @@ export interface AccessZone {
   emergencyContact?:   string;
 }
 
+// Collection: accessCards/{profileId}_{cardId}
+export interface AccessCardDoc {
+  id:          string;
+  profileId:   string;
+  holderTitle: string;
+  holderName:  string;
+  holderRole:  string;
+  holderPhoto: string;
+  isActive:    boolean;
+  createdAt:   string;
+}
+
 // Collection: accessLogs/{autoId}
 export interface AccessLog {
-  profileId: string;
-  zoneId:    string;
-  zoneName:  string;
-  status:    'granted' | 'denied';
-  device:    string;
-  timestamp: string;
+  profileId:   string;
+  zoneId:      string;
+  zoneName:    string;
+  status:      'granted' | 'denied';
+  device:      string;
+  timestamp:   string;
+  cardId?:     string;
+  holderName?: string;
 }
 
 // Collection: modules/{uid}_{type}

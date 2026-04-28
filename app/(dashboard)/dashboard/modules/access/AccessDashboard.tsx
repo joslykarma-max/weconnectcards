@@ -5,14 +5,7 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import type { AccessZone, AccessLog } from '@/lib/types';
-
-interface BadgeInfo {
-  title:       string;
-  holderName:  string;
-  holderRole:  string;
-  holderPhoto: string;
-}
+import type { AccessZone, AccessLog, AccessCardDoc } from '@/lib/types';
 
 const DAYS   = ['lun','mar','mer','jeu','ven','sam','dim'];
 const EMOJIS = ['🚪','🔑','🔒','🏢','🚗','🏋️','🏨','🏫','🏪','🏭','🏠','⚡','💼','🛡️','🔐','🎯','📦','🧪','🖥️','🔓'];
@@ -31,26 +24,118 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   );
 }
 
+// ── Inline card editor (add or edit) ──────────────────────────────────────────
+function CardEditor({
+  card,
+  onSave,
+  onCancel,
+}: {
+  card: Partial<AccessCardDoc>;
+  onSave:  (data: Partial<AccessCardDoc>) => Promise<void>;
+  onCancel: () => void;
+}) {
+  const [draft,   setDraft]   = useState<Partial<AccessCardDoc>>(card);
+  const [saving,  setSaving]  = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '9px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+
+  async function uploadPhoto(file: File) {
+    setUploading(true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const res  = await fetch('/api/upload?folder=accessBadges', { method: 'POST', body: fd });
+    const data = await res.json() as { url?: string };
+    if (data.url) setDraft(p => ({ ...p, holderPhoto: data.url }));
+    setUploading(false);
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    await onSave(draft);
+    setSaving(false);
+  }
+
+  const label: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 };
+
+  return (
+    <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Photo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <input ref={photoRef} type="file" accept="image/*" style={{ display: 'none' }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) { uploadPhoto(f); e.target.value = ''; } }} />
+        <button onClick={() => photoRef.current?.click()} disabled={uploading}
+          style={{ width: 56, height: 56, borderRadius: '50%', border: '2px dashed rgba(99,102,241,0.4)', background: draft.holderPhoto ? 'none' : 'rgba(99,102,241,0.08)', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, padding: 0 }}>
+          {draft.holderPhoto
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={draft.holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <span style={{ fontSize: uploading ? 12 : 22, color: '#818CF8' }}>{uploading ? '⏳' : '+'}</span>
+          }
+        </button>
+        <div style={{ flex: 1 }}>
+          <p style={label}>Photo</p>
+          <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>JPG / PNG · optionnel</p>
+        </div>
+      </div>
+
+      <div>
+        <p style={label}>Titre du badge</p>
+        <input style={inputCss} placeholder="Badge Employé, Clé Résidence…"
+          value={draft.holderTitle || ''} onChange={e => setDraft(p => ({ ...p, holderTitle: e.target.value }))} />
+      </div>
+      <div>
+        <p style={label}>Nom du porteur</p>
+        <input style={inputCss} placeholder="Koffi Mensah"
+          value={draft.holderName || ''} onChange={e => setDraft(p => ({ ...p, holderName: e.target.value }))} />
+      </div>
+      <div>
+        <p style={label}>Rôle / Poste</p>
+        <input style={inputCss} placeholder="Directeur Commercial, Membre…"
+          value={draft.holderRole || ''} onChange={e => setDraft(p => ({ ...p, holderRole: e.target.value }))} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={handleSave} disabled={saving}
+          style={{ flex: 1, padding: '9px 0', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontSize: 13, fontFamily: 'Syne, sans-serif', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
+          {saving ? 'Enregistrement…' : '✓ Enregistrer'}
+        </button>
+        <button onClick={onCancel}
+          style={{ padding: '9px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>
+          Annuler
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AccessDashboard({
-  initialBadge,
   initialZones,
   initialLogs,
+  initialCards,
+  username,
 }: {
-  initialBadge: BadgeInfo;
   initialZones: AccessZone[];
   initialLogs:  AccessLog[];
+  initialCards: AccessCardDoc[];
+  username:     string;
 }) {
-  const router    = useRouter();
-  const [badge,   setBadge]   = useState<BadgeInfo>(initialBadge);
-  const [zones,   setZones]   = useState<AccessZone[]>(initialZones);
-  const [saving,  setSaving]  = useState(false);
-  const [saved,   setSaved]   = useState(false);
-  const [uploadingPhoto, setUploadingPhoto] = useState(false);
-  const [expandedId,     setExpandedId]     = useState<string | null>(zones.length === 0 ? null : zones[0].id);
-  const [showEmojiFor,   setShowEmojiFor]   = useState<string | null>(null);
-  const [editingPinFor,  setEditingPinFor]  = useState<string | null>(null);
-  const [newPinValue,    setNewPinValue]    = useState('');
-  const photoInputRef = useRef<HTMLInputElement>(null);
+  const router   = useRouter();
+  const [cards,  setCards]  = useState<AccessCardDoc[]>(initialCards);
+  const [zones,  setZones]  = useState<AccessZone[]>(initialZones);
+  const [saving, setSaving] = useState(false);
+  const [saved,  setSaved]  = useState(false);
+
+  // Card editing state
+  const [addingCard,  setAddingCard]  = useState(false);
+  const [editingCard, setEditingCard] = useState<string | null>(null);
+  const [copied,      setCopied]      = useState<string | null>(null);
+
+  // Zone editing state
+  const [expandedId,    setExpandedId]    = useState<string | null>(null);
+  const [showEmojiFor,  setShowEmojiFor]  = useState<string | null>(null);
+  const [editingPinFor, setEditingPinFor] = useState<string | null>(null);
+  const [newPinValue,   setNewPinValue]   = useState('');
 
   const logs = [...initialLogs].sort((a, b) =>
     new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
@@ -62,20 +147,47 @@ export default function AccessDashboard({
     l.status === 'denied' && new Date(l.timestamp).toDateString() === new Date().toDateString()
   ).length;
 
-  function setField<K extends keyof BadgeInfo>(k: K, v: BadgeInfo[K]) {
-    setBadge(p => ({ ...p, [k]: v }));
+  // ── Card CRUD helpers ───────────────────────────────────────────────────────
+  async function createCard(data: Partial<AccessCardDoc>) {
+    const res  = await fetch('/api/access/cards', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    const json = await res.json() as { card: AccessCardDoc };
+    setCards(p => [...p, json.card]);
+    setAddingCard(false);
   }
 
+  async function updateCard(id: string, data: Partial<AccessCardDoc>) {
+    await fetch(`/api/access/cards?id=${id}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    setCards(p => p.map(c => c.id === id ? { ...c, ...data } : c));
+    setEditingCard(null);
+  }
+
+  async function deleteCard(id: string) {
+    if (!confirm('Supprimer ce porteur ?')) return;
+    await fetch(`/api/access/cards?id=${id}`, { method: 'DELETE' });
+    setCards(p => p.filter(c => c.id !== id));
+  }
+
+  function copyLink(cardId: string) {
+    const url = `${window.location.origin}/m/${username}/access?card=${cardId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(cardId);
+      setTimeout(() => setCopied(null), 2000);
+    });
+  }
+
+  // ── Zone helpers ────────────────────────────────────────────────────────────
   function updateZone(id: string, patch: Partial<AccessZone>) {
     setZones(p => p.map(z => z.id === id ? { ...z, ...patch } : z));
   }
-
   function updateSchedule(id: string, patch: Partial<AccessZone['schedule']>) {
-    setZones(p => p.map(z =>
-      z.id === id ? { ...z, schedule: { ...z.schedule, ...patch } } : z
-    ));
+    setZones(p => p.map(z => z.id === id ? { ...z, schedule: { ...z.schedule, ...patch } } : z));
   }
-
   async function confirmPin(zoneId: string) {
     if (!newPinValue) return;
     const hash = await hashPin(newPinValue);
@@ -83,7 +195,6 @@ export default function AccessDashboard({
     setEditingPinFor(null);
     setNewPinValue('');
   }
-
   function addZone() {
     if (zones.length >= 5) return;
     const id = Date.now().toString();
@@ -95,22 +206,11 @@ export default function AccessDashboard({
     setExpandedId(id);
   }
 
-  async function uploadPhoto(file: File) {
-    setUploadingPhoto(true);
-    const fd = new FormData();
-    fd.append('file', file);
-    const res  = await fetch('/api/upload?folder=accessBadges', { method: 'POST', body: fd });
-    const data = await res.json() as { url?: string };
-    if (data.url) setField('holderPhoto', data.url);
-    setUploadingPhoto(false);
-  }
-
-  async function save() {
+  async function saveZones() {
     setSaving(true);
     await fetch('/api/modules', {
-      method:  'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ type: 'access', config: { ...badge, zones } }),
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'access', config: { zones } }),
     });
     setSaving(false);
     setSaved(true);
@@ -118,10 +218,11 @@ export default function AccessDashboard({
   }
 
   function exportCSV() {
-    const hdr  = ['Zone','Statut','Date','Heure','Appareil'];
+    const hdr  = ['Porteur','Zone','Statut','Date','Heure','Appareil'];
     const rows = logs.map(l => {
       const d = new Date(l.timestamp);
-      return [l.zoneName, l.status === 'granted' ? 'Accordé' : 'Refusé', d.toLocaleDateString('fr-FR'), d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), l.device];
+      return [l.holderName || '—', l.zoneName, l.status === 'granted' ? 'Accordé' : 'Refusé',
+        d.toLocaleDateString('fr-FR'), d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), l.device];
     });
     const csv = [hdr, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const url = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' }));
@@ -139,81 +240,128 @@ export default function AccessDashboard({
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>←</button>
         <div>
           <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>🔑 Clé d&apos;accès</h2>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Badge NFC multi-zones avec contrôle horaire</p>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Badge NFC multi-porteurs — zones partagées</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr 340px', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr 340px', gap: 24, alignItems: 'start' }}>
 
-        {/* ── Col 1: Badge du porteur ── */}
+        {/* ── Col 1 : Porteurs de badge ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
-            <h3 style={{ ...sHead, marginBottom: 18 }}>Badge du porteur</h3>
-
-            {/* Photo */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-              <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }}
-                onChange={e => { const f = e.target.files?.[0]; if (f) { uploadPhoto(f); e.target.value = ''; } }} />
-              <button onClick={() => photoInputRef.current?.click()} disabled={uploadingPhoto}
-                style={{ width: 64, height: 64, borderRadius: '50%', border: '2px dashed rgba(99,102,241,0.4)', background: badge.holderPhoto ? 'none' : 'rgba(99,102,241,0.08)', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, padding: 0 }}>
-                {badge.holderPhoto
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={badge.holderPhoto} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: uploadingPhoto ? 14 : 24, color: '#818CF8' }}>{uploadingPhoto ? '⏳' : '+'}</span>
-                }
-              </button>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
-                <p style={{ color: '#F8F9FC', fontSize: 13, margin: 0 }}>Photo du porteur</p>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Optionnel · JPG/PNG</p>
+                <h3 style={sHead}>Porteurs</h3>
+                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>{cards.length} badge{cards.length !== 1 ? 's' : ''} · 1 carte NFC chacun</p>
               </div>
+              {!addingCard && (
+                <button onClick={() => { setAddingCard(true); setEditingCard(null); }}
+                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 12px', color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  + Nouveau
+                </button>
+              )}
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <Input label="Titre du badge" placeholder="Badge Employé, Clé Résidence..." value={badge.title} onChange={e => setField('title', e.target.value)} />
-              <Input label="Nom du porteur" placeholder="Koffi Mensah" value={badge.holderName} onChange={e => setField('holderName', e.target.value)} />
-              <Input label="Rôle / Poste" placeholder="Directeur Commercial, Membre..." value={badge.holderRole} onChange={e => setField('holderRole', e.target.value)} />
-            </div>
-          </Card>
-
-          {/* Aperçu badge */}
-          <Card padding="md">
-            <p style={label}>Aperçu badge</p>
-            <div style={{ background: 'linear-gradient(135deg, #0D0E14, #1a1d2e)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, padding: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {badge.holderPhoto
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={badge.holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    : <span style={{ fontSize: 20 }}>👤</span>
-                  }
-                </div>
-                <div>
-                  <p style={{ color: '#F8F9FC', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, margin: 0 }}>{badge.holderName || 'Nom du porteur'}</p>
-                  <p style={{ color: '#818CF8', fontSize: 11, margin: 0 }}>{badge.holderRole || 'Rôle'}</p>
-                </div>
+            {/* Add form */}
+            {addingCard && (
+              <div style={{ marginBottom: 16 }}>
+                <CardEditor
+                  card={{ holderTitle: "Badge d'accès", holderName: '', holderRole: '', holderPhoto: '' }}
+                  onSave={createCard}
+                  onCancel={() => setAddingCard(false)}
+                />
               </div>
-              <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, textTransform: 'uppercase' }}>{badge.title || 'Badge d\'accès'}</p>
-              <div style={{ marginTop: 10, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {zones.slice(0, 3).map(z => (
-                  <span key={z.id} style={{ fontSize: 11, background: 'rgba(255,255,255,0.06)', borderRadius: 4, padding: '3px 8px', color: '#9CA3AF' }}>{z.emoji} {z.name}</span>
+            )}
+
+            {/* Cards list */}
+            {cards.length === 0 && !addingCard ? (
+              <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                <p style={{ fontSize: 32, marginBottom: 8 }}>🪪</p>
+                <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 16 }}>Aucun porteur encore</p>
+                <button onClick={() => setAddingCard(true)}
+                  style={{ padding: '9px 18px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
+                  + Créer le premier badge
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {cards.map(card => (
+                  <div key={card.id}>
+                    {/* Card row */}
+                    <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        {/* Avatar */}
+                        <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {card.holderPhoto
+                            // eslint-disable-next-line @next/next/no-img-element
+                            ? <img src={card.holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            : <span style={{ fontSize: 18 }}>👤</span>
+                          }
+                        </div>
+                        {/* Name / role */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {card.holderName || 'Sans nom'}
+                          </p>
+                          <p style={{ color: '#6B7280', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {card.holderRole || card.holderTitle}
+                          </p>
+                        </div>
+                        {/* Actions */}
+                        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                          <button onClick={() => copyLink(card.id)} title="Copier le lien NFC"
+                            style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)', background: copied === card.id ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)', color: copied === card.id ? '#10B981' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {copied === card.id ? '✓' : '🔗'}
+                          </button>
+                          <button onClick={() => setEditingCard(editingCard === card.id ? null : card.id)} title="Modifier"
+                            style={{ width: 28, height: 28, borderRadius: 5, border: `1px solid ${editingCard === card.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`, background: editingCard === card.id ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)', color: editingCard === card.id ? '#818CF8' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            ✎
+                          </button>
+                          <button onClick={() => deleteCard(card.id)} title="Supprimer"
+                            style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(239,68,68,0.2)', background: 'rgba(239,68,68,0.05)', color: '#EF4444', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            ×
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Link hint */}
+                      <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        /m/{username}/access?card={card.id}
+                      </p>
+                    </div>
+
+                    {/* Inline edit form */}
+                    {editingCard === card.id && (
+                      <div style={{ marginTop: 8 }}>
+                        <CardEditor
+                          card={card}
+                          onSave={data => updateCard(card.id, data)}
+                          onCancel={() => setEditingCard(null)}
+                        />
+                      </div>
+                    )}
+                  </div>
                 ))}
-                {zones.length > 3 && <span style={{ fontSize: 11, color: '#6B7280' }}>+{zones.length - 3}</span>}
               </div>
-            </div>
+            )}
           </Card>
 
-          <Button variant="gradient" size="lg" loading={saving} onClick={save} style={{ width: '100%' }}>
-            {saved ? '✓ Sauvegardé !' : 'Sauvegarder'}
-          </Button>
+          {/* How to use hint */}
+          <div style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 10, padding: 14 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#06B6D4', textTransform: 'uppercase', marginBottom: 8 }}>Comment ça marche</p>
+            <p style={{ color: '#6B7280', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
+              Chaque porteur a son propre lien NFC. Copiez le lien 🔗 et configurez-le sur sa carte physique. Les zones d&apos;accès sont partagées par tous.
+            </p>
+          </div>
         </div>
 
-        {/* ── Col 2: Zones ── */}
+        {/* ── Col 2 : Zones ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h3 style={sHead}>Zones d&apos;accès</h3>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>Max 5 zones par badge</p>
+                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>Partagées par tous les porteurs · max 5</p>
               </div>
               {zones.length < 5 && (
                 <button onClick={addZone}
@@ -225,7 +373,7 @@ export default function AccessDashboard({
 
             {zones.length === 0 && (
               <p style={{ color: '#6B7280', fontSize: 13, textAlign: 'center', padding: '32px 0' }}>
-                Aucune zone — ajoutez une zone d&apos;accès ci-dessus
+                Aucune zone — cliquez sur + Ajouter
               </p>
             )}
 
@@ -233,7 +381,6 @@ export default function AccessDashboard({
               const isExpanded = expandedId === zone.id;
               return (
                 <div key={zone.id} style={{ borderBottom: idx < zones.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', paddingBottom: 12, marginBottom: 12 }}>
-                  {/* Zone header (always visible) */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
                     onClick={() => setExpandedId(isExpanded ? null : zone.id)}>
                     <span style={{ fontSize: 20 }}>{zone.emoji}</span>
@@ -251,10 +398,8 @@ export default function AccessDashboard({
                     <span style={{ color: '#6B7280', fontSize: 12 }}>{isExpanded ? '▲' : '▼'}</span>
                   </div>
 
-                  {/* Zone detail (expanded) */}
                   {isExpanded && (
                     <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-
                       {/* Emoji + name */}
                       <div style={{ display: 'flex', gap: 10 }}>
                         <div style={{ position: 'relative' }}>
@@ -339,12 +484,10 @@ export default function AccessDashboard({
                           </div>
                         </div>
                         {!zone.schedule.allDay && (
-                          <>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-                              <Input label="De" type="time" value={zone.schedule.startTime} onChange={e => updateSchedule(zone.id, { startTime: e.target.value })} />
-                              <Input label="À" type="time" value={zone.schedule.endTime} onChange={e => updateSchedule(zone.id, { endTime: e.target.value })} />
-                            </div>
-                          </>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                            <Input label="De" type="time" value={zone.schedule.startTime} onChange={e => updateSchedule(zone.id, { startTime: e.target.value })} />
+                            <Input label="À"  type="time" value={zone.schedule.endTime}   onChange={e => updateSchedule(zone.id, { endTime:   e.target.value })} />
+                          </div>
                         )}
                         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                           {DAYS.map(d => {
@@ -359,7 +502,6 @@ export default function AccessDashboard({
                         </div>
                       </div>
 
-                      {/* Message post-accès */}
                       <div>
                         <p style={label}>Message après accès accordé (optionnel)</p>
                         <input value={zone.afterAccessMessage || ''} onChange={e => updateZone(zone.id, { afterAccessMessage: e.target.value })}
@@ -367,7 +509,6 @@ export default function AccessDashboard({
                           style={inputCss} />
                       </div>
 
-                      {/* Contact urgence */}
                       <div>
                         <p style={label}>Contact urgence (optionnel)</p>
                         <input value={zone.emergencyContact || ''} onChange={e => updateZone(zone.id, { emergencyContact: e.target.value })}
@@ -380,9 +521,13 @@ export default function AccessDashboard({
               );
             })}
           </Card>
+
+          <Button variant="gradient" size="lg" loading={saving} onClick={saveZones} style={{ width: '100%' }}>
+            {saved ? '✓ Zones sauvegardées !' : 'Sauvegarder les zones'}
+          </Button>
         </div>
 
-        {/* ── Col 3: Journal ── */}
+        {/* ── Col 3 : Journal ── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 24 }}>
           <Card padding="md">
             <h3 style={{ ...sHead, marginBottom: 16 }}>Journal d&apos;accès</h3>
@@ -412,6 +557,7 @@ export default function AccessDashboard({
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: '#F8F9FC', fontSize: 12, fontWeight: 500, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.zoneName}</p>
                         <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', margin: 0 }}>
+                          {l.holderName && <span style={{ color: '#4B5563' }}>{l.holderName} · </span>}
                           {d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} · {d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
@@ -422,6 +568,7 @@ export default function AccessDashboard({
             </div>
           </Card>
         </div>
+
       </div>
     </div>
   );
