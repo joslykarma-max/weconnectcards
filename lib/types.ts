@@ -215,3 +215,33 @@ export interface ModuleDoc {
   config?:   Record<string, unknown>;
   updatedAt: string;
 }
+
+// ── QR Codes ─────────────────────────────────────────────────────────────────
+export type QrType = 'url' | 'text' | 'wifi' | 'contact' | 'email' | 'phone';
+
+// Collection: qrCodes/{qrId}
+export interface QrCodeDoc {
+  id:             string;
+  userId:         string;
+  type:           QrType;
+  label:          string;
+  data:           string;        // QR payload (tracking URL for Pro URL codes)
+  targetUrl?:     string;        // original destination (Pro URL type only)
+  fgColor:        string;
+  bgColor:        string;
+  dataUrl:        string;        // base64 PNG preview
+  size:           number;
+  ecLevel:        'L' | 'M' | 'Q' | 'H';
+  createdAt:      string;
+  scanCount:      number;
+  lastScannedAt?: string;
+}
+
+// Collection: qrScans/{autoId}
+export interface QrScanDoc {
+  qrId:       string;
+  userId:     string;
+  scannedAt:  string;
+  device:     'mobile' | 'desktop' | 'unknown';
+  userAgent?: string;
+}
