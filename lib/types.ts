@@ -61,12 +61,13 @@ export interface SavedContactDoc {
 
 // Collection: cards/{cardId}
 export interface CardDoc {
-  userId:      string;
-  edition:     string;
-  nfcId?:      string;
-  status:      'pending' | 'shipped' | 'active' | 'inactive';
-  orderedAt:   string;
-  activatedAt?: string;
+  userId:        string;
+  edition:       string;
+  nfcId?:        string;
+  status:        'pending' | 'shipped' | 'active' | 'inactive';
+  orderedAt:     string;
+  activatedAt?:  string;
+  accessCardId?: string; // links to accessCards/{userId}_{accessCardId}
 }
 
 // Collection: teams/{ownerUid}
@@ -176,6 +177,7 @@ export interface AccessCardDoc {
   holderPhoto: string;
   isActive:    boolean;
   createdAt:   string;
+  nfcId?:      string; // linked physical NFC card ID
 }
 
 // Collection: accessLogs/{autoId}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import type { CardDoc, ProfileDoc } from '@/lib/types';
+import type { CardDoc, ProfileDoc, AccessCardDoc } from '@/lib/types';
 
 export async function GET(
   req: NextRequest,
@@ -32,7 +32,7 @@ export async function GET(
     return NextResponse.redirect(`${base}/dashboard`);
   }
 
-  adminDb.collection('scans').add({
+  const logScan = () => adminDb.collection('scans').add({
     userId:    card.userId,
     nfcId:     id,
     device:    'nfc',
@@ -40,5 +40,21 @@ export async function GET(
     scannedAt: new Date().toISOString(),
   }).catch(() => {});
 
+  // If this card is linked to an access porteur, redirect to their badge page
+  if (card.accessCardId) {
+    const accessCardSnap = await adminDb
+      .collection('accessCards')
+      .doc(`${card.userId}_${card.accessCardId}`)
+      .get();
+
+    if (accessCardSnap.exists && (accessCardSnap.data() as AccessCardDoc).isActive) {
+      logScan();
+      return NextResponse.redirect(
+        `${base}/m/${profile.username}/access?card=${card.accessCardId}`
+      );
+    }
+  }
+
+  logScan();
   return NextResponse.redirect(`${base}/${profile.username}`);
 }

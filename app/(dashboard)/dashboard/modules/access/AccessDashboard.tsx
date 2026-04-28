@@ -127,9 +127,14 @@ export default function AccessDashboard({
   const [saved,  setSaved]  = useState(false);
 
   // Card editing state
-  const [addingCard,  setAddingCard]  = useState(false);
-  const [editingCard, setEditingCard] = useState<string | null>(null);
-  const [copied,      setCopied]      = useState<string | null>(null);
+  const [addingCard,    setAddingCard]    = useState(false);
+  const [editingCard,   setEditingCard]   = useState<string | null>(null);
+  const [copied,        setCopied]        = useState<string | null>(null);
+  const [assigningCard, setAssigningCard] = useState<string | null>(null);
+  const [nfcInput,      setNfcInput]      = useState('');
+  const [nfcError,      setNfcError]      = useState('');
+  const [nfcScanning,   setNfcScanning]   = useState(false);
+  const [nfcSaving,     setNfcSaving]     = useState(false);
 
   // Zone editing state
   const [expandedId,    setExpandedId]    = useState<string | null>(null);
@@ -179,6 +184,56 @@ export default function AccessDashboard({
       setCopied(cardId);
       setTimeout(() => setCopied(null), 2000);
     });
+  }
+
+  async function assignNfc(porteurId: string) {
+    const code = nfcInput.trim().toUpperCase();
+    if (!code) { setNfcError('Entre le code NFC de la carte.'); return; }
+    setNfcSaving(true);
+    setNfcError('');
+    const res  = await fetch(`/api/access/cards?id=${porteurId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nfcId: code }),
+    });
+    const data = await res.json() as { error?: string };
+    setNfcSaving(false);
+    if (!res.ok) { setNfcError(data.error ?? 'Erreur lors de l\'assignation.'); return; }
+    setCards(p => p.map(c => c.id === porteurId ? { ...c, nfcId: code } : c));
+    setAssigningCard(null);
+    setNfcInput('');
+  }
+
+  async function unlinkNfc(porteurId: string) {
+    if (!confirm('Désassigner cette carte NFC du porteur ?')) return;
+    await fetch(`/api/access/cards?id=${porteurId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ unlink: true }),
+    });
+    setCards(p => p.map(c => c.id === porteurId ? { ...c, nfcId: undefined } : c));
+  }
+
+  async function scanNfc(porteurId: string) {
+    type NDEFReader = {
+      scan: () => Promise<void>;
+      addEventListener: (event: string, handler: (e: { serialNumber: string }) => void) => void;
+    };
+    const NDEFReaderCtor = (window as unknown as Record<string, unknown>).NDEFReader as (new () => NDEFReader) | undefined;
+    if (!NDEFReaderCtor) { setNfcError('Web NFC non disponible sur cet appareil/navigateur.'); return; }
+    setNfcScanning(true);
+    setNfcError('');
+    try {
+      const reader = new NDEFReaderCtor();
+      await reader.scan();
+      reader.addEventListener('reading', (event: { serialNumber: string }) => {
+        const id = event.serialNumber.replace(/:/g, '').toUpperCase();
+        setNfcInput(id);
+        setNfcScanning(false);
+        void assignNfc(porteurId);
+      });
+    } catch {
+      setNfcScanning(false);
+      setNfcError('Scan annulé ou permission refusée.');
+    }
   }
 
   // ── Zone helpers ────────────────────────────────────────────────────────────
@@ -328,7 +383,52 @@ export default function AccessDashboard({
                       <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         /m/{username}/access?card={card.id}
                       </p>
+
+                      {/* NFC card status / assignment */}
+                      {card.nfcId ? (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, background: 'rgba(16,185,129,0.07)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 6, padding: '7px 10px' }}>
+                          <span style={{ color: '#10B981', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>
+                            🔗 NFC: {card.nfcId.slice(0, 8)}{card.nfcId.length > 8 ? '…' : ''}
+                          </span>
+                          <button onClick={() => unlinkNfc(card.id)}
+                            style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: 11, cursor: 'pointer', fontFamily: 'Space Mono, monospace' }}>
+                            Désassigner
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={() => { setAssigningCard(assigningCard === card.id ? null : card.id); setNfcInput(''); setNfcError(''); }}
+                          style={{ marginTop: 10, width: '100%', padding: '7px 0', background: 'rgba(6,182,212,0.06)', border: '1px dashed rgba(6,182,212,0.25)', borderRadius: 6, color: '#06B6D4', fontSize: 11, fontFamily: 'Space Mono, monospace', cursor: 'pointer', letterSpacing: 1 }}>
+                          ⚡ LIER UNE CARTE NFC
+                        </button>
+                      )}
                     </div>
+
+                    {/* NFC assignment panel */}
+                    {assigningCard === card.id && (
+                      <div style={{ marginTop: 8, background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 10, padding: 14 }}>
+                        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#06B6D4', textTransform: 'uppercase', marginBottom: 10 }}>Lier une carte NFC</p>
+                        <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>
+                          Entre le code NFC de la carte physique (imprimé au dos), ou scanne-la directement depuis un téléphone Android avec Chrome.
+                        </p>
+                        <div style={{ display: 'flex', gap: 8, marginBottom: nfcError ? 8 : 0 }}>
+                          <input
+                            value={nfcInput}
+                            onChange={e => { setNfcInput(e.target.value.toUpperCase()); setNfcError(''); }}
+                            placeholder="Ex: A1B2C3D4E5"
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '8px 12px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 12, outline: 'none', letterSpacing: 2 }}
+                          />
+                          <button onClick={() => scanNfc(card.id)} disabled={nfcScanning}
+                            style={{ padding: '8px 12px', background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, color: '#06B6D4', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                            {nfcScanning ? '📡…' : '📡 Scanner'}
+                          </button>
+                          <button onClick={() => assignNfc(card.id)} disabled={nfcSaving || !nfcInput}
+                            style={{ padding: '8px 14px', background: nfcInput ? 'linear-gradient(135deg, #4338CA, #6366F1)' : 'rgba(255,255,255,0.04)', border: 'none', borderRadius: 6, color: nfcInput ? '#fff' : '#4B5563', fontSize: 12, cursor: nfcInput ? 'pointer' : 'not-allowed', fontFamily: 'Space Mono, monospace' }}>
+                            {nfcSaving ? '…' : '✓'}
+                          </button>
+                        </div>
+                        {nfcError && <p style={{ color: '#EF4444', fontSize: 12, margin: 0 }}>{nfcError}</p>}
+                      </div>
+                    )}
 
                     {/* Inline edit form */}
                     {editingCard === card.id && (
