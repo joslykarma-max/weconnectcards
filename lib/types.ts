@@ -68,6 +68,7 @@ export interface CardDoc {
   orderedAt:     string;
   activatedAt?:  string;
   accessCardId?: string; // links to accessCards/{userId}_{accessCardId}
+  memberCardId?: string; // links to memberCards/{userId}_{memberCardId}
 }
 
 // Collection: teams/{ownerUid}
@@ -190,6 +191,20 @@ export interface AccessLog {
   timestamp:   string;
   cardId?:     string;
   holderName?: string;
+}
+
+// Collection: memberCards/{profileId}_{cardId}
+export interface MemberCardDoc {
+  id:          string;
+  profileId:   string;
+  memberName:  string;
+  memberId:    string;    // custom member number, e.g. "CDE-2025-001"
+  level:       'silver' | 'gold' | 'platinum' | 'vip';
+  expiryDate?: string;    // YYYY-MM-DD
+  photoUrl?:   string;
+  isActive:    boolean;
+  createdAt:   string;
+  nfcId?:      string;    // linked physical NFC card ID
 }
 
 // Collection: modules/{uid}_{type}

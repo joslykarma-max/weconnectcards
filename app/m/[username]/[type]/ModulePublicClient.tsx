@@ -887,37 +887,79 @@ const LEVEL_STYLES: Record<string, { color: string; bg: string; border: string; 
   vip:      { color: '#6366F1', bg: 'rgba(99,102,241,0.12)',  border: 'rgba(99,102,241,0.3)',  label: '👑 VIP'      },
 };
 
-function MemberModule({ config, username }: { config: Record<string, unknown>; username: string }) {
-  const level = LEVEL_STYLES[String(config.level ?? 'silver')] ?? LEVEL_STYLES.silver;
-  const benefits = String(config.benefits || '').split('\n').filter(Boolean);
+interface MemberCardData {
+  id:          string;
+  memberName:  string;
+  memberId:    string;
+  level:       string;
+  expiryDate?: string;
+  photoUrl?:   string;
+}
+
+function MemberModule({ config, username, memberCard }: { config: Record<string, unknown>; username: string; memberCard?: MemberCardData | null }) {
+  const levelKey  = memberCard?.level ?? String(config.level ?? 'silver');
+  const level     = LEVEL_STYLES[levelKey] ?? LEVEL_STYLES.silver;
+  const benefits  = String(config.benefits || '').split('\n').filter(Boolean);
+  const clubName  = String(config.clubName || 'Club');
+  const website   = String(config.website  || '');
+
+  // Member info: from memberCard if available, else fall back to legacy config
+  const memberName = memberCard?.memberName || String(config.memberName || '');
+  const memberId   = memberCard?.memberId   || String(config.memberId   || '');
+  const expiryDate = memberCard?.expiryDate || String(config.expiryDate || '');
+  const photoUrl   = memberCard?.photoUrl   || '';
+
+  // No card scanned and no legacy data
+  if (!memberCard && !config.memberName) {
+    return (
+      <Shell backHref={`/${username}`}>
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🎫</span>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: '#F8F9FC', marginBottom: 8 }}>{clubName}</h2>
+          <p style={{ color: '#6B7280', fontSize: 14 }}>Scannez votre carte membre NFC pour afficher vos informations.</p>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell backHref={`/${username}`}>
-      <div style={{ background: `linear-gradient(135deg, ${level.bg.replace('0.12', '0.2')}, #12141C)`, border: `1px solid ${level.border}`, borderRadius: 16, padding: 32, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+      <div style={{ background: `linear-gradient(135deg, ${level.bg.replace('0.12', '0.2')}, #12141C)`, border: `1px solid ${level.border}`, borderRadius: 16, padding: 28, marginBottom: 24 }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: level.color, textTransform: 'uppercase', marginBottom: 8 }}>Carte Membre</p>
-            <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC' }}>
-              {String(config.clubName || 'Club')}
-            </h1>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: level.color, textTransform: 'uppercase', marginBottom: 6 }}>Carte Membre</p>
+            <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>{clubName}</h1>
           </div>
-          <div style={{ background: level.bg, border: `1px solid ${level.border}`, borderRadius: 8, padding: '6px 14px' }}>
-            <p style={{ color: level.color, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13 }}>{level.label}</p>
+          <div style={{ background: level.bg, border: `1px solid ${level.border}`, borderRadius: 8, padding: '6px 14px', flexShrink: 0 }}>
+            <p style={{ color: level.color, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, margin: 0 }}>{level.label}</p>
           </div>
         </div>
 
-        {!!config.memberName && (
+        {/* Member info */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 16 }}>
+          {photoUrl ? (
+            <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${level.border}`, flexShrink: 0 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
+          ) : null}
           <div>
-            <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 4 }}>MEMBRE</p>
-            <p style={{ color: '#F8F9FC', fontSize: 18, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>{String(config.memberName)}</p>
+            {memberName && (
+              <>
+                <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 3 }}>MEMBRE</p>
+                <p style={{ color: '#F8F9FC', fontSize: 18, fontFamily: 'Syne, sans-serif', fontWeight: 700, margin: 0 }}>{memberName}</p>
+              </>
+            )}
+            {memberId && (
+              <p style={{ color: level.color, fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>#{memberId}</p>
+            )}
           </div>
-        )}
-        {!!config.memberId && (
-          <p style={{ color: level.color, fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 8 }}>#{String(config.memberId)}</p>
-        )}
-        {!!config.expiryDate && (
-          <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 16 }}>
-            Valable jusqu&apos;au {new Date(String(config.expiryDate)).toLocaleDateString('fr-FR')}
+        </div>
+
+        {expiryDate && (
+          <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>
+            Valable jusqu&apos;au {new Date(expiryDate).toLocaleDateString('fr-FR')}
           </p>
         )}
       </div>
@@ -928,10 +970,17 @@ function MemberModule({ config, username }: { config: Record<string, unknown>; u
           {benefits.map((b, i) => (
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
               <span style={{ color: level.color, flexShrink: 0 }}>✦</span>
-              <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>{b}</p>
+              <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', margin: 0 }}>{b}</p>
             </div>
           ))}
         </div>
+      )}
+
+      {website && (
+        <a href={website} target="_blank" rel="noopener noreferrer"
+          style={{ display: 'block', textAlign: 'center', marginTop: 20, color: level.color, fontSize: 13, fontFamily: 'DM Sans, sans-serif', textDecoration: 'none' }}>
+          🌐 {website.replace(/^https?:\/\//, '')}
+        </a>
       )}
     </Shell>
   );
@@ -1401,14 +1450,24 @@ interface HolderCard {
   holderPhoto: string;
 }
 
+interface MemberCardProp {
+  id:          string;
+  memberName:  string;
+  memberId:    string;
+  level:       string;
+  expiryDate?: string;
+  photoUrl?:   string;
+}
+
 export default function ModulePublicClient({
-  type, username, profileId = '', config, holderCard = null,
+  type, username, profileId = '', config, holderCard = null, memberCard = null,
 }: {
   type:        string;
   username:    string;
   profileId?:  string;
   config:      Record<string, unknown>;
   holderCard?: HolderCard | null;
+  memberCard?: MemberCardProp | null;
 }) {
   switch (type) {
     case 'loyalty':     return <LoyaltyModule     config={config} username={username} profileId={profileId} />;
@@ -1417,7 +1476,7 @@ export default function ModulePublicClient({
     case 'portfolio':   return <PortfolioModule    config={config} username={username} />;
     case 'event':       return <EventModule        config={config} username={username} profileId={profileId} />;
     case 'certificate': return <CertificateModule  config={config} username={username} />;
-    case 'member':      return <MemberModule       config={config} username={username} />;
+    case 'member':      return <MemberModule       config={config} username={username} memberCard={memberCard} />;
     case 'access':      return <AccessModule       config={config} username={username} profileId={profileId} holderCard={holderCard} />;
     case 'medical':     return <MedicalModule      config={config} username={username} />;
     default:            return null;

@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase-admin';
 import ModulePublicClient from './ModulePublicClient';
-import type { ModuleDoc, AccessCardDoc } from '@/lib/types';
+import type { ModuleDoc, AccessCardDoc, MemberCardDoc } from '@/lib/types';
 
 interface Props {
   params:      Promise<{ username: string; type: string }>;
@@ -43,12 +43,17 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
   const moduleData = moduleSnap.data() as ModuleDoc;
   if (!moduleData.isActive) notFound();
 
-  // For access module, load the specific card if ?card= is provided
+  // Load card-specific data for modules that support multi-card
   let holderCard: AccessCardDoc | null = null;
-  if (type === 'access' && cardId) {
-    const cardSnap = await adminDb.collection('accessCards').doc(`${uid}_${cardId}`).get();
-    if (cardSnap.exists) {
-      holderCard = cardSnap.data() as AccessCardDoc;
+  let memberCard: MemberCardDoc | null = null;
+
+  if (cardId) {
+    if (type === 'access') {
+      const snap = await adminDb.collection('accessCards').doc(`${uid}_${cardId}`).get();
+      if (snap.exists) holderCard = snap.data() as AccessCardDoc;
+    } else if (type === 'member') {
+      const snap = await adminDb.collection('memberCards').doc(`${uid}_${cardId}`).get();
+      if (snap.exists) memberCard = snap.data() as MemberCardDoc;
     }
   }
 
@@ -59,6 +64,7 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
       profileId={uid}
       config={moduleData.config ?? {}}
       holderCard={holderCard}
+      memberCard={memberCard}
     />
   );
 }

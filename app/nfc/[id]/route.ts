@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import type { CardDoc, ProfileDoc, AccessCardDoc } from '@/lib/types';
+import type { CardDoc, ProfileDoc, AccessCardDoc, MemberCardDoc } from '@/lib/types';
 
 export async function GET(
   req: NextRequest,
@@ -51,6 +51,21 @@ export async function GET(
       logScan();
       return NextResponse.redirect(
         `${base}/m/${profile.username}/access?card=${card.accessCardId}`
+      );
+    }
+  }
+
+  // If this card is linked to a member card, redirect to their member page
+  if (card.memberCardId) {
+    const memberCardSnap = await adminDb
+      .collection('memberCards')
+      .doc(`${card.userId}_${card.memberCardId}`)
+      .get();
+
+    if (memberCardSnap.exists && (memberCardSnap.data() as MemberCardDoc).isActive) {
+      logScan();
+      return NextResponse.redirect(
+        `${base}/m/${profile.username}/member?card=${card.memberCardId}`
       );
     }
   }
