@@ -116,7 +116,7 @@ export default function MedicalPage() {
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <Input label="Nom complet" placeholder="Kofi Mensah" value={form.fullName} onChange={set('fullName')} />
+              <Input label="Nom complet" placeholder="Gilles Amoussou" value={form.fullName} onChange={set('fullName')} />
               <Input label="Date de naissance" type="date" value={form.birthDate} onChange={set('birthDate')} />
               <div>
                 {label('Groupe sanguin')}
@@ -130,9 +130,9 @@ export default function MedicalPage() {
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 4 }}>
                 <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, color: '#F8F9FC', marginBottom: 12 }}>Contact d&apos;urgence principal</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <Input label="Nom" placeholder="Marie Mensah" value={form.emergencyName} onChange={set('emergencyName')} />
+                  <Input label="Nom" placeholder="Carine Hounkpatin" value={form.emergencyName} onChange={set('emergencyName')} />
                   <Input label="Relation" placeholder="Épouse, parent, ami..." value={form.emergencyRel} onChange={set('emergencyRel')} />
-                  <Input label="Téléphone" placeholder="+225 07 00 00 00 00" value={form.emergencyPhone} onChange={set('emergencyPhone')} />
+                  <Input label="Téléphone" placeholder="+229 97 00 00 00" value={form.emergencyPhone} onChange={set('emergencyPhone')} />
                 </div>
               </div>
             </div>
@@ -160,17 +160,17 @@ export default function MedicalPage() {
                 {label('Vaccinations')}
                 {textarea(form.vaccinations, set('vaccinations') as React.ChangeEventHandler<HTMLTextAreaElement>, 'Tétanos 2022, Covid vaccin...')}
               </div>
-              <Input label="Médecin traitant" placeholder="Dr. Kouassi Jean" value={form.doctorName} onChange={set('doctorName')} />
-              <Input label="Téléphone médecin" placeholder="+225 07 00 00 00 00" value={form.doctorPhone} onChange={set('doctorPhone')} />
-              <Input label="Hôpital de référence" placeholder="CHU de Cocody" value={form.hospital} onChange={set('hospital')} />
-              <Input label="N° assuré / Assurance" placeholder="123456789 — NSIA" value={form.insuranceNumber} onChange={set('insuranceNumber')} />
+              <Input label="Médecin traitant" placeholder="Dr. Agbossou Sylvain" value={form.doctorName} onChange={set('doctorName')} />
+              <Input label="Téléphone médecin" placeholder="+229 97 00 00 00" value={form.doctorPhone} onChange={set('doctorPhone')} />
+              <Input label="Hôpital de référence" placeholder="CNHU-HKM de Cotonou" value={form.hospital} onChange={set('hospital')} />
+              <Input label="N° assuré / Assurance" placeholder="123456789 — RAMU" value={form.insuranceNumber} onChange={set('insuranceNumber')} />
 
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 4 }}>
                 <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, color: '#F8F9FC', marginBottom: 12 }}>2ème contact d&apos;urgence</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <Input label="Nom" placeholder="Jean Mensah" value={form.emergency2Name} onChange={set('emergency2Name')} />
+                  <Input label="Nom" placeholder="Didier Adjovi" value={form.emergency2Name} onChange={set('emergency2Name')} />
                   <Input label="Relation" placeholder="Frère, collègue..." value={form.emergency2Rel} onChange={set('emergency2Rel')} />
-                  <Input label="Téléphone" placeholder="+225 07 00 00 00 00" value={form.emergency2Phone} onChange={set('emergency2Phone')} />
+                  <Input label="Téléphone" placeholder="+229 96 00 00 00" value={form.emergency2Phone} onChange={set('emergency2Phone')} />
                 </div>
               </div>
               <div>
