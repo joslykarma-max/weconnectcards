@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import type { LoyaltyCardDoc, ModuleDoc } from '@/lib/types';
+import type { LoyaltyCardDoc, ModuleDoc, RewardTier } from '@/lib/types';
 
 // POST /api/loyalty/stamp — add one stamp after code validation
 export async function POST(req: NextRequest) {
@@ -16,12 +16,11 @@ export async function POST(req: NextRequest) {
 
   const normalizedPhone = phone.replace(/\s/g, '');
 
-  // Verify stamp code against module config
   const moduleSnap = await adminDb.collection('modules').doc(`${profileId}_loyalty`).get();
   if (!moduleSnap.exists) {
     return NextResponse.json({ error: 'Module non configuré.' }, { status: 404 });
   }
-  const config = (moduleSnap.data() as ModuleDoc).config ?? {};
+  const config    = (moduleSnap.data() as ModuleDoc).config ?? {};
   const stampCode = String(config.stampCode || '');
 
   if (!stampCode) {
@@ -31,28 +30,40 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Code incorrect.' }, { status: 403 });
   }
 
-  const goal  = Number(config.stampGoal) || 10;
-  const docId = `${profileId}_${normalizedPhone}`;
+  // Resolve tiers
+  const rawTiers = config.tiers as RewardTier[] | undefined;
+  const tiers: RewardTier[] = rawTiers?.length
+    ? rawTiers
+    : [{ stamps: Number(config.stampGoal) || 10, reward: String(config.reward ?? '') }];
+  const sortedTiers = [...tiers].sort((a, b) => a.stamps - b.stamps);
+  const maxStamps   = sortedTiers[sortedTiers.length - 1].stamps;
+
+  const docId   = `${profileId}_${normalizedPhone}`;
   const cardRef = adminDb.collection('loyaltyCards').doc(docId);
   const cardSnap = await cardRef.get();
 
   const currentStamps = cardSnap.exists ? ((cardSnap.data() as LoyaltyCardDoc).stamps ?? 0) : 0;
-  const newStamps = currentStamps + 1;
-  const completed = newStamps >= goal;
-  const now = new Date().toISOString();
+  const newStamps     = currentStamps + 1;
+  const now           = new Date().toISOString();
+
+  // Check if this stamp crosses a tier threshold
+  const triggeredTier = sortedTiers.find(t => t.stamps === newStamps) ?? null;
+
+  // Reset stamps when the highest tier is reached
+  const completed   = newStamps >= maxStamps;
+  const finalStamps = completed ? 0 : newStamps;
 
   await cardRef.set({
     profileId,
     phone:       normalizedPhone,
-    stamps:      completed ? 0 : newStamps, // reset on completion
+    stamps:      finalStamps,
     lastStampAt: now,
     ...(cardSnap.exists ? {} : { createdAt: now }),
   }, { merge: true });
 
   return NextResponse.json({
-    stamps:    completed ? 0 : newStamps,
-    goal,
+    stamps:        finalStamps,
     completed,
-    reward:    String(config.reward || ''),
+    triggeredTier,
   });
 }

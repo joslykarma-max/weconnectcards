@@ -6,35 +6,61 @@ import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
-type Customer = { phone: string; stamps: number; lastStampAt: string | null; createdAt: string };
+type RewardTier = { stamps: number; reward: string };
+type Customer   = { phone: string; stamps: number; lastStampAt: string | null; createdAt: string };
 
 type Config = {
-  businessName: string; reward: string; stampGoal: string;
-  expiryDays: string; stampEmoji: string; stampCode: string;
+  businessName: string;
+  expiryDays:  string;
+  stampEmoji:  string;
+  stampCode:   string;
+  tiers:       RewardTier[];
 };
 
 export default function LoyaltyDashboard({ initialConfig, customers }: { initialConfig: Config; customers: Customer[] }) {
   const router = useRouter();
-  const [form, setForm]   = useState<Config>(initialConfig);
+  const [form, setForm]     = useState<Config>(initialConfig);
   const [saving, setSaving] = useState(false);
   const [saved,  setSaved]  = useState(false);
   const [showCode, setShowCode] = useState(false);
 
-  const set = (k: keyof Config) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (k: keyof Omit<Config, 'tiers'>) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }));
+
+  function setTier(i: number, key: keyof RewardTier, value: string | number) {
+    setForm(p => {
+      const tiers = [...p.tiers];
+      tiers[i] = { ...tiers[i], [key]: key === 'stamps' ? Number(value) || 0 : value };
+      return { ...p, tiers };
+    });
+  }
+
+  function addTier() {
+    setForm(p => {
+      const max = p.tiers.length > 0 ? Math.max(...p.tiers.map(t => t.stamps)) : 0;
+      return { ...p, tiers: [...p.tiers, { stamps: max + 5, reward: '' }] };
+    });
+  }
+
+  function removeTier(i: number) {
+    setForm(p => ({ ...p, tiers: p.tiers.filter((_, idx) => idx !== i) }));
+  }
 
   async function save() {
     setSaving(true);
+    const sortedTiers = [...form.tiers].sort((a, b) => a.stamps - b.stamps);
     await fetch('/api/modules', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'loyalty', config: form }),
+      body: JSON.stringify({ type: 'loyalty', config: { ...form, tiers: sortedTiers } }),
     });
     setSaving(false); setSaved(true);
     setTimeout(() => { setSaved(false); router.refresh(); }, 1500);
   }
 
-  const filled = parseInt(form.stampGoal) || 10;
-  const goal   = Math.min(filled, 10);
+  const sortedTiers = [...form.tiers].sort((a, b) => a.stamps - b.stamps);
+  const firstTierStamps = sortedTiers.length > 0 ? sortedTiers[0].stamps : 10;
+  const maxTierStamps   = sortedTiers.length > 0 ? sortedTiers[sortedTiers.length - 1].stamps : 10;
+  const previewStamps   = 3;
 
   return (
     <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -46,25 +72,25 @@ export default function LoyaltyDashboard({ initialConfig, customers }: { initial
         </div>
       </div>
 
-      {/* Explication du flux */}
       <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '14px 18px', display: 'flex', gap: 14 }}>
         <span style={{ fontSize: 20, flexShrink: 0 }}>💡</span>
         <div>
           <p style={{ color: '#818CF8', fontSize: 13, fontWeight: 600, marginBottom: 4, fontFamily: 'Syne, sans-serif' }}>Comment ça fonctionne ?</p>
           <p style={{ color: '#9CA3AF', fontSize: 13, lineHeight: 1.7 }}>
-            <strong style={{ color: '#F8F9FC' }}>Vous</strong> avez la carte NFC. Votre client scanne, entre son numéro et voit <strong style={{ color: '#F8F9FC' }}>sa propre carte</strong> avec ses tampons. Pour valider un tampon après un achat, dites-lui le <strong style={{ color: '#F8F9FC' }}>code tampon</strong> (défini ci-dessous) — il le saisit et son tampon s&apos;ajoute automatiquement.
+            <strong style={{ color: '#F8F9FC' }}>Vous</strong> avez la carte NFC. Le client scanne, entre son numéro et voit <strong style={{ color: '#F8F9FC' }}>sa propre carte</strong>. Après chaque achat, dites-lui le <strong style={{ color: '#F8F9FC' }}>code tampon</strong> — il le saisit et son tampon s&apos;ajoute. Chaque <strong style={{ color: '#F8F9FC' }}>palier</strong> débloque une récompense différente.
           </p>
         </div>
       </div>
 
       <div className="dash-overview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        {/* Colonne gauche */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          {/* Code tampon — priorité haute */}
+          {/* Code tampon */}
           <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(6,182,212,0.06))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 20 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#818CF8', textTransform: 'uppercase', marginBottom: 10 }}>🔑 Code tampon</p>
             <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 14, lineHeight: 1.6 }}>
-              Dites ce code à voix haute au client après chaque achat. Il le saisit sur son écran pour valider le tampon. Changez-le quand vous voulez.
+              Dites ce code à voix haute au client après chaque achat. Changez-le quand vous voulez.
             </p>
             <div style={{ position: 'relative' }}>
               <input
@@ -86,11 +112,9 @@ export default function LoyaltyDashboard({ initialConfig, customers }: { initial
           </div>
 
           <Card padding="md">
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>Configuration du programme</h3>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>Configuration générale</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Input label="Nom de votre commerce" placeholder="Café du Plateau" value={form.businessName} onChange={set('businessName')} />
-              <Input label="Récompense offerte" placeholder="1 café offert, -20%..." value={form.reward} onChange={set('reward')} />
-              <Input label="Tampons nécessaires" type="number" placeholder="10" value={form.stampGoal} onChange={set('stampGoal')} hint="Nombre de tampons pour déclencher la récompense" />
               <Input label="Validité de la carte (jours)" type="number" placeholder="365" value={form.expiryDays} onChange={set('expiryDays')} />
               <div>
                 <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>Icône tampon</p>
@@ -111,32 +135,104 @@ export default function LoyaltyDashboard({ initialConfig, customers }: { initial
           </Button>
         </div>
 
+        {/* Colonne droite */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Paliers de récompense */}
+          <Card padding="md">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>Paliers de récompense</h3>
+              <button onClick={addTier}
+                style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, padding: '5px 12px', color: '#818CF8', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
+                + Ajouter
+              </button>
+            </div>
+
+            {form.tiers.length === 0 && (
+              <p style={{ color: '#4B5563', fontSize: 13, textAlign: 'center', padding: '16px 0' }}>
+                Aucun palier. Cliquez sur « + Ajouter » pour commencer.
+              </p>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {sortedTiers.map((tier, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+                  <div style={{ width: 76, flexShrink: 0 }}>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>Tampons</p>
+                    <input
+                      type="number" min={1}
+                      value={tier.stamps}
+                      onChange={e => setTier(form.tiers.indexOf(tier), 'stamps', e.target.value)}
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 6px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 16, outline: 'none', textAlign: 'center', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>Récompense</p>
+                    <input
+                      type="text"
+                      value={tier.reward}
+                      onChange={e => setTier(form.tiers.indexOf(tier), 'reward', e.target.value)}
+                      placeholder="Ex: 1 café offert"
+                      style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                    />
+                  </div>
+                  {form.tiers.length > 1 && (
+                    <button onClick={() => removeTier(form.tiers.indexOf(tier))}
+                      style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, padding: '10px 10px', color: '#EF4444', cursor: 'pointer', flexShrink: 0, fontSize: 16, lineHeight: 1 }}>
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {sortedTiers.length > 0 && (
+              <p style={{ color: '#4B5563', fontSize: 11, marginTop: 14, fontFamily: 'Space Mono, monospace', lineHeight: 1.5 }}>
+                La carte repart à zéro après le palier {maxTierStamps} tampon{maxTierStamps > 1 ? 's' : ''}.
+              </p>
+            )}
+          </Card>
+
           {/* Aperçu */}
           <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu (exemple 3/{filled})</p>
-            <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)', borderRadius: 12, padding: 24, textAlign: 'center' }}>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, color: '#F8F9FC', marginBottom: 4 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu (exemple {previewStamps}/{firstTierStamps})</p>
+            <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)', borderRadius: 12, padding: 20 }}>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15, color: '#F8F9FC', marginBottom: 2, textAlign: 'center' }}>
                 {form.businessName || 'Votre Commerce'}
               </p>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', letterSpacing: 2, marginBottom: 20, textTransform: 'uppercase' }}>Carte de fidélité</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6, marginBottom: 12 }}>
-                {Array.from({ length: Math.min(goal, filled) }).map((_, i) => (
-                  <div key={i} style={{ aspectRatio: '1', borderRadius: 8, background: i < 3 ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.06)', border: `1px solid ${i < 3 ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-                    {i < 3 ? form.stampEmoji : ''}
-                  </div>
-                ))}
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#818CF8', letterSpacing: 2, marginBottom: 14, textTransform: 'uppercase', textAlign: 'center' }}>Carte de fidélité</p>
+
+              {/* Barre de progression */}
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#818CF8' }}>{previewStamps} tampons</span>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#6B7280' }}>→ {firstTierStamps} pour 1er palier</span>
+                </div>
+                <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden', position: 'relative' }}>
+                  <div style={{ height: '100%', width: `${(previewStamps / (maxTierStamps || 1)) * 100}%`, background: 'linear-gradient(90deg, #6366F1, #818CF8)', borderRadius: 2 }} />
+                  {sortedTiers.map((tier, i) => (
+                    <div key={i} style={{ position: 'absolute', top: 0, bottom: 0, left: `${(tier.stamps / (maxTierStamps || 1)) * 100}%`, width: 2, background: 'rgba(255,255,255,0.3)', transform: 'translateX(-50%)' }} />
+                  ))}
+                </div>
               </div>
-              <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-                <div style={{ height: '100%', width: `${(3 / filled) * 100}%`, background: 'linear-gradient(90deg, #6366F1, #818CF8)', borderRadius: 2 }} />
+
+              {/* Liste des paliers */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {sortedTiers.map((tier, i) => {
+                  const achieved = previewStamps >= tier.stamps;
+                  return (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, background: achieved ? 'rgba(16,185,129,0.08)' : 'rgba(255,255,255,0.04)', borderRadius: 6, padding: '6px 10px', border: `1px solid ${achieved ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                      <span style={{ fontSize: 12, width: 16, textAlign: 'center', flexShrink: 0 }}>{achieved ? '✅' : '🔒'}</span>
+                      <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', flexShrink: 0 }}>{tier.stamps}✗</span>
+                      <span style={{ color: achieved ? '#10B981' : '#9CA3AF', fontSize: 11, fontFamily: 'DM Sans, sans-serif', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tier.reward || '—'}</span>
+                    </div>
+                  );
+                })}
               </div>
-              <p style={{ color: '#9CA3AF', fontSize: 12 }}>
-                3 / {filled} — <span style={{ color: '#818CF8' }}>{form.reward || 'récompense à définir'}</span>
-              </p>
             </div>
           </Card>
 
-          {/* Liste des clients fidèles */}
+          {/* Clients fidèles */}
           <Card padding="md">
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>
               Clients fidèles · {customers.length}
@@ -164,7 +260,7 @@ export default function LoyaltyDashboard({ initialConfig, customers }: { initial
                     </div>
                     <div style={{ flexShrink: 0 }}>
                       <div style={{ display: 'flex', gap: 2 }}>
-                        {Array.from({ length: Math.min(filled, 10) }).map((_, i) => (
+                        {Array.from({ length: Math.min(firstTierStamps, 10) }).map((_, i) => (
                           <div key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i < c.stamps ? '#6366F1' : 'rgba(255,255,255,0.08)' }} />
                         ))}
                       </div>

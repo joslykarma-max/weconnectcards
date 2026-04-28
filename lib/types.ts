@@ -87,6 +87,12 @@ export interface TeamMemberDoc {
   joinedAt?:   string;
 }
 
+// Loyalty reward tier
+export interface RewardTier {
+  stamps: number;
+  reward: string;
+}
+
 // Collection: loyaltyCards/{profileId}_{phone}
 export interface LoyaltyCardDoc {
   profileId:    string;

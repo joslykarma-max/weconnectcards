@@ -27,23 +27,28 @@ function Shell({ children, backHref }: { children: React.ReactNode; backHref: st
 }
 
 // ─── LOYALTY ────────────────────────────────────────────────────────────────
+type LoyaltyTier = { stamps: number; reward: string };
+type LoyaltyCard = { stamps: number; tiers: LoyaltyTier[]; emoji: string };
+
 function LoyaltyModule({ config, username, profileId }: { config: Record<string, unknown>; username: string; profileId: string }) {
-  const [phase, setPhase]       = useState<'phone' | 'card' | 'rewarded'>('phone');
-  const [phone, setPhone]       = useState('');
-  const [loading, setLoading]   = useState(false);
-  const [card, setCard]         = useState<{ stamps: number; goal: number; reward: string; emoji: string } | null>(null);
-  const [stampCode, setStampCode] = useState('');
-  const [stamping,  setStamping]  = useState(false);
+  const [phase, setPhase]           = useState<'phone' | 'card' | 'rewarded'>('phone');
+  const [phone, setPhone]           = useState('');
+  const [loading, setLoading]       = useState(false);
+  const [card, setCard]             = useState<LoyaltyCard | null>(null);
+  const [stampCode, setStampCode]   = useState('');
+  const [stamping,  setStamping]    = useState(false);
   const [stampError, setStampError] = useState('');
-  const [justStamped, setJustStamped] = useState(false);
+  const [justStamped, setJustStamped]       = useState(false);
+  const [triggeredTier, setTriggeredTier]   = useState<LoyaltyTier | null>(null);
+  const [rewardedTier, setRewardedTier]     = useState<LoyaltyTier | null>(null);
 
   async function loadCard() {
     if (!phone.trim()) return;
     setLoading(true);
     const res  = await fetch(`/api/loyalty?profileId=${encodeURIComponent(profileId)}&phone=${encodeURIComponent(phone.trim())}`);
-    const data = await res.json() as { stamps: number; goal: number; reward: string; emoji: string; error?: string };
+    const data = await res.json() as { stamps: number; tiers: LoyaltyTier[]; emoji: string; error?: string };
     setLoading(false);
-    if (!res.ok) { return; }
+    if (!res.ok) return;
     setCard(data);
     setPhase('card');
   }
@@ -56,22 +61,31 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ profileId, phone: phone.trim(), code: stampCode.trim() }),
     });
-    const data = await res.json() as { stamps: number; goal: number; completed: boolean; reward: string; error?: string };
+    const data = await res.json() as { stamps: number; completed: boolean; triggeredTier: LoyaltyTier | null; error?: string };
     setStamping(false);
     if (!res.ok) { setStampError(data.error ?? 'Code incorrect.'); return; }
+    setStampCode('');
     if (data.completed) {
-      setPhase('rewarded');
+      setRewardedTier(data.triggeredTier);
       setCard({ ...card, stamps: 0 });
+      setPhase('rewarded');
     } else {
       setCard({ ...card, stamps: data.stamps });
-      setJustStamped(true);
-      setStampCode('');
-      setTimeout(() => setJustStamped(false), 2000);
+      if (data.triggeredTier) {
+        setTriggeredTier(data.triggeredTier);
+        setTimeout(() => setTriggeredTier(null), 4000);
+      } else {
+        setJustStamped(true);
+        setTimeout(() => setJustStamped(false), 2000);
+      }
     }
   }
 
-  const stampGoal = card?.goal ?? (Number(config.stampGoal) || 10);
-  const emoji     = card?.emoji ?? (String(config.stampEmoji) || '⭐');
+  const emoji = card?.emoji ?? (String(config.stampEmoji) || '⭐');
+
+  // Compute next unclaimed tier based on current stamps
+  const nextTier = card?.tiers.find(t => t.stamps > card.stamps) ?? null;
+  const maxStamps = card?.tiers.length ? Math.max(...card.tiers.map(t => t.stamps)) : 10;
 
   return (
     <Shell backHref={`/${username}`}>
@@ -80,9 +94,14 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
         <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
           {String(config.businessName || 'Mon Commerce')}
         </h1>
-        <p style={{ color: '#9CA3AF', fontSize: 14 }}>
-          {stampGoal} tampons = <strong style={{ color: '#F8F9FC' }}>{card?.reward ?? String(config.reward || 'une récompense')}</strong>
-        </p>
+        {card?.tiers && card.tiers.length === 1 && (
+          <p style={{ color: '#9CA3AF', fontSize: 14 }}>
+            {card.tiers[0].stamps} tampons = <strong style={{ color: '#F8F9FC' }}>{card.tiers[0].reward || 'une récompense'}</strong>
+          </p>
+        )}
+        {card?.tiers && card.tiers.length > 1 && (
+          <p style={{ color: '#9CA3AF', fontSize: 14 }}>{card.tiers.length} niveaux de récompense</p>
+        )}
       </div>
 
       {/* Phase 1 — Saisie téléphone */}
@@ -111,45 +130,71 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
       {/* Phase 2 — Carte personnelle */}
       {phase === 'card' && card && (
         <>
-          {/* Grille tampons */}
-          <div style={{ background: '#181B26', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 24, marginBottom: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          {/* Compteur + barre de progression */}
+          <div style={{ background: '#181B26', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 24, marginBottom: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>Ma carte</p>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#818CF8' }}>{card.stamps} / {card.goal}</p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#818CF8' }}>
+                {emoji} {card.stamps}
+              </p>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8, marginBottom: 16 }}>
-              {Array.from({ length: card.goal }).map((_, i) => (
-                <div key={i} style={{
-                  aspectRatio: '1', borderRadius: 8,
-                  background: i < card.stamps ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${i < card.stamps ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20,
-                  opacity: i < card.stamps ? 1 : 0.3,
-                  transition: 'all 0.3s',
-                }}>
-                  {i < card.stamps ? emoji : ''}
-                </div>
+
+            {/* Barre de progression globale avec marqueurs */}
+            <div style={{ position: 'relative', height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'visible', marginBottom: 6 }}>
+              <div style={{ height: '100%', width: `${(card.stamps / maxStamps) * 100}%`, background: 'linear-gradient(90deg, #6366F1, #818CF8)', transition: 'width 0.5s', borderRadius: 3 }} />
+              {card.tiers.map((tier, i) => (
+                <div key={i} style={{ position: 'absolute', top: -2, left: `${(tier.stamps / maxStamps) * 100}%`, transform: 'translateX(-50%)', width: 10, height: 10, borderRadius: '50%', background: card.stamps >= tier.stamps ? '#10B981' : 'rgba(255,255,255,0.15)', border: `2px solid ${card.stamps >= tier.stamps ? '#10B981' : 'rgba(255,255,255,0.1)'}`, zIndex: 1 }} />
               ))}
             </div>
-            {/* Progress bar */}
-            <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${(card.stamps / card.goal) * 100}%`, background: 'linear-gradient(90deg, #6366F1, #818CF8)', transition: 'width 0.5s', borderRadius: 2 }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280' }}>0</span>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280' }}>{maxStamps}</span>
             </div>
-            <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 12, marginTop: 10 }}>
-              {card.goal - card.stamps} tampon{card.goal - card.stamps > 1 ? 's' : ''} restant{card.goal - card.stamps > 1 ? 's' : ''} pour votre récompense
-            </p>
+
+            {/* Paliers */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 16 }}>
+              {card.tiers.map((tier, i) => {
+                const achieved = card.stamps >= tier.stamps;
+                const isNext   = !achieved && (i === 0 || card.stamps >= card.tiers[i - 1].stamps);
+                return (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: achieved ? 'rgba(16,185,129,0.08)' : isNext ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${achieved ? 'rgba(16,185,129,0.25)' : isNext ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)'}` }}>
+                    <span style={{ fontSize: 14, flexShrink: 0 }}>{achieved ? '✅' : isNext ? '🎯' : '🔒'}</span>
+                    <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: achieved ? '#10B981' : '#6B7280', flexShrink: 0, minWidth: 28 }}>{tier.stamps}✗</span>
+                    <span style={{ flex: 1, color: achieved ? '#10B981' : isNext ? '#F8F9FC' : '#6B7280', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                      {tier.reward || '—'}
+                    </span>
+                    {isNext && !achieved && (
+                      <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', flexShrink: 0 }}>
+                        {tier.stamps - card.stamps} de plus
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Notification palier intermédiaire atteint */}
+          {triggeredTier && (
+            <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 12, textAlign: 'center' }}>
+              <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>🎁</span>
+              <p style={{ color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>Palier atteint !</p>
+              <p style={{ color: '#F8F9FC', fontSize: 13, marginTop: 4 }}>{triggeredTier.reward}</p>
+              <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 6 }}>Montrez cet écran au gérant pour obtenir votre récompense.</p>
+            </div>
+          )}
+
+          {/* Notification tampon simple */}
+          {justStamped && !triggeredTier && (
+            <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: '#818CF8', fontSize: 14, textAlign: 'center' }}>
+              {emoji} Tampon ajouté !
+            </div>
+          )}
 
           {/* Saisie code tampon */}
           <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 20 }}>
             <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 4 }}>Ajouter un tampon</p>
             <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 14 }}>Demandez le code du jour au gérant après votre achat.</p>
-            {justStamped && (
-              <div style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '10px 14px', marginBottom: 12, color: '#818CF8', fontSize: 14, textAlign: 'center' }}>
-                {emoji} Tampon ajouté !
-              </div>
-            )}
             <input
               type="text"
               value={stampCode}
@@ -164,7 +209,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
               disabled={stamping || !stampCode.trim()}
               style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', opacity: (!stampCode.trim() || stamping) ? 0.6 : 1 }}
             >
-              {stamping ? 'Validation...' : 'Valider le tampon'}
+              {stamping ? 'Validation...' : nextTier ? `Valider (encore ${nextTier.stamps - card.stamps} pour ${nextTier.reward || 'prochain palier'})` : 'Valider le tampon'}
             </button>
           </div>
 
@@ -175,7 +220,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
         </>
       )}
 
-      {/* Phase 3 — Récompense débloquée */}
+      {/* Phase 3 — Récompense débloquée (palier final) */}
       {phase === 'rewarded' && (
         <div style={{ textAlign: 'center', padding: '40px 24px', background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 12 }}>
           <span style={{ fontSize: 56, display: 'block', marginBottom: 16 }}>🎁</span>
@@ -183,13 +228,13 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
             Félicitations !
           </h2>
           <p style={{ color: '#818CF8', fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-            {card?.reward ?? String(config.reward || 'votre récompense')}
+            {rewardedTier?.reward ?? String(config.reward || 'votre récompense')}
           </p>
           <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 24 }}>
             Montrez cet écran au gérant pour obtenir votre récompense. Votre carte repart à zéro.
           </p>
           <button
-            onClick={() => { setPhase('card'); setJustStamped(false); }}
+            onClick={() => { setPhase('card'); setRewardedTier(null); }}
             style={{ padding: '12px 24px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
           >
             Continuer à collecter →
