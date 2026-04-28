@@ -56,7 +56,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* "Voir ma page" — hidden on mobile via CSS */}
         <a
-          href="/dashboard/profile"
+          href="/dashboard/preview"
           className="topbar-viewlink"
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
@@ -139,7 +139,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
 
               {/* Voir ma page (visible en mobile dans le menu) */}
               <a
-                href="/dashboard/profile"
+                href="/dashboard/preview"
                 onClick={() => setOpen(false)}
                 className="topbar-menulink"
                 style={{
