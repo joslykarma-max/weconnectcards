@@ -80,6 +80,18 @@ const navItems = [
     ),
   },
   {
+    href:  '/dashboard/qrcode',
+    label: 'QR Codes',
+    icon:  (
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <path d="M14 14h2v2h-2zM18 14h3M14 18v3M18 18h3v3h-3zM21 14v2"/>
+      </svg>
+    ),
+  },
+  {
     href:  '/dashboard/team',
     label: 'Équipe',
     icon:  (

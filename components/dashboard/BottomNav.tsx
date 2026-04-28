@@ -85,7 +85,8 @@ export default function BottomNav() {
              pathname.startsWith('/dashboard/analytics') ||
              pathname.startsWith('/dashboard/contacts') ||
              pathname.startsWith('/dashboard/team') ||
-             pathname.startsWith('/dashboard/preview'))
+             pathname.startsWith('/dashboard/preview') ||
+             pathname.startsWith('/dashboard/qrcode'))
           : item.href === '/dashboard'
             ? pathname === '/dashboard'
             : pathname.startsWith(item.href);
