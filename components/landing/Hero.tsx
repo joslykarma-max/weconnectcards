@@ -50,7 +50,7 @@ function HeroSlideshow() {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             background: i === current || i === prev ? undefined : slide.fallback,
-            opacity: i === current ? 1 : i === prev && fading ? 0 : 0,
+            opacity: i === current ? 0.5 : i === prev && fading ? 0 : 0,
             transition: i === current ? 'opacity 0.9s ease' : i === prev ? 'opacity 0.9s ease' : 'none',
             zIndex: i === current ? 1 : i === prev ? 0 : -1,
           }}
