@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   description: 'La plateforme NFC premium pour partager votre identité professionnelle en un geste. Carte intelligente + dashboard temps réel.',
   keywords: ['NFC', 'carte de visite digitale', 'profil professionnel', 'We Connect', 'technologie NFC'],
   authors: [{ name: 'We Connect' }],
-  icons: { icon: '/logo.png', apple: '/logo.png' },
   openGraph: {
     title: 'We Connect — Your Identity. One Touch.',
     description: 'Partagez votre identité professionnelle en un geste avec la carte NFC premium.',
@@ -32,6 +31,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className="h-full">
       <head>
+        <link rel="icon" href="/logo.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/logo.png" />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full antialiased">
