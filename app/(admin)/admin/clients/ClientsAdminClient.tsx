@@ -62,10 +62,10 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 8 }}>
           Admin
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)', marginBottom: 4 }}>
           Clients
         </h1>
-        <p style={{ color: '#6B7280', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
           {clients.length} compte{clients.length > 1 ? 's' : ''} enregistré{clients.length > 1 ? 's' : ''}
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: 6, padding: '9px 14px',
-            color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+            color: 'var(--t-text)', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
             outline: 'none', width: 280, boxSizing: 'border-box',
           }}
         />
@@ -109,7 +109,7 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
           Aucun client trouvé.
         </div>
       ) : (
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, overflow: 'hidden' }}>
           {/* Header */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 110px 80px 80px 120px', gap: 12, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             {['Nom', 'Email', 'Plan', 'Cartes', 'Actives', 'Inscrit le'].map((h, i) => (
@@ -132,20 +132,20 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
               >
                 {/* Name */}
                 <div>
-                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC', fontWeight: 500 }}>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)', fontWeight: 500 }}>
                     {client.displayName || '—'}
                   </p>
                 </div>
 
                 {/* Email */}
-                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: 'var(--t-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {client.email}
                 </span>
 
                 {/* Plan (click to change) */}
                 <div style={{ position: 'relative' }}>
                   {isChanging ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, position: 'absolute', top: -4, left: 0, zIndex: 10, background: '#1A1D28', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: 6, minWidth: 110 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, position: 'absolute', top: -4, left: 0, zIndex: 10, background: 'var(--t-card)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: 6, minWidth: 110 }}>
                       {PLANS.map(p => (
                         <button
                           key={p}

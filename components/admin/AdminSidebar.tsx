@@ -49,7 +49,7 @@ export default function AdminSidebar() {
     <aside style={{
       width: 220,
       minHeight: '100vh',
-      background: '#0D0E14',
+      background: 'var(--t-sidebar)',
       borderRight: '1px solid rgba(239,68,68,0.15)',
       display: 'flex',
       flexDirection: 'column',

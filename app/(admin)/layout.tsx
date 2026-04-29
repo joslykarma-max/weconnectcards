@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import AdminTopbar from '@/components/admin/AdminTopbar';
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -19,11 +20,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!isAdmin) redirect('/dashboard');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#08090C' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--t-bg)' }}>
       <AdminSidebar />
-      <main style={{ flex: 1, overflowY: 'auto', padding: '32px 40px', maxWidth: 1200 }}>
-        {children}
-      </main>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <AdminTopbar />
+        <main style={{ flex: 1, overflowY: 'auto', padding: '32px 40px' }}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

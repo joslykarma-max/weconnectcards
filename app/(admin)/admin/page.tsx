@@ -5,7 +5,7 @@ import Link from 'next/link';
 function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color: string }) {
   return (
     <div style={{
-      background: '#12141C',
+      background: 'var(--t-surface)',
       border: `1px solid ${color}22`,
       borderRadius: 8,
       padding: '20px 24px',
@@ -13,11 +13,11 @@ function StatCard({ label, value, sub, color }: { label: string; value: string |
       <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color, textTransform: 'uppercase', marginBottom: 10 }}>
         {label}
       </p>
-      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC', lineHeight: 1 }}>
+      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: 'var(--t-text)', lineHeight: 1 }}>
         {value}
       </p>
       {sub && (
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#6B7280', marginTop: 6 }}>{sub}</p>
+        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)', marginTop: 6 }}>{sub}</p>
       )}
     </div>
   );
@@ -61,10 +61,10 @@ export default async function AdminOverviewPage() {
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>
           Admin Panel
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
           Vue d&apos;ensemble
         </h1>
-        <p style={{ color: '#6B7280', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
           {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
       </div>
@@ -78,20 +78,20 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Plan breakdown */}
-      <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '20px 24px' }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#9CA3AF', textTransform: 'uppercase', marginBottom: 16 }}>
+      <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: '20px 24px' }}>
+        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-sub)', textTransform: 'uppercase', marginBottom: 16 }}>
           Répartition par plan
         </p>
         <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
           {[
-            { label: 'Essentiel', count: byPlan.essentiel, color: '#9CA3AF' },
+            { label: 'Essentiel', count: byPlan.essentiel, color: 'var(--t-text-sub)' },
             { label: 'Pro',       count: byPlan.pro,       color: '#6366F1' },
             { label: 'Équipe',    count: byPlan.equipe,    color: '#06B6D4' },
           ].map(p => (
             <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF' }}>{p.label}</span>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC' }}>{p.count}</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text-sub)' }}>{p.label}</span>
+              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>{p.count}</span>
               {users.length > 0 && (
                 <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4B5563' }}>
                   {Math.round(p.count / users.length * 100)}%
@@ -110,7 +110,7 @@ export default async function AdminOverviewPage() {
       </div>
 
       {/* Pending orders */}
-      <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '20px 24px' }}>
+      <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: '20px 24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase' }}>
             Commandes à traiter
@@ -150,10 +150,10 @@ export default async function AdminOverviewPage() {
                 onMouseOver={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'; }}
                 onMouseOut={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
               >
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC' }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)' }}>
                   {order.user?.displayName ?? '—'}
                 </span>
-                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: 'var(--t-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {order.user?.email ?? order.userId.slice(0, 12) + '…'}
                 </span>
                 <span style={{
@@ -187,7 +187,7 @@ export default async function AdminOverviewPage() {
             <line x1="1" y1="10" x2="23" y2="10"/>
           </svg>
           <div>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC', fontWeight: 500 }}>Gérer les cartes</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)', fontWeight: 500 }}>Gérer les cartes</p>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#EF4444', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Configurer · Expédier</p>
           </div>
         </Link>
@@ -205,7 +205,7 @@ export default async function AdminOverviewPage() {
             <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
           <div>
-            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC', fontWeight: 500 }}>Gérer les clients</p>
+            <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)', fontWeight: 500 }}>Gérer les clients</p>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#6366F1', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>Plans · Comptes</p>
           </div>
         </Link>

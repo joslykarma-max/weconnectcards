@@ -147,7 +147,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: 6,
     padding: '10px 14px',
-    color: '#F8F9FC',
+    color: 'var(--t-text)',
     fontFamily: 'Space Mono, monospace',
     fontSize: 12,
     outline: 'none',
@@ -162,7 +162,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>
             Admin
           </p>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC' }}>
+          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)' }}>
             Commandes &amp; Cartes
           </h1>
         </div>
@@ -191,7 +191,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
       />
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: 0 }}>
+      <div style={{ display: 'flex', gap: 4, borderBottom: 'var(--t-border-full)', paddingBottom: 0 }}>
         {TABS.map(t => (
           <button
             key={t}
@@ -216,7 +216,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
           {tab === 'pending' ? '✅ Aucune commande en attente.' : 'Aucune carte trouvée.'}
         </div>
       ) : (
-        <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, overflow: 'hidden' }}>
           {/* Header row */}
           <div style={{ display: 'grid', gridTemplateColumns: '36px 1fr 1fr 90px 120px 140px 120px', gap: 12, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             {['', 'Client', 'Email', 'Plan', 'Code NFC', 'Commandée le', 'Action'].map((h, i) => (
@@ -240,12 +240,12 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 <div style={{ width: 28, height: 18, borderRadius: 3, background: es.bg, border: `1px solid ${es.accent}44`, flexShrink: 0 }} />
 
                 {/* Client name */}
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {card.user?.displayName ?? <span style={{ color: '#4B5563' }}>ID: {card.userId.slice(0, 10)}…</span>}
                 </span>
 
                 {/* Email */}
-                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: 'var(--t-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {card.user?.email ?? '—'}
                 </span>
 
@@ -309,17 +309,17 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
           }}
         >
-          <div style={{ background: '#12141C', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: 32, width: '100%', maxWidth: 440 }}>
+          <div style={{ background: 'var(--t-surface)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: 32, width: '100%', maxWidth: 440 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 16 }}>
               Configurer la carte
             </p>
 
             {/* Client info */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6, padding: '12px 16px', marginBottom: 24 }}>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 2 }}>
+            <div style={{ background: 'rgba(255,255,255,0.03)', border: 'var(--t-border-full)', borderRadius: 6, padding: '12px 16px', marginBottom: 24 }}>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 2 }}>
                 {configCard.user?.displayName ?? 'Client inconnu'}
               </p>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280' }}>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: 'var(--t-text-muted)' }}>
                 {configCard.user?.email ?? configCard.userId}
               </p>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: configCard.user?.plan === 'pro' ? '#818CF8' : '#9CA3AF', marginTop: 6, textTransform: 'uppercase', letterSpacing: 1 }}>
@@ -329,7 +329,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
 
             {/* NFC ID */}
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
+              <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
                 Code NFC (programmé sur la puce)
               </label>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -361,7 +361,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
 
             {/* Edition */}
             <div style={{ marginBottom: 24 }}>
-              <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
+              <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>
                 Édition de la carte
               </label>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -397,7 +397,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 style={{
                   flex: 1, padding: '10px', background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                  color: '#6B7280', fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer',
+                  color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer',
                 }}
               >
                 Annuler
@@ -429,14 +429,14 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
           }}
         >
-          <div style={{ background: '#12141C', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 32, width: '100%', maxWidth: 400 }}>
+          <div style={{ background: 'var(--t-surface)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 32, width: '100%', maxWidth: 400 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 20 }}>
               Créer une carte
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div>
-                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                   UID Firebase du client
                 </label>
                 <input
@@ -447,7 +447,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 />
               </div>
               <div>
-                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
                   Code NFC
                 </label>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -473,7 +473,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 </div>
               </div>
               <div>
-                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
+                <label style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
                   Édition
                 </label>
                 <div style={{ display: 'flex', gap: 8 }}>
@@ -506,7 +506,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 style={{
                   flex: 1, padding: '10px', background: 'rgba(255,255,255,0.04)',
                   border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                  color: '#6B7280', fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer',
+                  color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer',
                 }}
               >
                 Annuler
