@@ -57,7 +57,7 @@ export default function Nav() {
         gap: 24,
       }}>
         <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <LogoHorizontal symbolSize="sm" />
+          <LogoHorizontal symbolSize="md" />
         </Link>
 
         {/* Desktop links */}
