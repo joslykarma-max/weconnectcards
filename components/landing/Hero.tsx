@@ -6,10 +6,10 @@ import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
 
 const SLIDES = [
-  { src: '/slides/slide1.jpg', fallback: 'linear-gradient(135deg, #0D0E14 0%, #1a1a2e 100%)' },
-  { src: '/slides/slide2.jpg', fallback: 'linear-gradient(135deg, #0c1a2e 0%, #0e2340 100%)' },
-  { src: '/slides/slide3.jpg', fallback: 'linear-gradient(135deg, #1e1b4b 0%, #2d1b4b 100%)' },
-  { src: '/slides/slide4.jpg', fallback: 'linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%)' },
+  { src: '/slides/slide1.png', fallback: 'linear-gradient(135deg, #0D0E14 0%, #1a1a2e 100%)' },
+  { src: '/slides/slide2.png', fallback: 'linear-gradient(135deg, #0c1a2e 0%, #0e2340 100%)' },
+  { src: '/slides/slide3.png', fallback: 'linear-gradient(135deg, #1e1b4b 0%, #2d1b4b 100%)' },
+  { src: '/slides/slide4.png', fallback: 'linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%)' },
 ];
 
 const SLIDE_INTERVAL = 5000;
