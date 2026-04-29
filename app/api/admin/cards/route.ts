@@ -7,7 +7,7 @@ import type { CardDoc, UserDoc } from '@/lib/types';
 export async function GET() {
   await requireAdmin();
 
-  const cardsSnap = await adminDb.collection('cards').get();
+  const cardsSnap = await adminDb.collection('cards').orderBy('orderedAt', 'desc').limit(300).get();
   const cards = cardsSnap.docs.map(d => ({ id: d.id, ...(d.data() as CardDoc) }));
 
   const userIds = [...new Set(cards.map(c => c.userId))];

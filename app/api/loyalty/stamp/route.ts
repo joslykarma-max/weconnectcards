@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import type { LoyaltyCardDoc, ModuleDoc, RewardTier } from '@/lib/types';
 
 // POST /api/loyalty/stamp — add one stamp after code validation
 export async function POST(req: NextRequest) {
+  if (!rateLimit(getClientIp(req), 10, 60_000)) {
+    return NextResponse.json({ error: 'Trop de tentatives. Réessaie dans une minute.' }, { status: 429 });
+  }
+
   const { profileId, phone, code } = await req.json() as {
     profileId: string;
     phone:     string;

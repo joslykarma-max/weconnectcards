@@ -3,7 +3,7 @@ import type { UserDoc, CardDoc } from '@/lib/types';
 import CardsAdminClient, { type AdminCard } from './CardsAdminClient';
 
 export default async function AdminCardsPage() {
-  const cardsSnap = await adminDb.collection('cards').get();
+  const cardsSnap = await adminDb.collection('cards').orderBy('orderedAt', 'desc').limit(300).get();
   const cards = cardsSnap.docs.map(d => ({ id: d.id, ...(d.data() as CardDoc) }));
 
   // Fetch all referenced users in parallel

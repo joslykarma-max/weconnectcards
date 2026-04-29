@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -224,7 +225,7 @@ export default function EventDashboard({
               {posters.map((url, i) => (
                 <div key={i} style={{ position: 'relative', width: 100, height: 140, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Affiche ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <Image src={url} alt={`Affiche ${i + 1}`} fill style={{ objectFit: 'cover' }} />
                   <button onClick={() => setPosters(p => p.filter((_, j) => j !== i))}
                     style={{ position: 'absolute', top: 4, right: 4, width: 22, height: 22, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#fff', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>
                     ×

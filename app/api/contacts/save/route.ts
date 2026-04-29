@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { getDeviceFromUA } from '@/lib/utils';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  if (!rateLimit(getClientIp(req), 5, 60_000)) {
+    return NextResponse.json({ error: 'Trop de requêtes.' }, { status: 429 });
+  }
+
   const body = await req.json() as {
     profileId?: string;
     name?:      string;

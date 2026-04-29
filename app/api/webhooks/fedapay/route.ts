@@ -8,26 +8,38 @@ export async function GET(req: NextRequest) {
   const plan          = searchParams.get('plan') as 'essentiel' | 'pro' | null;
   const edition       = searchParams.get('edition') ?? 'midnight';
   const transactionId = searchParams.get('id');
-  const source        = searchParams.get('source'); // 'card' | null
+  const source        = searchParams.get('source');
 
-  if (!uid || !plan) {
-    return NextResponse.redirect(new URL('/dashboard/settings?payment=error', req.url));
+  const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
+  const errDest = source === 'card' ? '/dashboard/card' : '/dashboard/settings';
+
+  // Require all essential params
+  if (!uid || !plan || !transactionId) {
+    return NextResponse.redirect(`${appUrl}${errDest}?payment=error`);
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
-
   try {
-    if (transactionId) {
-      const transaction = await getTransaction(Number(transactionId));
-      if (transaction.status !== 'approved') {
-        const dest = source === 'card' ? '/dashboard/card' : '/dashboard/settings';
-        return NextResponse.redirect(`${appUrl}${dest}?payment=cancelled`);
-      }
+    // Verify payment status with FedaPay
+    const transaction = await getTransaction(Number(transactionId));
+    if (transaction.status !== 'approved') {
+      return NextResponse.redirect(`${appUrl}${errDest}?payment=cancelled`);
+    }
+
+    // Idempotency — skip if this transactionId was already processed
+    const existingPayment = await adminDb
+      .collection('payments')
+      .where('transactionId', '==', transactionId)
+      .limit(1)
+      .get();
+
+    if (!existingPayment.empty) {
+      const successDest = source === 'card' ? '/dashboard/card' : '/dashboard/settings';
+      return NextResponse.redirect(`${appUrl}${successDest}?payment=success`);
     }
 
     const now = new Date().toISOString();
 
-    // Fetch pending order for delivery info + edition
+    // Fetch pending order for delivery info + edition override
     const pendingSnap = await adminDb.collection('pendingOrders').doc(uid).get();
     const pending     = pendingSnap.exists ? pendingSnap.data() : null;
 
@@ -39,8 +51,8 @@ export async function GET(req: NextRequest) {
     await adminDb.collection('payments').add({
       uid,
       plan,
-      transactionId: transactionId ?? null,
-      paidAt:        now,
+      transactionId,
+      paidAt: now,
     });
 
     await adminDb.collection('cards').add({
@@ -59,6 +71,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.redirect(`${appUrl}${successDest}?payment=success`);
   } catch (err) {
     console.error('[webhook/fedapay]', err);
-    return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=error`);
+    return NextResponse.redirect(`${appUrl}${errDest}?payment=error`);
   }
 }

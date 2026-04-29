@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -70,7 +71,7 @@ function MemberEditor({
           style={{ width: 52, height: 52, borderRadius: '50%', border: `2px dashed ${currentLevel.border}`, background: draft.photoUrl ? 'none' : currentLevel.bg, cursor: 'pointer', overflow: 'hidden', flexShrink: 0, padding: 0 }}>
           {draft.photoUrl
             // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={draft.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <Image src={draft.photoUrl} alt="" fill style={{ objectFit: 'cover' }} />
             : <span style={{ fontSize: uploading ? 12 : 20, color: currentLevel.color }}>{uploading ? '⏳' : '+'}</span>
           }
         </button>
@@ -148,7 +149,7 @@ function CardPreview({ card, clubName, benefits }: { card: Partial<MemberCardDoc
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: level.bg, border: `1px solid ${level.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           {card?.photoUrl
             // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={card.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <Image src={card.photoUrl} alt="" fill style={{ objectFit: 'cover' }} />
             : <span style={{ fontSize: 20 }}>👤</span>
           }
         </div>
@@ -354,7 +355,7 @@ export default function MemberDashboard({
                 style={{ width: 52, height: 52, borderRadius: 10, border: '2px dashed rgba(99,102,241,0.3)', background: config.clubPhoto ? 'none' : 'rgba(99,102,241,0.06)', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, padding: 0 }}>
                 {config.clubPhoto
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={config.clubPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ? <Image src={config.clubPhoto} alt="" fill style={{ objectFit: 'cover' }} />
                   : <span style={{ fontSize: uploadingLogo ? 12 : 22, color: '#818CF8' }}>{uploadingLogo ? '⏳' : '🏛️'}</span>
                 }
               </button>
@@ -440,7 +441,7 @@ export default function MemberDashboard({
                           <div style={{ width: 40, height: 40, borderRadius: '50%', background: lvl.bg, border: `1px solid ${lvl.border}`, overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {card.photoUrl
                               // eslint-disable-next-line @next/next/no-img-element
-                              ? <img src={card.photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              ? <Image src={card.photoUrl} alt="" fill style={{ objectFit: 'cover' }} />
                               : <span style={{ fontSize: 18 }}>👤</span>
                             }
                           </div>

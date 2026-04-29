@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -141,7 +142,7 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
                             <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 10px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8, transition: 'border-color 0.2s' }}>
                               {item.imageUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img src={item.imageUrl} alt={item.name} style={{ width: 52, height: 52, borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} loading="lazy" />
+                                <Image src={item.imageUrl} alt={item.name} width={52} height={52} style={{ borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
                               ) : (
                                 <span style={{ fontSize: 24, flexShrink: 0 }}>{item.emoji}</span>
                               )}
@@ -432,7 +433,7 @@ export default function MenuDashboard({
                           {item.imageUrl ? (
                             <div style={{ width: 40, height: 40, borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={item.imageUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              <Image src={item.imageUrl} alt="" fill style={{ objectFit: 'cover' }} />
                             </div>
                           ) : (
                             <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
@@ -488,7 +489,7 @@ export default function MenuDashboard({
                           {newItem.imageUrl ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={newItem.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover' }} />
+                              <Image src={newItem.imageUrl} alt="" width={44} height={44} style={{ borderRadius: 6, objectFit: 'cover' }} />
                               <button onClick={() => setNewItem(p => ({ ...p, imageUrl: '' }))}
                                 style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>
                                 Supprimer

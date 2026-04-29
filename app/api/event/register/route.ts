@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import '@/lib/firebase-admin';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
+  if (!rateLimit(getClientIp(req), 5, 60_000)) {
+    return NextResponse.json({ error: 'Trop de tentatives. Réessaie dans une minute.' }, { status: 429 });
+  }
+
   const { profileId, name, email, phone, ticketTypeId, ticketTypeName, ticketPrice } = await req.json();
 
   if (!profileId || !name || !phone || !ticketTypeId) {

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import LogoStacked from '@/components/logo/LogoStacked';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
@@ -350,7 +351,7 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
                           {item.imageUrl ? (
                             <div style={{ width: 72, height: 72, borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} loading="lazy" />
+                              <Image src={item.imageUrl} alt={item.name} fill style={{ objectFit: 'cover' }} />
                             </div>
                           ) : (
                             <span style={{ fontSize: 32, flexShrink: 0 }}>{item.emoji}</span>
@@ -596,14 +597,13 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
             {posters.length === 1 ? (
               // Une seule affiche : pleine largeur
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={posters[0]} alt="Affiche" style={{ width: '100%', maxHeight: 320, objectFit: 'cover', borderRadius: 12 }} />
+              <Image src={posters[0]} alt="Affiche" width={600} height={320} style={{ width: '100%', height: 'auto', maxHeight: 320, objectFit: 'cover', borderRadius: 12 }} />
             ) : (
               // Plusieurs : scroll horizontal
               <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingLeft: 16, paddingRight: 16, scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
                 {posters.map((url, i) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img key={i} src={url} alt={`Affiche ${i + 1}`}
-                    style={{ width: 220, height: 300, objectFit: 'cover', borderRadius: 10, flexShrink: 0, scrollSnapAlign: 'start' }} />
+                  <Image key={i} src={url} alt={`Affiche ${i + 1}`} width={220} height={300}
+                    style={{ objectFit: 'cover', borderRadius: 10, flexShrink: 0, scrollSnapAlign: 'start' }} />
                 ))}
               </div>
             )}
@@ -941,7 +941,7 @@ function MemberModule({ config, username, memberCard }: { config: Record<string,
           {photoUrl ? (
             <div style={{ width: 52, height: 52, borderRadius: '50%', overflow: 'hidden', border: `2px solid ${level.border}`, flexShrink: 0 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photoUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Image src={photoUrl} alt="" fill style={{ objectFit: 'cover' }} />
             </div>
           ) : null}
           <div>
@@ -1100,7 +1100,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '2px solid rgba(99,102,241,0.3)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {holderPhoto
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <Image src={holderPhoto} alt="" fill style={{ objectFit: 'cover' }} />
                 : <span style={{ fontSize: 26 }}>👤</span>
               }
             </div>

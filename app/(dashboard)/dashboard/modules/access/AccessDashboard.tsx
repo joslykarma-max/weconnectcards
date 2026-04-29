@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -69,7 +70,7 @@ function CardEditor({
           style={{ width: 56, height: 56, borderRadius: '50%', border: '2px dashed rgba(99,102,241,0.4)', background: draft.holderPhoto ? 'none' : 'rgba(99,102,241,0.08)', cursor: 'pointer', overflow: 'hidden', flexShrink: 0, padding: 0 }}>
           {draft.holderPhoto
             // eslint-disable-next-line @next/next/no-img-element
-            ? <img src={draft.holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <Image src={draft.holderPhoto} alt="" fill style={{ objectFit: 'cover' }} />
             : <span style={{ fontSize: uploading ? 12 : 22, color: '#818CF8' }}>{uploading ? '⏳' : '+'}</span>
           }
         </button>
@@ -349,7 +350,7 @@ export default function AccessDashboard({
                         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                           {card.holderPhoto
                             // eslint-disable-next-line @next/next/no-img-element
-                            ? <img src={card.holderPhoto} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ? <Image src={card.holderPhoto} alt="" fill style={{ objectFit: 'cover' }} />
                             : <span style={{ fontSize: 18 }}>👤</span>
                           }
                         </div>
