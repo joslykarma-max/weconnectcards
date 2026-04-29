@@ -851,8 +851,8 @@ export default function QrCodeClient({ initialCodes, isPro }: { initialCodes: Qr
               )}
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 8 }}>Pro</p>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 4 }}>
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC' }}>9€</p>
-                <span style={{ color: '#6B7280', fontSize: 13 }}>/mois</span>
+                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32, color: '#F8F9FC' }}>9 900</p>
+                <span style={{ color: '#6B7280', fontSize: 13 }}>FCFA/mois</span>
               </div>
               <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 24 }}>Tout Essentiel + suivi complet</p>
 
