@@ -6,9 +6,9 @@ import LogoHorizontal from '@/components/logo/LogoHorizontal';
 import Button from '@/components/ui/Button';
 
 const navLinks = [
-  { href: '#how-it-works', label: 'Comment ça marche' },
-  { href: '#features',     label: 'Features' },
-  { href: '#pricing',      label: 'Tarifs' },
+  { href: '/comment-ca-marche', label: 'Comment ça marche' },
+  { href: '/features',          label: 'Features' },
+  { href: '/tarifs',            label: 'Tarifs' },
 ];
 
 export default function Nav() {
@@ -63,7 +63,7 @@ export default function Nav() {
         {/* Desktop links */}
         <div className="nav-links-desktop" style={{ display: 'flex', gap: 32, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#374151', textDecoration: 'none', transition: 'color 0.2s' }}
@@ -71,7 +71,7 @@ export default function Nav() {
               onMouseLeave={(e) => (e.currentTarget.style.color = '#374151')}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
         </div>
 
@@ -134,22 +134,22 @@ export default function Nav() {
       }}>
         <div style={{ padding: '12px 24px 28px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
               style={{
                 fontFamily: 'DM Sans, sans-serif',
                 fontSize: 16,
-                color: '#9CA3AF',
+                color: '#374151',
                 textDecoration: 'none',
                 padding: '13px 4px',
-                borderBottom: '1px solid rgba(255,255,255,0.05)',
+                borderBottom: '1px solid rgba(0,0,0,0.06)',
                 display: 'block',
               }}
             >
               {link.label}
-            </a>
+            </Link>
           ))}
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
