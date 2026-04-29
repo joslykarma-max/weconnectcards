@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   description: 'La plateforme NFC premium pour partager votre identité professionnelle en un geste. Carte intelligente + dashboard temps réel.',
   keywords: ['NFC', 'carte de visite digitale', 'profil professionnel', 'We Connect', 'technologie NFC'],
   authors: [{ name: 'We Connect' }],
+  icons: { icon: '/logo.png', apple: '/logo.png' },
   openGraph: {
     title: 'We Connect — Your Identity. One Touch.',
     description: 'Partagez votre identité professionnelle en un geste avec la carte NFC premium.',
