@@ -59,16 +59,36 @@ export interface SavedContactDoc {
   phone?:    string;
 }
 
+export interface DeliveryInfo {
+  fullName: string;
+  phone:    string;
+  address:  string;
+  city:     string;
+  country:  'BJ' | 'TG' | 'BF'; // Bénin, Togo, Burkina Faso
+  notes?:   string;
+}
+
 // Collection: cards/{cardId}
 export interface CardDoc {
-  userId:        string;
-  edition:       string;
-  nfcId?:        string;
-  status:        'pending' | 'shipped' | 'active' | 'inactive';
-  orderedAt:     string;
-  activatedAt?:  string;
-  accessCardId?: string; // links to accessCards/{userId}_{accessCardId}
-  memberCardId?: string; // links to memberCards/{userId}_{memberCardId}
+  userId:          string;
+  edition:         string;
+  nfcId?:          string;
+  status:          'pending' | 'shipped' | 'active' | 'inactive';
+  orderedAt:       string;
+  activatedAt?:    string;
+  delivery?:       DeliveryInfo;
+  selectedModule?: string;
+  accessCardId?:   string;
+  memberCardId?:   string;
+}
+
+// Collection: pendingOrders/{uid}
+export interface PendingOrderDoc {
+  uid:       string;
+  plan:      'essentiel' | 'pro';
+  edition:   string;
+  delivery:  DeliveryInfo;
+  createdAt: string;
 }
 
 // Collection: teams/{ownerUid}

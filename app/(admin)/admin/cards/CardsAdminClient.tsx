@@ -2,6 +2,21 @@
 
 import { useState } from 'react';
 
+type DeliveryInfo = {
+  fullName: string;
+  phone:    string;
+  address:  string;
+  city:     string;
+  country:  'BJ' | 'TG' | 'BF';
+  notes?:   string;
+};
+
+const COUNTRY_LABELS: Record<string, string> = {
+  BJ: '🇧🇯 Bénin',
+  TG: '🇹🇬 Togo',
+  BF: '🇧🇫 Burkina Faso',
+};
+
 export type AdminCard = {
   id: string;
   userId: string;
@@ -10,6 +25,7 @@ export type AdminCard = {
   status: string;
   orderedAt: string;
   activatedAt?: string | null;
+  delivery?: DeliveryInfo | null;
   user: { displayName: string; email: string; plan: string } | null;
 };
 
@@ -360,6 +376,32 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 Plan {configCard.user?.plan ?? '—'}
               </p>
             </div>
+
+            {/* Delivery info */}
+            {configCard.delivery && (
+              <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 8, padding: '12px 16px', marginBottom: 20 }}>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#F59E0B', textTransform: 'uppercase', marginBottom: 10 }}>
+                  📦 Adresse de livraison
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)', marginBottom: 2 }}>
+                  {configCard.delivery.fullName}
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)', marginBottom: 2 }}>
+                  {configCard.delivery.phone}
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)', marginBottom: 2 }}>
+                  {configCard.delivery.address}, {configCard.delivery.city}
+                </p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)', marginBottom: configCard.delivery.notes ? 6 : 0 }}>
+                  {COUNTRY_LABELS[configCard.delivery.country] ?? configCard.delivery.country}
+                </p>
+                {configCard.delivery.notes && (
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#F59E0B', fontStyle: 'italic' }}>
+                    Note: {configCard.delivery.notes}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* NFC ID */}
             <div style={{ marginBottom: 20 }}>

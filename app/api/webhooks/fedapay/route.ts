@@ -4,9 +4,11 @@ import { getTransaction } from '@/lib/fedapay';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const uid              = searchParams.get('uid');
-  const plan             = searchParams.get('plan') as 'essentiel' | 'pro' | null;
-  const transactionId    = searchParams.get('id');
+  const uid           = searchParams.get('uid');
+  const plan          = searchParams.get('plan') as 'essentiel' | 'pro' | null;
+  const edition       = searchParams.get('edition') ?? 'midnight';
+  const transactionId = searchParams.get('id');
+  const source        = searchParams.get('source'); // 'card' | null
 
   if (!uid || !plan) {
     return NextResponse.redirect(new URL('/dashboard/settings?payment=error', req.url));
@@ -18,11 +20,16 @@ export async function GET(req: NextRequest) {
     if (transactionId) {
       const transaction = await getTransaction(Number(transactionId));
       if (transaction.status !== 'approved') {
-        return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=cancelled`);
+        const dest = source === 'card' ? '/dashboard/card' : '/dashboard/settings';
+        return NextResponse.redirect(`${appUrl}${dest}?payment=cancelled`);
       }
     }
 
     const now = new Date().toISOString();
+
+    // Fetch pending order for delivery info + edition
+    const pendingSnap = await adminDb.collection('pendingOrders').doc(uid).get();
+    const pending     = pendingSnap.exists ? pendingSnap.data() : null;
 
     await adminDb.collection('users').doc(uid).set(
       { plan, updatedAt: now },
@@ -36,15 +43,20 @@ export async function GET(req: NextRequest) {
       paidAt:        now,
     });
 
-    // Create a new card order for each successful payment
     await adminDb.collection('cards').add({
       userId:    uid,
-      edition:   'midnight',
+      edition:   pending?.edition ?? edition,
       status:    'pending',
       orderedAt: now,
+      ...(pending?.delivery ? { delivery: pending.delivery } : {}),
     });
 
-    return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=success`);
+    if (pendingSnap.exists) {
+      await adminDb.collection('pendingOrders').doc(uid).delete();
+    }
+
+    const successDest = source === 'card' ? '/dashboard/card' : '/dashboard/settings';
+    return NextResponse.redirect(`${appUrl}${successDest}?payment=success`);
   } catch (err) {
     console.error('[webhook/fedapay]', err);
     return NextResponse.redirect(`${appUrl}/dashboard/settings?payment=error`);

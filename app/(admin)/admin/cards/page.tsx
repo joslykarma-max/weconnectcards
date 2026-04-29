@@ -21,6 +21,7 @@ export default async function AdminCardsPage() {
       status:      c.status,
       orderedAt:   c.orderedAt,
       activatedAt: c.activatedAt ?? null,
+      delivery:    c.delivery ?? null,
       user: userMap[c.userId]
         ? { displayName: userMap[c.userId].displayName, email: userMap[c.userId].email, plan: userMap[c.userId].plan }
         : null,

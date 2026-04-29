@@ -1,26 +1,29 @@
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import CardsClient from './CardsClient';
-import type { CardDoc, ProfileDoc } from '@/lib/types';
+import type { CardDoc, ProfileDoc, UserDoc } from '@/lib/types';
 
 export default async function CardPage() {
   const user = await requireAuth();
 
-  const [cardsSnap, profileSnap] = await Promise.all([
+  const [cardsSnap, profileSnap, userSnap] = await Promise.all([
     adminDb.collection('cards').where('userId', '==', user.uid).get(),
     adminDb.collection('profiles').doc(user.uid).get(),
+    adminDb.collection('users').doc(user.uid).get(),
   ]);
 
   const cards = cardsSnap.docs
     .map((d) => {
       const data = d.data() as CardDoc;
       return {
-        id:          d.id,
-        edition:     data.edition,
-        status:      data.status,
-        nfcId:       data.nfcId       ?? null,
-        orderedAt:   data.orderedAt,
-        activatedAt: data.activatedAt ?? null,
+        id:             d.id,
+        edition:        data.edition,
+        status:         data.status,
+        nfcId:          data.nfcId          ?? null,
+        orderedAt:      data.orderedAt,
+        activatedAt:    data.activatedAt    ?? null,
+        delivery:       data.delivery       ?? null,
+        selectedModule: data.selectedModule ?? null,
       };
     })
     .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt));
@@ -33,5 +36,8 @@ export default async function CardPage() {
     theme:       profileData.theme,
   } : null;
 
-  return <CardsClient cards={cards} profile={profile} />;
+  const userDoc   = userSnap.exists ? (userSnap.data() as UserDoc) : null;
+  const userPlan  = userDoc?.plan ?? 'essentiel';
+
+  return <CardsClient cards={cards} profile={profile} userPlan={userPlan} />;
 }
