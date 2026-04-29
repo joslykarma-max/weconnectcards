@@ -55,6 +55,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
   const [tab, setTab]           = useState<typeof TABS[number]>('pending');
   const [search, setSearch]     = useState('');
   const [configCard, setConfigCard] = useState<AdminCard | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [nfcInput, setNfcInput] = useState('');
   const [editionInput, setEditionInput] = useState('midnight');
   const [saving, setSaving]     = useState(false);
@@ -87,8 +88,17 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
   };
 
   function openConfigure(card: AdminCard) {
+    setIsEditMode(false);
     setConfigCard(card);
     setNfcInput(card.nfcId ?? generateNfcId());
+    setEditionInput(card.edition ?? 'midnight');
+    setSaveErr('');
+  }
+
+  function openEdit(card: AdminCard) {
+    setIsEditMode(true);
+    setConfigCard(card);
+    setNfcInput(card.nfcId ?? '');
     setEditionInput(card.edition ?? 'midnight');
     setSaveErr('');
   }
@@ -98,15 +108,18 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
     if (!nfcInput.trim()) { setSaveErr('Entre un code NFC.'); return; }
     setSaving(true);
     setSaveErr('');
+    const body = isEditMode
+      ? { cardId: configCard.id, nfcId: nfcInput.trim().toUpperCase(), edition: editionInput }
+      : { cardId: configCard.id, nfcId: nfcInput.trim().toUpperCase(), edition: editionInput, status: 'shipped' };
     const res = await fetch('/api/admin/cards', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cardId: configCard.id, nfcId: nfcInput.trim().toUpperCase(), edition: editionInput, status: 'shipped' }),
+      body: JSON.stringify(body),
     });
     const data = await res.json() as { error?: string };
     if (!res.ok) { setSaveErr(data.error ?? 'Erreur.'); setSaving(false); return; }
     setCards(prev => prev.map(c => c.id === configCard.id
-      ? { ...c, nfcId: nfcInput.trim().toUpperCase(), edition: editionInput, status: 'shipped' }
+      ? { ...c, nfcId: nfcInput.trim().toUpperCase(), edition: editionInput, ...(isEditMode ? {} : { status: 'shipped' }) }
       : c
     ));
     setSaving(false);
@@ -292,6 +305,27 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                       ✓ Active
                     </span>
                   )}
+                  {/* Edit button for all non-pending cards */}
+                  {card.status !== 'pending' && (
+                    <button
+                      onClick={() => openEdit(card)}
+                      title="Modifier le code NFC"
+                      style={{
+                        width: 26, height: 26, background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+                        cursor: 'pointer', color: '#6B7280', display: 'flex',
+                        alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#F8F9FC'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.25)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = '#6B7280'; (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'; }}
+                    >
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             );
@@ -311,7 +345,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
         >
           <div style={{ background: 'var(--t-surface)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: 32, width: '100%', maxWidth: 440 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 16 }}>
-              Configurer la carte
+              {isEditMode ? 'Modifier la carte' : 'Configurer la carte'}
             </p>
 
             {/* Client info */}
@@ -412,7 +446,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                   cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,
                 }}
               >
-                {saving ? 'Enregistrement…' : '✅ Marquer comme expédiée'}
+                {saving ? 'Enregistrement…' : isEditMode ? '💾 Enregistrer les modifications' : '✅ Marquer comme expédiée'}
               </button>
             </div>
           </div>
