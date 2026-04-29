@@ -1,9 +1,134 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Badge from '@/components/ui/Badge';
 import Button from '@/components/ui/Button';
+
+const SLIDES = [
+  { src: '/slides/slide1.jpg', fallback: 'linear-gradient(135deg, #0D0E14 0%, #1a1a2e 100%)' },
+  { src: '/slides/slide2.jpg', fallback: 'linear-gradient(135deg, #0c1a2e 0%, #0e2340 100%)' },
+  { src: '/slides/slide3.jpg', fallback: 'linear-gradient(135deg, #1e1b4b 0%, #2d1b4b 100%)' },
+  { src: '/slides/slide4.jpg', fallback: 'linear-gradient(135deg, #1a0a0a 0%, #2d1515 100%)' },
+];
+
+const SLIDE_INTERVAL = 5000;
+
+function HeroSlideshow() {
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev]       = useState<number | null>(null);
+  const [fading, setFading]   = useState(false);
+
+  useEffect(() => {
+    const timer = setInterval(() => advance('auto'), SLIDE_INTERVAL);
+    return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current]);
+
+  function advance(dir: 'auto' | 'prev' | 'next' | number) {
+    const next = typeof dir === 'number'
+      ? dir
+      : dir === 'prev'
+        ? (current - 1 + SLIDES.length) % SLIDES.length
+        : (current + 1) % SLIDES.length;
+    if (next === current) return;
+    setPrev(current);
+    setCurrent(next);
+    setFading(true);
+    setTimeout(() => { setPrev(null); setFading(false); }, 800);
+  }
+
+  return (
+    <>
+      {/* Slides */}
+      {SLIDES.map((slide, i) => (
+        <div
+          key={i}
+          style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${slide.src})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            background: i === current || i === prev ? undefined : slide.fallback,
+            opacity: i === current ? 1 : i === prev && fading ? 0 : 0,
+            transition: i === current ? 'opacity 0.9s ease' : i === prev ? 'opacity 0.9s ease' : 'none',
+            zIndex: i === current ? 1 : i === prev ? 0 : -1,
+          }}
+        >
+          {/* Image with fallback */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: `url(${slide.src})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }} />
+          {/* Fallback gradient (shows if image fails to load) */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: slide.fallback,
+            zIndex: -1,
+          }} />
+        </div>
+      ))}
+
+      {/* Dark overlay for text readability */}
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.58)', zIndex: 2 }} />
+
+      {/* Dot navigation */}
+      <div style={{
+        position: 'absolute', bottom: 32, left: '50%', transform: 'translateX(-50%)',
+        display: 'flex', gap: 10, zIndex: 10, alignItems: 'center',
+      }}>
+        {SLIDES.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => advance(i)}
+            style={{
+              width: i === current ? 28 : 8,
+              height: 8,
+              borderRadius: 4,
+              background: i === current ? '#fff' : 'rgba(255,255,255,0.35)',
+              border: 'none', cursor: 'pointer', padding: 0,
+              transition: 'all 0.4s cubic-bezier(0.23,1,0.32,1)',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Arrow prev */}
+      <button
+        onClick={() => advance('prev')}
+        style={{
+          position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)',
+          zIndex: 10, width: 40, height: 40, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+          color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(4px)', transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+
+      {/* Arrow next */}
+      <button
+        onClick={() => advance('next')}
+        style={{
+          position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)',
+          zIndex: 10, width: 40, height: 40, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+          color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(4px)', transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.2)'; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.1)'; }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </>
+  );
+}
 
 const EDITIONS = [
   {
@@ -324,8 +449,7 @@ export default function Hero() {
         paddingTop: 80,
       }}
     >
-      <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
-      <div className="glow-electric" style={{ position: 'absolute', inset: 0 }} />
+      <HeroSlideshow />
 
       <div
         className="hero-grid"
