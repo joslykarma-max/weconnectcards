@@ -7,7 +7,7 @@ interface LogoHorizontalProps {
   className?: string;
 }
 
-const heights = { sm: 32, md: 48, lg: 80 };
+const heights = { sm: 48, md: 64, lg: 100 };
 
 export default function LogoHorizontal({
   symbolSize = 'md',

@@ -6,7 +6,7 @@ interface LogoStackedProps {
   className?: string;
 }
 
-const heights = { sm: 40, md: 60 };
+const heights = { sm: 56, md: 80 };
 
 export default function LogoStacked({
   symbolSize = 'sm',
