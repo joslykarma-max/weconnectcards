@@ -29,9 +29,9 @@ export default function Nav() {
       .catch(() => {});
   }, []);
 
-  const navBg = scrolled || menuOpen ? 'rgba(8,9,12,0.96)' : 'transparent';
-  const navBlur = scrolled || menuOpen ? 'blur(14px)' : 'none';
-  const navBorder = scrolled || menuOpen ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent';
+  const navBg = '#FFFFFF';
+  const navBlur = 'none';
+  const navBorder = '1px solid rgba(0,0,0,0.08)';
 
   return (
     <nav
@@ -66,9 +66,9 @@ export default function Nav() {
             <a
               key={link.href}
               href={link.href}
-              style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF', textDecoration: 'none', transition: 'color 0.2s' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#F8F9FC')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#9CA3AF')}
+              style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#374151', textDecoration: 'none', transition: 'color 0.2s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#6366F1')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#374151')}
             >
               {link.label}
             </a>
@@ -98,11 +98,11 @@ export default function Nav() {
           aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
           style={{
             background: 'none',
-            border: '1px solid rgba(255,255,255,0.1)',
+            border: '1px solid rgba(0,0,0,0.12)',
             borderRadius: 8,
             cursor: 'pointer',
             padding: '8px 10px',
-            color: '#F8F9FC',
+            color: '#374151',
             flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
