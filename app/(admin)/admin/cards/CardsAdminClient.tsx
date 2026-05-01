@@ -17,16 +17,28 @@ const COUNTRY_LABELS: Record<string, string> = {
   BF: '🇧🇫 Burkina Faso',
 };
 
+type CardCustomization = {
+  displayName?: string;
+  title?:       string;
+  company?:     string;
+  logoUrl?:     string;
+  brandColor?:  string;
+};
+
 export type AdminCard = {
   id: string;
   userId: string;
   edition: string;
+  cardType?:      'standard' | 'pro' | 'prestige' | null;
+  metallic?:      boolean | null;
+  pvcColor?:      'white' | 'black' | null;
+  customization?: CardCustomization | null;
   nfcId?: string | null;
   status: string;
   orderedAt: string;
   activatedAt?: string | null;
   delivery?: DeliveryInfo | null;
-  user: { displayName: string; email: string; plan: string } | null;
+  user: { displayName: string; email: string; plan: string; username?: string } | null;
 };
 
 const EDITIONS = ['midnight', 'electric', 'glass', 'metal'];
@@ -376,6 +388,94 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                 Plan {configCard.user?.plan ?? '—'}
               </p>
             </div>
+
+            {/* Card spec (type, metallic, color, customization) */}
+            {(configCard.cardType || configCard.metallic !== null || configCard.customization) && (
+              <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '12px 16px', marginBottom: 16 }}>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 10 }}>
+                  💳 Spécifications carte
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                  {configCard.cardType && (
+                    <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)' }}>
+                      <span style={{ color: 'var(--t-text-muted)' }}>Type :</span> <strong style={{ textTransform: 'capitalize' }}>{configCard.cardType}</strong>
+                    </p>
+                  )}
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)' }}>
+                    <span style={{ color: 'var(--t-text-muted)' }}>Matière :</span>{' '}
+                    <strong>{configCard.metallic ? '✨ Métal' : 'PVC'}</strong>
+                    {configCard.pvcColor && !configCard.metallic && ` (${configCard.pvcColor === 'white' ? 'Blanc' : 'Noir'})`}
+                  </p>
+                  <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)' }}>
+                    <span style={{ color: 'var(--t-text-muted)' }}>Édition :</span> <strong>{configCard.edition}</strong>
+                  </p>
+                </div>
+
+                {configCard.customization && (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 8 }}>
+                      Identité visuelle (à imprimer)
+                    </p>
+                    {configCard.customization.displayName && (
+                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)', marginBottom: 2 }}>
+                        <span style={{ color: 'var(--t-text-muted)' }}>Nom :</span> <strong>{configCard.customization.displayName}</strong>
+                      </p>
+                    )}
+                    {configCard.customization.title && (
+                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)', marginBottom: 2 }}>
+                        <span style={{ color: 'var(--t-text-muted)' }}>Poste :</span> <strong>{configCard.customization.title}</strong>
+                      </p>
+                    )}
+                    {configCard.customization.company && (
+                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)', marginBottom: 2 }}>
+                        <span style={{ color: 'var(--t-text-muted)' }}>Entreprise :</span> <strong>{configCard.customization.company}</strong>
+                      </p>
+                    )}
+                    {configCard.customization.brandColor && (
+                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text)', marginBottom: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ color: 'var(--t-text-muted)' }}>Couleur :</span>
+                        <span style={{ display: 'inline-block', width: 14, height: 14, borderRadius: 3, background: configCard.customization.brandColor, border: '1px solid rgba(255,255,255,0.2)' }} />
+                        <strong style={{ fontFamily: 'Space Mono, monospace', fontSize: 11 }}>{configCard.customization.brandColor}</strong>
+                      </p>
+                    )}
+                    {configCard.customization.logoUrl && (
+                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--t-text-muted)', marginTop: 6, wordBreak: 'break-all' }}>
+                        <span>Logo :</span> <a href={configCard.customization.logoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#818CF8', textDecoration: 'underline' }}>{configCard.customization.logoUrl}</a>
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* QR Code of customer's profile */}
+            {configCard.user?.username && (
+              <div style={{ background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '12px 16px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ flexShrink: 0, padding: 4, background: '#fff', borderRadius: 6 }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(`https://weconnect.cards/${configCard.user.username}`)}`}
+                    alt="QR profil"
+                    width={88}
+                    height={88}
+                  />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#10B981', textTransform: 'uppercase', marginBottom: 6 }}>
+                    🔗 QR du profil client
+                  </p>
+                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#818CF8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 4 }}>
+                    weconnect.cards/{configCard.user.username}
+                  </p>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(`https://weconnect.cards/${configCard.user!.username}`)}
+                    style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 4, padding: '4px 10px', color: '#818CF8', fontSize: 10, fontFamily: 'DM Sans, sans-serif', cursor: 'pointer' }}
+                  >
+                    Copier l&apos;URL
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Delivery info */}
             {configCard.delivery && (

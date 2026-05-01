@@ -59,18 +59,64 @@ const COUNTRIES = {
   BF: { label: 'Burkina Faso', flag: '🇧🇫', days: '5–7 jours ouvrés' },
 } as const;
 
-const ORDER_PLANS = {
-  essentiel: {
-    price:    '10 500 XOF',
-    features: ['1 module au choix', 'Carte NFC physique', 'Livraison incluse'],
-    color:    '#6366F1',
+type CardType = 'standard' | 'pro' | 'prestige';
+
+const ORDER_PLANS: Record<CardType, {
+  basePrice:   number;
+  metalSurcharge: number; // pourcentage
+  label:       string;
+  color:       string;
+  features:    string[];
+  hasMetalOption: boolean;
+  hasColorOption: boolean;
+  hasCustomization: boolean;
+  freeMonths:  number;
+}> = {
+  standard: {
+    basePrice:        10_000,
+    metalSurcharge:   20,
+    label:            'Standard',
+    color:            '#9CA3AF',
+    features:         ['Carte WeConnect (recto)', 'QR dynamique (verso)', '1 module', '6 mois offerts'],
+    hasMetalOption:   true,
+    hasColorOption:   true,
+    hasCustomization: false,
+    freeMonths:       6,
   },
   pro: {
-    price:    '20 000 XOF',
-    features: ['Tous les modules', 'Statistiques avancées', 'Carte NFC physique', 'Livraison incluse'],
-    color:    '#10B981',
+    basePrice:        15_000,
+    metalSurcharge:   14,
+    label:            'Pro',
+    color:            '#6366F1',
+    features:         ['Carte personnalisée', '3 modules', 'Compte Pro', '6 mois offerts'],
+    hasMetalOption:   true,
+    hasColorOption:   true,
+    hasCustomization: true,
+    freeMonths:       6,
   },
-} as const;
+  prestige: {
+    basePrice:        25_000,
+    metalSurcharge:   0,
+    label:            'Prestige',
+    color:            '#F59E0B',
+    features:         ['Personnalisation complète', 'Double face', 'Métal premium', 'Tous modules', '12 mois offerts'],
+    hasMetalOption:   false, // toujours métal
+    hasColorOption:   false,
+    hasCustomization: true,
+    freeMonths:       12,
+  },
+};
+
+function computePrice(cardType: CardType, metallic: boolean): number {
+  const p = ORDER_PLANS[cardType];
+  if (cardType === 'prestige') return p.basePrice;
+  if (metallic) return Math.round(p.basePrice * (1 + p.metalSurcharge / 100));
+  return p.basePrice;
+}
+
+function fmtFCFA(n: number): string {
+  return n.toLocaleString('fr-FR') + ' FCFA';
+}
 
 const MODULES = [
   { id: 'profile', label: 'Carte de visite',   desc: 'Liens sociaux, contact, mini bio',   icon: '👤' },
@@ -139,11 +185,18 @@ function OrderModal({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const [step, setStep]           = useState<1 | 2>(1);
-  const [plan, setPlan]           = useState<'essentiel' | 'pro'>('essentiel');
-  const [edition, setEdition]     = useState('midnight');
-  const [ordering, setOrdering]   = useState(false);
-  const [orderError, setOrderError] = useState('');
+  const [step, setStep]               = useState<1 | 2 | 3>(1);
+  const [cardType, setCardType]       = useState<CardType>('standard');
+  const [edition, setEdition]         = useState('midnight');
+  const [metallic, setMetallic]       = useState(false);
+  const [pvcColor, setPvcColor]       = useState<'white' | 'black'>('black');
+  const [customDisplayName, setCustomDisplayName] = useState(profile?.displayName ?? '');
+  const [customTitle, setCustomTitle]             = useState(profile?.title ?? '');
+  const [customCompany, setCustomCompany]         = useState('');
+  const [customLogoUrl, setCustomLogoUrl]         = useState('');
+  const [customBrandColor, setCustomBrandColor]   = useState('#6366F1');
+  const [ordering, setOrdering]                   = useState(false);
+  const [orderError, setOrderError]               = useState('');
 
   const [delivery, setDelivery] = useState<DeliveryInfo>({
     fullName: profile?.displayName ?? '',
@@ -154,6 +207,9 @@ function OrderModal({
     notes:    '',
   });
 
+  const planMeta   = ORDER_PLANS[cardType];
+  const finalPrice = computePrice(cardType, planMeta.hasMetalOption ? metallic : cardType === 'prestige');
+
   function setField(field: keyof DeliveryInfo, value: string) {
     setDelivery((prev) => ({ ...prev, [field]: value }));
   }
@@ -162,10 +218,25 @@ function OrderModal({
     setOrdering(true);
     setOrderError('');
     try {
+      const customization = planMeta.hasCustomization ? {
+        displayName: customDisplayName.trim(),
+        title:       customTitle.trim() || undefined,
+        company:     customCompany.trim() || undefined,
+        logoUrl:     customLogoUrl.trim() || undefined,
+        brandColor:  customBrandColor,
+      } : undefined;
+
       const res  = await fetch('/api/cards/order', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ plan, edition, delivery }),
+        body:    JSON.stringify({
+          cardType,
+          edition,
+          metallic: planMeta.hasMetalOption ? metallic : cardType === 'prestige',
+          pvcColor: planMeta.hasColorOption ? pvcColor : undefined,
+          customization,
+          delivery,
+        }),
       });
       const data = await res.json() as { paymentUrl?: string; error?: string };
       if (!res.ok || !data.paymentUrl) throw new Error(data.error ?? 'Erreur');
@@ -222,23 +293,27 @@ function OrderModal({
         </button>
 
         {/* Step indicator */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center' }}>
-          {[1, 2].map((s) => (
-            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center', flexWrap: 'wrap' }}>
+          {[
+            { n: 1, label: 'Carte' },
+            { n: 2, label: 'Personnaliser' },
+            { n: 3, label: 'Livraison' },
+          ].map((s) => (
+            <div key={s.n} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{
-                width: 28, height: 28, borderRadius: '50%',
-                background: step >= s ? '#6366F1' : 'rgba(255,255,255,0.07)',
-                border: `1px solid ${step >= s ? '#6366F1' : 'rgba(255,255,255,0.12)'}`,
+                width: 26, height: 26, borderRadius: '50%',
+                background: step >= s.n ? '#6366F1' : 'rgba(255,255,255,0.07)',
+                border: `1px solid ${step >= s.n ? '#6366F1' : 'rgba(255,255,255,0.12)'}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'Space Mono, monospace', fontSize: 11,
-                color: step >= s ? '#fff' : 'var(--t-text-muted)',
+                color: step >= s.n ? '#fff' : 'var(--t-text-muted)',
               }}>
-                {s}
+                {s.n}
               </div>
-              <span style={{ fontSize: 12, color: step === s ? 'var(--t-text)' : 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif' }}>
-                {s === 1 ? 'Plan & édition' : 'Livraison'}
+              <span style={{ fontSize: 11.5, color: step === s.n ? 'var(--t-text)' : 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif' }}>
+                {s.label}
               </span>
-              {s < 2 && <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />}
+              {s.n < 3 && <div style={{ width: 16, height: 1, background: 'rgba(255,255,255,0.1)', margin: '0 4px' }} />}
             </div>
           ))}
         </div>
@@ -246,42 +321,46 @@ function OrderModal({
         {step === 1 && (
           <>
             <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
-              Choisir un plan
+              Choisir une carte
             </h3>
             <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
-              Sélectionne le plan et l&apos;édition de ta carte NFC.
+              3 éditions officielles. Choisis celle qui matche ton ambition.
             </p>
 
-            {/* Plan selector */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-              {(Object.entries(ORDER_PLANS) as [keyof typeof ORDER_PLANS, typeof ORDER_PLANS[keyof typeof ORDER_PLANS]][]).map(([key, info]) => (
+            {/* Card type selector */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
+              {(Object.entries(ORDER_PLANS) as [CardType, typeof ORDER_PLANS[CardType]][]).map(([key, info]) => (
                 <button
                   key={key}
-                  onClick={() => setPlan(key)}
+                  onClick={() => { setCardType(key); if (key === 'prestige') setMetallic(true); }}
                   style={{
-                    padding: 16, borderRadius: 10, cursor: 'pointer', textAlign: 'left',
-                    background: plan === key ? `${info.color}12` : 'rgba(255,255,255,0.03)',
-                    border: `2px solid ${plan === key ? info.color : 'rgba(255,255,255,0.08)'}`,
+                    padding: 14, borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                    background: cardType === key ? `${info.color}12` : 'rgba(255,255,255,0.03)',
+                    border: `2px solid ${cardType === key ? info.color : 'rgba(255,255,255,0.08)'}`,
                     transition: 'all 0.15s',
                   }}
                 >
-                  <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 4, textTransform: 'capitalize' }}>
-                    {key}
-                  </p>
-                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: info.color, marginBottom: 10 }}>
-                    {info.price}
-                  </p>
-                  {info.features.map((f) => (
-                    <p key={f} style={{ fontSize: 11, color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif', marginBottom: 2 }}>
-                      ✓ {f}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t-text)', textTransform: 'capitalize' }}>
+                      Carte {info.label}
                     </p>
-                  ))}
+                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, color: info.color }}>
+                      {fmtFCFA(info.basePrice)}
+                    </p>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {info.features.map((f) => (
+                      <span key={f} style={{ fontSize: 11, color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif' }}>
+                        ✓ {f}
+                      </span>
+                    ))}
+                  </div>
                 </button>
               ))}
             </div>
 
             {/* Edition selector */}
-            <p style={labelStyle}>Édition de la carte</p>
+            <p style={labelStyle}>Édition visuelle</p>
             <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
               {Object.entries(EDITION_STYLES).map(([key, s]) => (
                 <button
@@ -308,12 +387,160 @@ function OrderModal({
             </div>
 
             <Button variant="gradient" size="md" style={{ width: '100%' }} onClick={() => setStep(2)}>
-              Continuer → Livraison
+              Continuer → Personnaliser
             </Button>
           </>
         )}
 
         {step === 2 && (
+          <>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
+              Personnaliser ta carte
+            </h3>
+            <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
+              {cardType === 'prestige'
+                ? 'Carte métallique premium, double face, entièrement personnalisée.'
+                : `Carte ${planMeta.label} — choisis matière et couleur.`}
+            </p>
+
+            {/* Metallic toggle */}
+            {planMeta.hasMetalOption && (
+              <div style={{ marginBottom: 18 }}>
+                <label style={labelStyle}>Matière</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <button
+                    onClick={() => setMetallic(false)}
+                    style={{
+                      padding: '12px 14px', cursor: 'pointer', textAlign: 'left',
+                      background: !metallic ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                      border: `2px solid ${!metallic ? '#6366F1' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <p style={{ fontSize: 13, color: 'var(--t-text)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>PVC</p>
+                    <p style={{ fontSize: 10, color: 'var(--t-text-muted)', fontFamily: 'Space Mono, monospace' }}>Standard · inclus</p>
+                  </button>
+                  <button
+                    onClick={() => setMetallic(true)}
+                    style={{
+                      padding: '12px 14px', cursor: 'pointer', textAlign: 'left',
+                      background: metallic ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                      border: `2px solid ${metallic ? '#6366F1' : 'rgba(255,255,255,0.08)'}`,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <p style={{ fontSize: 13, color: 'var(--t-text)', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>Métal ✨</p>
+                    <p style={{ fontSize: 10, color: '#F59E0B', fontFamily: 'Space Mono, monospace' }}>+{planMeta.metalSurcharge}%</p>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* PVC color (only if PVC) */}
+            {planMeta.hasColorOption && !metallic && (
+              <div style={{ marginBottom: 18 }}>
+                <label style={labelStyle}>Couleur PVC</label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  {(['black', 'white'] as const).map((c) => (
+                    <button
+                      key={c}
+                      onClick={() => setPvcColor(c)}
+                      style={{
+                        padding: '12px 14px', cursor: 'pointer',
+                        background: pvcColor === c ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                        border: `2px solid ${pvcColor === c ? '#6366F1' : 'rgba(255,255,255,0.08)'}`,
+                        borderRadius: 8,
+                        display: 'flex', alignItems: 'center', gap: 10,
+                      }}
+                    >
+                      <div style={{
+                        width: 24, height: 16, borderRadius: 3,
+                        background: c === 'white' ? '#F8F9FC' : '#08090C',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                      }} />
+                      <span style={{ fontSize: 13, color: 'var(--t-text)', fontFamily: 'DM Sans, sans-serif' }}>
+                        {c === 'white' ? 'Blanc' : 'Noir'}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Customization (Pro/Prestige) */}
+            {planMeta.hasCustomization && (
+              <div style={{
+                marginBottom: 18, padding: 16,
+                background: 'rgba(99,102,241,0.05)',
+                border: '1px solid rgba(99,102,241,0.15)',
+                borderRadius: 8,
+              }}>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 14 }}>
+                  Identité visuelle
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <label style={labelStyle}>Nom à afficher *</label>
+                    <input style={inputStyle} value={customDisplayName}
+                      onChange={(e) => setCustomDisplayName(e.target.value)} placeholder="Sophie Martin" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Poste / Titre</label>
+                    <input style={inputStyle} value={customTitle}
+                      onChange={(e) => setCustomTitle(e.target.value)} placeholder="CEO & Founder" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Entreprise</label>
+                    <input style={inputStyle} value={customCompany}
+                      onChange={(e) => setCustomCompany(e.target.value)} placeholder="Acme Corp" />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>URL du logo (PNG/SVG)</label>
+                    <input style={inputStyle} value={customLogoUrl}
+                      onChange={(e) => setCustomLogoUrl(e.target.value)} placeholder="https://exemple.com/logo.png" />
+                    <p style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 4 }}>
+                      Tu peux nous envoyer le fichier après commande si tu n&apos;as pas encore d&apos;URL.
+                    </p>
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Couleur d&apos;accent</label>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <input type="color" value={customBrandColor}
+                        onChange={(e) => setCustomBrandColor(e.target.value)}
+                        style={{ width: 48, height: 36, border: 'none', borderRadius: 6, cursor: 'pointer', background: 'transparent' }}
+                      />
+                      <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: 'var(--t-text-muted)' }}>
+                        {customBrandColor}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Price summary */}
+            <div style={{
+              background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '12px 14px', marginBottom: 16,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
+                Total
+              </p>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: planMeta.color }}>
+                {fmtFCFA(finalPrice)}
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Button variant="ghost" size="md" onClick={() => setStep(1)} style={{ flex: 1 }}>← Retour</Button>
+              <Button variant="gradient" size="md" onClick={() => setStep(3)} style={{ flex: 2 }}>
+                Continuer → Livraison
+              </Button>
+            </div>
+          </>
+        )}
+
+        {step === 3 && (
           <>
             <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
               Informations de livraison
@@ -402,7 +629,7 @@ function OrderModal({
             )}
 
             <div style={{ display: 'flex', gap: 10 }}>
-              <Button variant="ghost" size="md" onClick={() => setStep(1)} style={{ flex: 1 }}>
+              <Button variant="ghost" size="md" onClick={() => setStep(2)} style={{ flex: 1 }}>
                 ← Retour
               </Button>
               <Button
@@ -411,7 +638,7 @@ function OrderModal({
                 onClick={handleOrder}
                 style={{ flex: 2 }}
               >
-                {ordering ? 'Redirection...' : `Commander — ${ORDER_PLANS[plan].price}`}
+                {ordering ? 'Redirection...' : `Commander — ${fmtFCFA(finalPrice)}`}
               </Button>
             </div>
           </>

@@ -68,10 +68,23 @@ export interface DeliveryInfo {
   notes?:   string;
 }
 
+// Customization for Pro/Prestige cards
+export interface CardCustomization {
+  displayName?: string;
+  title?:       string;
+  company?:     string;
+  logoUrl?:     string;
+  brandColor?:  string;
+}
+
 // Collection: cards/{cardId}
 export interface CardDoc {
   userId?:         string;
   edition:         string;
+  cardType?:       'standard' | 'pro' | 'prestige';
+  metallic?:       boolean;
+  pvcColor?:       'white' | 'black';
+  customization?:  CardCustomization;
   nfcId?:          string;
   status:          'in_stock' | 'pending' | 'shipped' | 'active' | 'inactive';
   orderedAt?:      string;
