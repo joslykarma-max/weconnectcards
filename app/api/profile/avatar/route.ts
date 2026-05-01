@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import { requireAuth } from '@/lib/session';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 
@@ -19,19 +20,28 @@ export async function POST(req: NextRequest) {
   }
 
   const buffer    = Buffer.from(await file.arrayBuffer());
-  const ext       = file.type.split('/')[1] ?? 'jpg';
-  const filePath  = `avatars/${user.uid}.${ext}`;
+  const ext       = (file.type.split('/')[1] ?? 'jpg').replace(/[^a-z0-9]/gi, '');
+  const filePath  = `avatars/${user.uid}-${Date.now()}.${ext}`;
   const bucket    = adminStorage.bucket();
   const fileRef   = bucket.file(filePath);
+  const token     = randomUUID();
 
-  await fileRef.save(buffer, {
-    metadata:  { contentType: file.type },
-    resumable: false,
-  });
+  try {
+    await fileRef.save(buffer, {
+      metadata: {
+        contentType: file.type,
+        metadata: { firebaseStorageDownloadTokens: token },
+      },
+      resumable: false,
+    });
+  } catch (err) {
+    console.error('[avatar] upload failed:', err);
+    return NextResponse.json({
+      error: 'Échec du téléversement. Vérifiez que Firebase Storage est activé.',
+    }, { status: 500 });
+  }
 
-  await fileRef.makePublic();
-
-  const avatarUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
+  const avatarUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
 
   await adminDb.collection('profiles').doc(user.uid).set(
     { avatar: avatarUrl, updatedAt: new Date().toISOString() },

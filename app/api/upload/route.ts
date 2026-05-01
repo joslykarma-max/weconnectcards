@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
 import admin from 'firebase-admin';
 import { getSession } from '@/lib/session';
 import '@/lib/firebase-admin';
@@ -23,10 +24,23 @@ export async function POST(req: NextRequest) {
 
   const bucket  = admin.storage().bucket();
   const fileRef = bucket.file(path);
+  const token   = randomUUID();
 
-  await fileRef.save(buffer, { metadata: { contentType: file.type } });
-  await fileRef.makePublic();
+  try {
+    await fileRef.save(buffer, {
+      metadata: {
+        contentType: file.type,
+        metadata: { firebaseStorageDownloadTokens: token },
+      },
+      resumable: false,
+    });
+  } catch (err) {
+    console.error('[upload] save failed:', err);
+    return NextResponse.json({
+      error: 'Échec du téléversement. Vérifiez que Firebase Storage est activé.',
+    }, { status: 500 });
+  }
 
-  const url = `https://storage.googleapis.com/${bucket.name}/${path}`;
+  const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
   return NextResponse.json({ url });
 }
