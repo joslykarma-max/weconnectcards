@@ -1,11 +1,59 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Input, Textarea } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+
+const LS_KEY = 'profile-split-pct';
+
+function useResizableSplit(initial = 50) {
+  const [pct, setPct]    = useState(initial);
+  const containerRef     = useRef<HTMLDivElement>(null);
+  const draggingRef      = useRef(false);
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null;
+    if (stored) {
+      const n = parseFloat(stored);
+      if (!isNaN(n) && n >= 20 && n <= 80) setPct(n);
+    }
+  }, []);
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (!draggingRef.current || !containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const next = ((e.clientX - rect.left) / rect.width) * 100;
+      const clamped = Math.max(25, Math.min(75, next));
+      setPct(clamped);
+    }
+    function onUp() {
+      if (draggingRef.current) {
+        draggingRef.current = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        try { window.localStorage.setItem(LS_KEY, String(pct)); } catch {}
+      }
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    return () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+  }, [pct]);
+
+  function onHandleDown() {
+    draggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  return { pct, containerRef, onHandleDown };
+}
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
 type Profile = {
@@ -151,10 +199,12 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     setSavingEdit(false);
   }
 
+  const { pct, containerRef, onHandleDown } = useResizableSplit(50);
+
   return (
-    <div style={{ maxWidth: 840, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
-      {/* Profile form */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div ref={containerRef} style={{ maxWidth: 1100, display: 'flex', alignItems: 'stretch', gap: 0 }}>
+      {/* Profile form (left column) */}
+      <div style={{ flex: `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
         <Card padding="md">
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
             Photo de profil
@@ -238,8 +288,35 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
         </Button>
       </div>
 
+      {/* Drag handle */}
+      <div
+        onMouseDown={onHandleDown}
+        style={{
+          width: 28,
+          cursor: 'col-resize',
+          position: 'relative',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          userSelect: 'none',
+        }}
+        title="Glisser pour redimensionner"
+      >
+        <div style={{
+          width: 4,
+          height: 60,
+          borderRadius: 2,
+          background: 'rgba(99,102,241,0.25)',
+          transition: 'background 0.2s',
+        }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
+        />
+      </div>
+
       {/* Links */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
         <Card padding="md">
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
             Liens ({links.length})
