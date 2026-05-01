@@ -60,8 +60,20 @@ export async function getTransaction(id: number): Promise<FedaPayTransaction> {
   return data.transaction;
 }
 
+// Tarifs officiels We Connect
 export const PLANS = {
-  essentiel: { amount: 10_500, currency: 'XOF', label: 'Plan Essentiel' },
-  pro:       { amount: 20_000, currency: 'XOF', label: 'Plan Pro' },
-  pro_sub:   { amount:  2_000, currency: 'XOF', label: 'Abonnement Pro mensuel' },
+  // Cartes physiques (achat unique, abonnement inclus)
+  standard:  { amount: 10_000, currency: 'XOF', label: 'Carte Standard' },
+  pro:       { amount: 15_000, currency: 'XOF', label: 'Carte Pro' },
+  prestige:  { amount: 25_000, currency: 'XOF', label: 'Carte Prestige' },
+  // Surcoûts version métallique (en pourcentage du prix de base)
+  standard_metal: { amount: 12_000, currency: 'XOF', label: 'Carte Standard métal (+20%)' },
+  pro_metal:      { amount: 17_100, currency: 'XOF', label: 'Carte Pro métal (+14%)' },
+  // Upgrade compte Essentiel → Pro (sans changer de carte)
+  account_upgrade: { amount: 5_500, currency: 'XOF', label: 'Passage compte Pro' },
+  // Réabonnement mensuel après la période gratuite
+  monthly_sub: { amount: 2_000, currency: 'XOF', label: 'Abonnement mensuel' },
+  // ── Aliases pour compat code existant ──
+  essentiel: { amount: 10_000, currency: 'XOF', label: 'Carte Standard' },
+  pro_sub:   { amount:  2_000, currency: 'XOF', label: 'Abonnement mensuel' },
 } as const;

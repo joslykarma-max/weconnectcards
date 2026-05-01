@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
+// Card type → account plan mapping (Pro/Prestige cards auto-grant Pro account)
+const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
+  standard:  'essentiel',
+  essentiel: 'essentiel',
+  pro:       'pro',
+  prestige:  'pro',
+};
+
 export async function POST(req: NextRequest) {
-  const { name, email, password, username, plan = 'essentiel' } = await req.json() as {
+  const { name, email, password, username, plan = 'standard' } = await req.json() as {
     name: string;
     email: string;
     password: string;
@@ -34,16 +42,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: msg }, { status: 409 });
   }
 
-  const now = new Date().toISOString();
+  const now           = new Date().toISOString();
+  const accountPlan   = CARD_TO_ACCOUNT_PLAN[plan] ?? 'essentiel';
+  const cardEdition   = plan === 'prestige' ? 'metal' : plan === 'pro' ? 'electric' : 'midnight';
 
   // Write to Firestore atomically
   const batch = adminDb.batch();
   batch.set(adminDb.collection('users').doc(uid), {
-    email, displayName: name, plan, createdAt: now,
+    email, displayName: name,
+    plan:        accountPlan,
+    cardType:    plan, // standard | pro | prestige
+    createdAt:   now,
   });
   batch.set(adminDb.collection('profiles').doc(uid), {
     uid, username, displayName: name,
-    theme:   plan === 'pro' ? 'electric' : 'midnight',
+    theme:    cardEdition,
     isPublic: true,
     updatedAt: now,
   });
@@ -51,5 +64,5 @@ export async function POST(req: NextRequest) {
 
   await batch.commit();
 
-  return NextResponse.json({ uid, email }, { status: 201 });
+  return NextResponse.json({ uid, email, plan: accountPlan, cardType: plan }, { status: 201 });
 }

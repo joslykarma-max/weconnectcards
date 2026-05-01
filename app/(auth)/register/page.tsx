@@ -93,7 +93,7 @@ function RegisterForm() {
             placeholder="sophie-martin"
             value={form.username}
             onChange={set('username')}
-            hint="weconnect.io/votre-username"
+            hint="weconnect.cards/votre-username"
             required
           />
           <Input
