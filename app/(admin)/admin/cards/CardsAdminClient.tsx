@@ -439,9 +439,29 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                       </p>
                     )}
                     {configCard.customization.logoUrl && (
-                      <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: 'var(--t-text-muted)', marginTop: 6, wordBreak: 'break-all' }}>
-                        <span>Logo :</span> <a href={configCard.customization.logoUrl} target="_blank" rel="noopener noreferrer" style={{ color: '#818CF8', textDecoration: 'underline' }}>{configCard.customization.logoUrl}</a>
-                      </p>
+                      <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)' }}>Logo :</p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={configCard.customization.logoUrl}
+                          alt="Logo client"
+                          style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 4, background: '#fff', padding: 3, border: '1px solid rgba(255,255,255,0.1)' }}
+                        />
+                        <a
+                          href={configCard.customization.logoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                          style={{
+                            fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#818CF8',
+                            textDecoration: 'none', padding: '4px 10px',
+                            background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)',
+                            borderRadius: 4,
+                          }}
+                        >
+                          Télécharger ↓
+                        </a>
+                      </div>
                     )}
                   </div>
                 )}

@@ -194,6 +194,8 @@ function OrderModal({
   const [customTitle, setCustomTitle]             = useState(profile?.title ?? '');
   const [customCompany, setCustomCompany]         = useState('');
   const [customLogoUrl, setCustomLogoUrl]         = useState('');
+  const [uploadingLogo, setUploadingLogo]         = useState(false);
+  const [logoError, setLogoError]                 = useState('');
   const [customBrandColor, setCustomBrandColor]   = useState('#6366F1');
   const [ordering, setOrdering]                   = useState(false);
   const [orderError, setOrderError]               = useState('');
@@ -212,6 +214,30 @@ function OrderModal({
 
   function setField(field: keyof DeliveryInfo, value: string) {
     setDelivery((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { setLogoError('Format invalide (image requise).'); return; }
+    if (file.size > 5 * 1024 * 1024)     { setLogoError('Fichier trop lourd (max 5 Mo).'); return; }
+
+    setUploadingLogo(true);
+    setLogoError('');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res  = await fetch('/api/upload?folder=cardLogos', { method: 'POST', body: formData });
+    const data = await res.json() as { url?: string; error?: string };
+
+    if (!res.ok || !data.url) {
+      setLogoError(data.error ?? 'Échec du téléversement.');
+    } else {
+      setCustomLogoUrl(data.url);
+    }
+    setUploadingLogo(false);
+    e.target.value = ''; // allow re-uploading same file
   }
 
   async function handleOrder() {
@@ -495,12 +521,69 @@ function OrderModal({
                       onChange={(e) => setCustomCompany(e.target.value)} placeholder="Acme Corp" />
                   </div>
                   <div>
-                    <label style={labelStyle}>URL du logo (PNG/SVG)</label>
-                    <input style={inputStyle} value={customLogoUrl}
-                      onChange={(e) => setCustomLogoUrl(e.target.value)} placeholder="https://exemple.com/logo.png" />
-                    <p style={{ fontSize: 11, color: 'var(--t-text-muted)', marginTop: 4 }}>
-                      Tu peux nous envoyer le fichier après commande si tu n&apos;as pas encore d&apos;URL.
-                    </p>
+                    <label style={labelStyle}>Logo (PNG, JPG, SVG — max 5 Mo)</label>
+                    {customLogoUrl ? (
+                      <div style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: 10,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(99,102,241,0.25)',
+                        borderRadius: 8,
+                      }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={customLogoUrl}
+                          alt="Logo"
+                          style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 6, background: '#fff', padding: 4 }}
+                        />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#10B981', fontWeight: 600 }}>
+                            ✓ Logo téléversé
+                          </p>
+                          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: 'var(--t-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {customLogoUrl.split('/').pop()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCustomLogoUrl('')}
+                          style={{
+                            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
+                            borderRadius: 4, padding: '4px 10px', color: '#EF4444',
+                            fontSize: 11, fontFamily: 'DM Sans, sans-serif', cursor: 'pointer',
+                          }}
+                        >
+                          Retirer
+                        </button>
+                      </div>
+                    ) : (
+                      <label style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                        padding: '14px 16px', cursor: uploadingLogo ? 'wait' : 'pointer',
+                        background: 'rgba(99,102,241,0.06)',
+                        border: '1px dashed rgba(99,102,241,0.3)',
+                        borderRadius: 8,
+                        transition: 'all 0.2s',
+                      }}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#818CF8" strokeWidth="2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                          <polyline points="17 8 12 3 7 8"/>
+                          <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#818CF8', fontWeight: 500 }}>
+                          {uploadingLogo ? 'Téléversement...' : 'Choisir un fichier'}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          disabled={uploadingLogo}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                    {logoError && (
+                      <p style={{ fontSize: 11, color: '#EF4444', marginTop: 6 }}>{logoError}</p>
+                    )}
                   </div>
                   <div>
                     <label style={labelStyle}>Couleur d&apos;accent</label>
