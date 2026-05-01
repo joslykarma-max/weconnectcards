@@ -117,6 +117,40 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     setLinks((prev) => prev.filter((l) => l.id !== id));
   }
 
+  const [editingId, setEditingId]     = useState<string | null>(null);
+  const [editType, setEditType]       = useState('phone');
+  const [editLabel, setEditLabel]     = useState('');
+  const [editUrl, setEditUrl]         = useState('');
+  const [savingEdit, setSavingEdit]   = useState(false);
+
+  function startEdit(link: Link) {
+    setEditingId(link.id);
+    setEditType(link.type);
+    setEditLabel(link.label);
+    setEditUrl(link.url);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditLabel('');
+    setEditUrl('');
+  }
+
+  async function saveEdit(id: string) {
+    if (!editLabel.trim() || !editUrl.trim()) return;
+    setSavingEdit(true);
+    const res = await fetch('/api/links', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type: editType, label: editLabel, url: editUrl }),
+    });
+    if (res.ok) {
+      const updated = await res.json() as Link;
+      setLinks((prev) => prev.map((l) => l.id === id ? { ...l, ...updated } : l));
+      cancelEdit();
+    }
+    setSavingEdit(false);
+  }
+
   return (
     <div style={{ maxWidth: 840, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28, alignItems: 'start' }}>
       {/* Profile form */}
@@ -212,7 +246,66 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
           </h3>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-            {links.map((link) => (
+            {links.map((link) => editingId === link.id ? (
+              <div
+                key={link.id}
+                style={{
+                  display: 'flex', flexDirection: 'column', gap: 8,
+                  padding: 12,
+                  background: 'rgba(99,102,241,0.06)',
+                  border: '1px solid rgba(99,102,241,0.25)',
+                  borderRadius: 6,
+                }}
+              >
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 4, padding: '8px 10px',
+                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                    outline: 'none', cursor: 'pointer',
+                  }}
+                >
+                  {LINK_TYPES.map((t) => (
+                    <option key={t.value} value={t.value} style={{ background: '#181B26' }}>{t.label}</option>
+                  ))}
+                </select>
+                <input
+                  placeholder="Label"
+                  value={editLabel}
+                  onChange={(e) => setEditLabel(e.target.value)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 4, padding: '8px 10px',
+                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                    outline: 'none',
+                  }}
+                />
+                <input
+                  placeholder="URL"
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  style={{
+                    background: 'rgba(255,255,255,0.05)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 4, padding: '8px 10px',
+                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                    outline: 'none',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <Button variant="gradient" size="sm" loading={savingEdit} onClick={() => saveEdit(link.id)} style={{ flex: 1 }}>
+                    Sauvegarder
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={cancelEdit} style={{ flex: 1 }}>
+                    Annuler
+                  </Button>
+                </div>
+              </div>
+            ) : (
               <div
                 key={link.id}
                 style={{
@@ -230,7 +323,26 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {link.label}
                   </p>
+                  <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {link.url}
+                  </p>
                 </div>
+                <button
+                  onClick={() => startEdit(link)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#818CF8', padding: 4, flexShrink: 0,
+                    opacity: 0.7, transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
+                  title="Modifier"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                </button>
                 <button
                   onClick={() => deleteLink(link.id)}
                   style={{
@@ -240,6 +352,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                  title="Supprimer"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="3 6 5 6 21 6"/>

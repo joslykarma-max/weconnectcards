@@ -40,6 +40,29 @@ export async function PUT(req: NextRequest) {
   return NextResponse.json({ ok: true });
 }
 
+export async function PATCH(req: NextRequest) {
+  const user = await requireAuth();
+  const { id, ...updates } = await req.json() as Partial<LinkDoc> & { id: string };
+
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+
+  // Whitelist editable fields
+  const patch: Partial<LinkDoc> = {};
+  if (updates.type     !== undefined) patch.type     = updates.type;
+  if (updates.label    !== undefined) patch.label    = updates.label;
+  if (updates.url      !== undefined) patch.url      = updates.url;
+  if (updates.icon     !== undefined) patch.icon     = updates.icon;
+  if (updates.isActive !== undefined) patch.isActive = updates.isActive;
+
+  if (Object.keys(patch).length === 0) {
+    return NextResponse.json({ error: 'No fields to update' }, { status: 400 });
+  }
+
+  await linksRef(user.uid).doc(id).update(patch);
+  const snap = await linksRef(user.uid).doc(id).get();
+  return NextResponse.json({ id, ...snap.data() });
+}
+
 export async function DELETE(req: NextRequest) {
   const user  = await requireAuth();
   const { searchParams } = new URL(req.url);
