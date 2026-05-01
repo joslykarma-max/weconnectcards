@@ -8,10 +8,11 @@ export default async function AdminClientsPage() {
     adminDb.collection('cards').get(),
   ]);
 
-  // Build card counts per user
+  // Build card counts per user (skip in-stock cards without an owner)
   const cardsByUser: Record<string, { total: number; active: number }> = {};
   cardsSnap.docs.forEach(d => {
     const c = d.data() as CardDoc;
+    if (!c.userId) return;
     if (!cardsByUser[c.userId]) cardsByUser[c.userId] = { total: 0, active: 0 };
     cardsByUser[c.userId].total++;
     if (c.status === 'active') cardsByUser[c.userId].active++;

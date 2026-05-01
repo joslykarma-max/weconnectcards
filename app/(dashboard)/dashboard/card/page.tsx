@@ -20,7 +20,7 @@ export default async function CardPage() {
         edition:        data.edition,
         status:         data.status,
         nfcId:          data.nfcId          ?? null,
-        orderedAt:      data.orderedAt,
+        orderedAt:      data.orderedAt      ?? '',
         activatedAt:    data.activatedAt    ?? null,
         delivery:       data.delivery       ?? null,
         selectedModule: data.selectedModule ?? null,

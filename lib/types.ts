@@ -70,11 +70,12 @@ export interface DeliveryInfo {
 
 // Collection: cards/{cardId}
 export interface CardDoc {
-  userId:          string;
+  userId?:         string;
   edition:         string;
   nfcId?:          string;
-  status:          'pending' | 'shipped' | 'active' | 'inactive';
-  orderedAt:       string;
+  status:          'in_stock' | 'pending' | 'shipped' | 'active' | 'inactive';
+  orderedAt?:      string;
+  stockedAt?:      string;
   activatedAt?:    string;
   delivery?:       DeliveryInfo;
   selectedModule?: string;

@@ -17,7 +17,7 @@ export async function GET(
 
   const card = snap.docs[0].data() as CardDoc;
 
-  if (card.status !== 'active') {
+  if (card.status !== 'active' || !card.userId) {
     return NextResponse.redirect(`${base}/activate?nfc=${id}`);
   }
 

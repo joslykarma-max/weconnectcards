@@ -21,7 +21,17 @@ export async function POST(req: NextRequest) {
     const cardDoc = codeSnap.docs[0];
     const data    = cardDoc.data() as CardDoc;
 
-    if (data.userId !== user.uid) {
+    // In-stock card (no owner yet) — claim it
+    if (data.status === 'in_stock' && !data.userId) {
+      await cardDoc.ref.update({
+        userId:      user.uid,
+        status:      'active',
+        activatedAt: now,
+      });
+      return NextResponse.json({ success: true });
+    }
+
+    if (data.userId && data.userId !== user.uid) {
       return NextResponse.json({ error: 'Cette carte est déjà liée à un autre compte.' }, { status: 409 });
     }
     if (data.status === 'active') {

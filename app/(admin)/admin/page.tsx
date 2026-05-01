@@ -49,10 +49,10 @@ export default async function AdminOverviewPage() {
   users.forEach(u => { userMap[u.uid] = u; });
 
   const pendingOrders = cards
-    .filter(c => c.status === 'pending')
-    .sort((a, b) => new Date(b.orderedAt).getTime() - new Date(a.orderedAt).getTime())
+    .filter(c => c.status === 'pending' && !!c.userId)
+    .sort((a, b) => new Date(b.orderedAt ?? 0).getTime() - new Date(a.orderedAt ?? 0).getTime())
     .slice(0, 8)
-    .map(c => ({ ...c, user: userMap[c.userId] ?? null }));
+    .map(c => ({ ...c, user: userMap[c.userId!] ?? null }));
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
@@ -154,7 +154,7 @@ export default async function AdminOverviewPage() {
                   {order.user?.displayName ?? '—'}
                 </span>
                 <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: 'var(--t-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {order.user?.email ?? order.userId.slice(0, 12) + '…'}
+                  {order.user?.email ?? (order.userId ?? '').slice(0, 12) + '…'}
                 </span>
                 <span style={{
                   fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 1,
@@ -164,7 +164,7 @@ export default async function AdminOverviewPage() {
                   {order.user?.plan ?? '—'}
                 </span>
                 <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#4B5563' }}>
-                  {new Date(order.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                  {order.orderedAt ? new Date(order.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : '—'}
                 </span>
               </Link>
             ))}

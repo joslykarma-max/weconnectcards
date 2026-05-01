@@ -7,18 +7,20 @@ import type { CardDoc, UserDoc } from '@/lib/types';
 export async function GET() {
   await requireAdmin();
 
-  const cardsSnap = await adminDb.collection('cards').orderBy('orderedAt', 'desc').limit(300).get();
-  const cards = cardsSnap.docs.map(d => ({ id: d.id, ...(d.data() as CardDoc) }));
+  const cardsSnap = await adminDb.collection('cards').limit(500).get();
+  const cards = cardsSnap.docs
+    .map(d => ({ id: d.id, ...(d.data() as CardDoc) }))
+    .filter(c => !!c.userId);
 
-  const userIds = [...new Set(cards.map(c => c.userId))];
+  const userIds  = [...new Set(cards.map(c => c.userId!))];
   const userDocs = await Promise.all(userIds.map(uid => adminDb.collection('users').doc(uid).get()));
   const userMap: Record<string, UserDoc> = {};
   userDocs.forEach(d => { if (d.exists) userMap[d.id] = d.data() as UserDoc; });
 
   const enriched = cards.map(c => ({
     ...c,
-    user: userMap[c.userId]
-      ? { displayName: userMap[c.userId].displayName, email: userMap[c.userId].email, plan: userMap[c.userId].plan }
+    user: userMap[c.userId!]
+      ? { displayName: userMap[c.userId!].displayName, email: userMap[c.userId!].email, plan: userMap[c.userId!].plan }
       : null,
   }));
 
