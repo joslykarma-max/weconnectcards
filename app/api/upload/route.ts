@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'Fichier manquant' }, { status: 400 });
-  if (!file.type.startsWith('image/')) return NextResponse.json({ error: 'Format non supporté (image uniquement)' }, { status: 400 });
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!ALLOWED_MIME.includes(file.type)) return NextResponse.json({ error: 'Format non supporté (JPG, PNG, WEBP, GIF uniquement)' }, { status: 400 });
   if (file.size > MAX_SIZE) return NextResponse.json({ error: 'Fichier trop volumineux (max 5 Mo)' }, { status: 400 });
 
   const buffer     = Buffer.from(await file.arrayBuffer());

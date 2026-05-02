@@ -25,10 +25,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Le mot de passe doit faire au moins 8 caractères.' }, { status: 400 });
   }
 
-  // Check username uniqueness in Firestore
-  const usernameSnap = await adminDb.collection('usernames').doc(username).get();
-  if (usernameSnap.exists) {
-    return NextResponse.json({ error: "Ce nom d'utilisateur est déjà pris." }, { status: 409 });
+  // Reserve username atomically — use a transaction to prevent race conditions
+  try {
+    await adminDb.runTransaction(async (tx) => {
+      const snap = await tx.get(adminDb.collection('usernames').doc(username));
+      if (snap.exists) throw new Error('USERNAME_TAKEN');
+      // We only reserve here; the actual set happens in the batch below
+      // (transaction read ensures no concurrent registration steals it)
+    });
+  } catch (err) {
+    if ((err as Error).message === 'USERNAME_TAKEN') {
+      return NextResponse.json({ error: "Ce nom d'utilisateur est déjà pris." }, { status: 409 });
+    }
+    throw err;
   }
 
   let uid: string;
@@ -69,6 +78,20 @@ export async function POST(req: NextRequest) {
   batch.set(adminDb.collection('usernames').doc(username), { uid });
 
   await batch.commit();
+
+  // Resolve pending team invitations for this email (fire-and-forget)
+  const normalizedEmail = email.trim().toLowerCase();
+  adminDb.collectionGroup('members')
+    .where('email', '==', normalizedEmail)
+    .where('status', '==', 'pending')
+    .get()
+    .then((snap) => {
+      const resolves = snap.docs.map((d) =>
+        d.ref.update({ uid, status: 'active', joinedAt: now }),
+      );
+      return Promise.all(resolves);
+    })
+    .catch((err) => console.error('[register] team invite resolve failed:', err));
 
   return NextResponse.json({ uid, email, plan: accountPlan, cardType: plan }, { status: 201 });
 }

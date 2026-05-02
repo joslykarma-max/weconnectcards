@@ -37,15 +37,18 @@ export function generateVCard(profile: {
   const email = profile.links?.find((l) => l.type === 'email')?.url?.replace('mailto:', '');
   const url   = `${process.env.NEXT_PUBLIC_URL}/${profile.username}`;
 
+  // Escape CRLF in vCard values per RFC 6868 to prevent injection
+  const esc = (s: string) => s.replace(/\r/g, '').replace(/\n/g, '\\n');
+
   const lines = [
     'BEGIN:VCARD',
     'VERSION:3.0',
-    `FN:${profile.displayName}`,
-    profile.title   ? `TITLE:${profile.title}`   : null,
-    profile.company ? `ORG:${profile.company}`   : null,
-    phone           ? `TEL:${phone}`             : null,
-    email           ? `EMAIL:${email}`           : null,
-    `URL:${url}`,
+    `FN:${esc(profile.displayName)}`,
+    profile.title   ? `TITLE:${esc(profile.title)}`   : null,
+    profile.company ? `ORG:${esc(profile.company)}`   : null,
+    phone           ? `TEL:${esc(phone)}`             : null,
+    email           ? `EMAIL:${esc(email)}`           : null,
+    `URL:${esc(url)}`,
     'END:VCARD',
   ].filter(Boolean);
 

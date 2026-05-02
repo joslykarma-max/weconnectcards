@@ -53,8 +53,9 @@ export default async function ProfilePage({ params }: Props) {
 
   const { uid } = usernameSnap.data() as { uid: string };
 
-  const [profileSnap, linksSnap, modulesSnap] = await Promise.all([
+  const [profileSnap, userSnap, linksSnap, modulesSnap] = await Promise.all([
     adminDb.collection('profiles').doc(uid).get(),
+    adminDb.collection('users').doc(uid).get(),
     adminDb.collection('profiles').doc(uid).collection('links').get(),
     adminDb.collection('modules').where('profileId', '==', uid).where('isActive', '==', true).get(),
   ]);
@@ -62,15 +63,23 @@ export default async function ProfilePage({ params }: Props) {
   const profileData = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
   if (!profileData?.isPublic) notFound();
 
+  // Check subscription — expired users get a limited view (links only, no modules)
+  const userData           = userSnap.exists ? (userSnap.data() as { subscriptionUntil?: string; plan?: string }) : null;
+  const subscriptionUntil  = userData?.subscriptionUntil;
+  const subscriptionActive = !subscriptionUntil || new Date(subscriptionUntil) > new Date();
+
   const links = linksSnap.docs
     .map((d) => ({ ...(d.data() as LinkDoc), id: d.id }))
     .filter((l) => l.isActive)
     .sort((a, b) => a.order - b.order);
 
-  const modules = modulesSnap.docs
-    .map((d) => (d.data() as ModuleDoc).type)
-    .filter((t) => MODULE_META[t])
-    .map((t) => ({ type: t, ...MODULE_META[t] }));
+  // Modules hidden when subscription expired
+  const modules = subscriptionActive
+    ? modulesSnap.docs
+        .map((d) => (d.data() as ModuleDoc).type)
+        .filter((t) => MODULE_META[t])
+        .map((t) => ({ type: t, ...MODULE_META[t] }))
+    : [];
 
   // Log the visit (fire-and-forget)
   const headersList = await headers();
