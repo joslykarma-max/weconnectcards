@@ -6,6 +6,14 @@ import type { LinkDoc } from '@/lib/types';
 const linksRef = (uid: string) =>
   adminDb.collection('profiles').doc(uid).collection('links');
 
+function normalizeUrl(url: string, type?: string): string {
+  const s = url.trim();
+  if (!s) return s;
+  if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(s)) return s;
+  if (type === 'phone') return `tel:${s}`;
+  return `https://${s}`;
+}
+
 export async function GET() {
   const user  = await requireAuth();
   const snap  = await linksRef(user.uid).orderBy('order').get();
@@ -21,7 +29,7 @@ export async function POST(req: NextRequest) {
   const order     = countSnap.data().count;
 
   const ref  = linksRef(user.uid).doc();
-  const link: LinkDoc = { id: ref.id, ...body, order, isActive: true };
+  const link: LinkDoc = { id: ref.id, ...body, url: normalizeUrl(body.url ?? '', body.type), order, isActive: true };
   await ref.set(link);
 
   return NextResponse.json(link, { status: 201 });
@@ -50,7 +58,7 @@ export async function PATCH(req: NextRequest) {
   const patch: Partial<LinkDoc> = {};
   if (updates.type     !== undefined) patch.type     = updates.type;
   if (updates.label    !== undefined) patch.label    = updates.label;
-  if (updates.url      !== undefined) patch.url      = updates.url;
+  if (updates.url      !== undefined) patch.url      = normalizeUrl(updates.url, updates.type);
   if (updates.icon     !== undefined) patch.icon     = updates.icon;
   if (updates.isActive !== undefined) patch.isActive = updates.isActive;
 

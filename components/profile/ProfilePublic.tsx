@@ -95,6 +95,14 @@ function logLinkClick(linkId: string) {
   fetch('/api/links/click', { method: 'POST', body: JSON.stringify({ linkId }), headers: { 'Content-Type': 'application/json' } }).catch(() => {});
 }
 
+// Ensure URL has a valid scheme; phone numbers get tel:, everything else https://
+function ensureScheme(url: string, type?: string): string {
+  if (!url) return '#';
+  if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(url)) return url;
+  if (type === 'phone') return `tel:${url}`;
+  return `https://${url}`;
+}
+
 export default function ProfilePublic({ profile }: { profile: Profile }) {
   const [saving, setSaving]   = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -187,7 +195,7 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
           {profile.links.map((link) => (
             <a
               key={link.id}
-              href={link.url}
+              href={ensureScheme(link.url, link.type)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => logLinkClick(link.id)}
