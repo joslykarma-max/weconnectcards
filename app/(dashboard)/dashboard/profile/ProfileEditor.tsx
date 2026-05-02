@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Input, Textarea } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
@@ -99,16 +100,81 @@ type Profile = {
 } | null;
 
 const LINK_TYPES = [
-  { value: 'phone',     label: 'Téléphone',  prefix: 'tel:' },
-  { value: 'email',     label: 'Email',       prefix: 'mailto:' },
-  { value: 'whatsapp',  label: 'WhatsApp',   prefix: 'https://wa.me/' },
-  { value: 'linkedin',  label: 'LinkedIn',   prefix: 'https://linkedin.com/in/' },
-  { value: 'instagram', label: 'Instagram',  prefix: 'https://instagram.com/' },
-  { value: 'website',   label: 'Site web',   prefix: 'https://' },
-  { value: 'calendly',  label: 'Calendly',   prefix: 'https://calendly.com/' },
-  { value: 'portfolio', label: 'Portfolio',  prefix: 'https://' },
-  { value: 'custom',    label: 'Autre lien', prefix: 'https://' },
+  { value: 'phone',     label: 'Téléphone'  },
+  { value: 'email',     label: 'Email'      },
+  { value: 'whatsapp',  label: 'WhatsApp'   },
+  { value: 'linkedin',  label: 'LinkedIn'   },
+  { value: 'instagram', label: 'Instagram'  },
+  { value: 'website',   label: 'Site web'   },
+  { value: 'calendly',  label: 'Calendly'   },
+  { value: 'portfolio', label: 'Portfolio'  },
+  { value: 'custom',    label: 'Autre lien' },
 ];
+
+// Per-type form config: what to ask + how to build the stored URL
+const LINK_FORM_CONFIG: Record<string, {
+  inputLabel: string;
+  placeholder: string;
+  autoLabel: string;
+  buildUrl: (val: string) => string;
+  module?: string;  // redirect to module instead of showing a URL input
+}> = {
+  phone: {
+    inputLabel: 'Numéro de téléphone',
+    placeholder: '+229 97 00 00 00',
+    autoLabel: 'Téléphone',
+    buildUrl: (v) => `tel:${v.trim()}`,
+  },
+  email: {
+    inputLabel: 'Adresse email',
+    placeholder: 'contact@exemple.com',
+    autoLabel: 'Email',
+    buildUrl: (v) => `mailto:${v.trim()}`,
+  },
+  whatsapp: {
+    inputLabel: 'Numéro WhatsApp (avec indicatif)',
+    placeholder: '+229 97 00 00 00',
+    autoLabel: 'WhatsApp',
+    buildUrl: (v) => `https://wa.me/${v.trim().replace(/[^0-9]/g, '')}`,
+  },
+  linkedin: {
+    inputLabel: 'Nom d\'utilisateur LinkedIn',
+    placeholder: 'votre-profil',
+    autoLabel: 'LinkedIn',
+    buildUrl: (v) => /^https?:/.test(v) ? v : `https://linkedin.com/in/${v.trim().replace(/^\//, '')}`,
+  },
+  instagram: {
+    inputLabel: 'Nom d\'utilisateur Instagram',
+    placeholder: '@votre_compte',
+    autoLabel: 'Instagram',
+    buildUrl: (v) => /^https?:/.test(v) ? v : `https://instagram.com/${v.trim().replace(/^@/, '')}`,
+  },
+  website: {
+    inputLabel: 'URL du site',
+    placeholder: 'https://monsite.com',
+    autoLabel: 'Site web',
+    buildUrl: (v) => v.trim(),
+  },
+  calendly: {
+    inputLabel: 'Nom d\'utilisateur Calendly',
+    placeholder: 'votre-nom',
+    autoLabel: 'Calendly',
+    buildUrl: (v) => /^https?:/.test(v) ? v : `https://calendly.com/${v.trim().replace(/^\//, '')}`,
+  },
+  portfolio: {
+    inputLabel: '',
+    placeholder: '',
+    autoLabel: 'Portfolio',
+    buildUrl: (v) => v,
+    module: '/dashboard/modules/portfolio',
+  },
+  custom: {
+    inputLabel: 'URL',
+    placeholder: 'https://...',
+    autoLabel: '',
+    buildUrl: (v) => v.trim(),
+  },
+};
 
 const THEMES = [
   { value: 'midnight', label: 'Midnight', bg: 'linear-gradient(135deg, #0D0E14, #181B26)' },
@@ -118,6 +184,7 @@ const THEMES = [
 ];
 
 export default function ProfileEditor({ profile }: { profile: Profile }) {
+  const router = useRouter();
   const [form, setForm] = useState({
     displayName: profile?.displayName ?? '',
     title:       profile?.title ?? '',
@@ -132,8 +199,8 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   const fileInputRef               = useRef<HTMLInputElement>(null);
   const [saving, setSaving]        = useState(false);
   const [newLinkType, setNewLinkType] = useState('phone');
-  const [newLinkLabel, setNewLinkLabel] = useState('');
-  const [newLinkUrl, setNewLinkUrl]   = useState('');
+  const [newLinkValue, setNewLinkValue] = useState('');
+  const [newLinkLabel, setNewLinkLabel] = useState(LINK_FORM_CONFIG['phone'].autoLabel);
   const [saved, setSaved] = useState(false);
 
   async function uploadAvatar(file: File) {
@@ -178,16 +245,24 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   }
 
   async function addLink() {
-    if (!newLinkLabel || !newLinkUrl) return;
+    if (!newLinkValue.trim() || !newLinkLabel.trim()) return;
+    const cfg = LINK_FORM_CONFIG[newLinkType] ?? LINK_FORM_CONFIG['custom'];
+    const url = cfg.buildUrl(newLinkValue);
     const res = await fetch('/api/links', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ type: newLinkType, label: newLinkLabel, url: newLinkUrl }),
+      body:    JSON.stringify({ type: newLinkType, label: newLinkLabel, url }),
     });
     const link = await res.json() as Link;
     setLinks((prev) => [...prev, link]);
-    setNewLinkLabel('');
-    setNewLinkUrl('');
+    setNewLinkValue('');
+    setNewLinkLabel(cfg.autoLabel);
+  }
+
+  function handleTypeChange(type: string) {
+    setNewLinkType(type);
+    setNewLinkValue('');
+    setNewLinkLabel(LINK_FORM_CONFIG[type]?.autoLabel ?? '');
   }
 
   async function deleteLink(id: string) {
@@ -481,48 +556,92 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
               Ajouter un lien
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <select
-                value={newLinkType}
-                onChange={(e) => setNewLinkType(e.target.value)}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 6, padding: '10px 14px',
-                  color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                  outline: 'none', cursor: 'pointer',
-                }}
-              >
+
+              {/* Type selector as pill grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                 {LINK_TYPES.map((t) => (
-                  <option key={t.value} value={t.value} style={{ background: '#181B26' }}>{t.label}</option>
+                  <button
+                    key={t.value}
+                    onClick={() => handleTypeChange(t.value)}
+                    style={{
+                      padding: '8px 4px',
+                      borderRadius: 6,
+                      border: `1px solid ${newLinkType === t.value ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.07)'}`,
+                      background: newLinkType === t.value ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.02)',
+                      color: newLinkType === t.value ? '#818CF8' : '#9CA3AF',
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {t.label}
+                  </button>
                 ))}
-              </select>
-              <input
-                placeholder="Label (ex: Mon WhatsApp)"
-                value={newLinkLabel}
-                onChange={(e) => setNewLinkLabel(e.target.value)}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 6, padding: '10px 14px',
-                  color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                  outline: 'none',
-                }}
-              />
-              <input
-                placeholder="URL ou numéro"
-                value={newLinkUrl}
-                onChange={(e) => setNewLinkUrl(e.target.value)}
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: 6, padding: '10px 14px',
-                  color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                  outline: 'none',
-                }}
-              />
-              <Button variant="secondary" size="sm" onClick={addLink} style={{ width: '100%' }}>
-                + Ajouter
-              </Button>
+              </div>
+
+              {/* Portfolio → redirect to module builder */}
+              {newLinkType === 'portfolio' ? (
+                <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '16px', textAlign: 'center' }}>
+                  <p style={{ color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, marginBottom: 6 }}>
+                    🎵 Portfolio Artiste
+                  </p>
+                  <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 14, fontFamily: 'DM Sans, sans-serif' }}>
+                    Crée une page portfolio avec bannière, liens plateformes, bio et email de booking.
+                  </p>
+                  <Button variant="gradient" size="sm" onClick={() => router.push('/dashboard/modules/portfolio')} style={{ width: '100%' }}>
+                    Créer mon portfolio →
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  {/* Dynamic input based on type */}
+                  <div>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1.5, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>
+                      {LINK_FORM_CONFIG[newLinkType]?.inputLabel ?? 'Valeur'}
+                    </p>
+                    <input
+                      placeholder={LINK_FORM_CONFIG[newLinkType]?.placeholder ?? ''}
+                      value={newLinkValue}
+                      onChange={(e) => setNewLinkValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }}
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 6, padding: '10px 14px',
+                        color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  {/* Label (editable, pre-filled with auto-label) */}
+                  <div>
+                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1.5, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>
+                      Nom affiché
+                    </p>
+                    <input
+                      placeholder="Ex: Mon WhatsApp pro"
+                      value={newLinkLabel}
+                      onChange={(e) => setNewLinkLabel(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }}
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: 6, padding: '10px 14px',
+                        color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <Button variant="secondary" size="sm" onClick={addLink} style={{ width: '100%' }}>
+                    + Ajouter
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </Card>
