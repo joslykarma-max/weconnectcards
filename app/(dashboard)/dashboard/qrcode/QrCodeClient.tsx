@@ -167,6 +167,7 @@ export default function QrCodeClient({ initialCodes, isPro }: { initialCodes: Qr
       setCodes((prev) => [json.code!, ...prev]);
       setSaveMsg('✓ QR code sauvegardé');
       setTimeout(() => setSaveMsg(''), 3000);
+      router.refresh(); // bust router cache so navigating back shows updated list
     }
     setSaving(false);
   }
@@ -176,6 +177,7 @@ export default function QrCodeClient({ initialCodes, isPro }: { initialCodes: Qr
     await fetch(`/api/qr?id=${id}`, { method: 'DELETE' });
     setCodes((prev) => prev.filter((c) => c.id !== id));
     if (selectedId === id) setSelectedId(null);
+    router.refresh();
   }
 
   // ── Load stats for selected code ──
