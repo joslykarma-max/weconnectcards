@@ -1,10 +1,13 @@
 // Firestore data model types
 // Collection: users/{uid}
 export interface UserDoc {
-  email:       string;
-  displayName: string;
-  plan:        'essentiel' | 'pro' | 'equipe';
-  createdAt:   string; // ISO date
+  email:             string;
+  displayName:       string;
+  plan:              'essentiel' | 'pro' | 'equipe';
+  cardType?:         'standard' | 'pro' | 'prestige'; // type de carte achetée
+  subscriptionUntil?: string; // ISO date — fin de la période d'abonnement
+  createdAt:         string;
+  updatedAt?:        string;
 }
 
 // Collection: profiles/{uid}

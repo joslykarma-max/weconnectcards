@@ -46,13 +46,19 @@ export async function POST(req: NextRequest) {
   const accountPlan   = CARD_TO_ACCOUNT_PLAN[plan] ?? 'essentiel';
   const cardEdition   = plan === 'prestige' ? 'metal' : plan === 'pro' ? 'electric' : 'midnight';
 
+  // Free subscription period: 12 months for Prestige, 6 months for Standard/Pro
+  const freeMonths = plan === 'prestige' ? 12 : 6;
+  const subscriptionUntil = new Date();
+  subscriptionUntil.setMonth(subscriptionUntil.getMonth() + freeMonths);
+
   // Write to Firestore atomically
   const batch = adminDb.batch();
   batch.set(adminDb.collection('users').doc(uid), {
     email, displayName: name,
-    plan:        accountPlan,
-    cardType:    plan, // standard | pro | prestige
-    createdAt:   now,
+    plan:              accountPlan,
+    cardType:          plan, // standard | pro | prestige
+    subscriptionUntil: subscriptionUntil.toISOString(),
+    createdAt:         now,
   });
   batch.set(adminDb.collection('profiles').doc(uid), {
     uid, username, displayName: name,
