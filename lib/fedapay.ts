@@ -1,7 +1,10 @@
 // FedaPay integration — paiements West Africa
 // Docs: https://docs.fedapay.com
 
-const FEDAPAY_BASE = process.env.NODE_ENV === 'production'
+// Use FEDAPAY_ENV=production explicitly — do NOT rely on NODE_ENV
+// (Vercel always sets NODE_ENV=production even on preview deployments)
+const isLive = process.env.FEDAPAY_ENV === 'production';
+const FEDAPAY_BASE = isLive
   ? 'https://api.fedapay.com/v1'
   : 'https://sandbox-api.fedapay.com/v1';
 

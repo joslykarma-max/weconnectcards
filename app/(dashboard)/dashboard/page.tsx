@@ -57,7 +57,7 @@ export default async function DashboardPage() {
           Bonjour, {profile?.displayName?.split(' ')[0] ?? 'là'} 👋
         </h2>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
-          Voici ce qui se passe avec votre profil{profile?.username ? ` weconnect.io/${profile.username}` : ''}.
+          Voici ce qui se passe avec votre profil{profile?.username ? ` weconnect.cards/${profile.username}` : ''}.
         </p>
       </div>
 
@@ -103,7 +103,7 @@ export default async function DashboardPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
               { href: '/dashboard/profile', icon: '✏️', label: 'Modifier mon profil',   desc: 'Photo, liens, bio' },
-              { href: profile?.username ? `/${profile.username}` : '#', icon: '👁️', label: 'Voir ma page publique', desc: `weconnect.io/${profile?.username ?? '...'}` },
+              { href: profile?.username ? `/${profile.username}` : '#', icon: '👁️', label: 'Voir ma page publique', desc: `weconnect.cards/${profile?.username ?? '...'}` },
               { href: '/dashboard/card',    icon: '💳', label: 'Gérer ma carte',        desc: 'NFC, QR code, activation' },
               { href: '/dashboard/analytics', icon: '📊', label: 'Voir les analytics',  desc: 'Stats détaillées' },
             ].map((action) => (

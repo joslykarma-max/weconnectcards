@@ -93,7 +93,7 @@ export default function SettingsClient({ user, subscription }: Props) {
       const res = await fetch('/api/checkout', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ plan: 'pro' }),
+        body:    JSON.stringify({ plan: 'account_upgrade' }),
       });
       const data = await res.json() as { payment_url?: string; error?: string };
       if (data.payment_url) {
@@ -158,7 +158,7 @@ export default function SettingsClient({ user, subscription }: Props) {
 
         {subscription?.plan === 'essentiel' && (
           <Button variant="gradient" size="md" loading={upgrading} onClick={upgradePlan}>
-            {upgrading ? 'Redirection...' : 'Passer au plan Pro — 20 000 FCFA + 2 000 FCFA/mois'}
+            {upgrading ? 'Redirection...' : 'Passer au plan Pro — 5 500 FCFA'}
           </Button>
         )}
       </Card>

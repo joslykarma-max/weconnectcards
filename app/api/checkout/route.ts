@@ -6,10 +6,16 @@ import type { UserDoc, ProfileDoc } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
   const user = await requireAuth();
-  const { plan } = await req.json() as { plan: 'essentiel' | 'pro' };
+  const { plan } = await req.json() as { plan: string };
 
-  if (!PLANS[plan]) {
+  const validUpgradePlans = ['account_upgrade', 'monthly_sub'];
+  if (!validUpgradePlans.includes(plan)) {
     return NextResponse.json({ error: 'Plan invalide.' }, { status: 400 });
+  }
+
+  const planInfo = PLANS[plan as keyof typeof PLANS];
+  if (!planInfo) {
+    return NextResponse.json({ error: 'Plan introuvable.' }, { status: 400 });
   }
 
   const [userSnap, profileSnap] = await Promise.all([
@@ -26,15 +32,24 @@ export async function POST(req: NextRequest) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
 
-  const { payment_url } = await createTransaction({
-    amount:        PLANS[plan].amount,
-    currency:      PLANS[plan].currency,
-    description:   PLANS[plan].label,
-    customerEmail: user.email ?? userData?.email ?? '',
-    customerName:  profileData?.displayName ?? userData?.displayName ?? user.email ?? '',
-    callbackUrl:   `${appUrl}/api/webhooks/fedapay?uid=${user.uid}&plan=${plan}`,
-    metadata:      { uid: user.uid, plan },
-  });
+  let payment_url: string;
+  try {
+    const result = await createTransaction({
+      amount:        planInfo.amount,
+      currency:      planInfo.currency,
+      description:   planInfo.label,
+      customerEmail: user.email ?? userData?.email ?? '',
+      customerName:  profileData?.displayName ?? userData?.displayName ?? user.email ?? '',
+      callbackUrl:   `${appUrl}/api/webhooks/fedapay?uid=${user.uid}&plan=${plan}`,
+      metadata:      { uid: user.uid, plan },
+    });
+    payment_url = result.payment_url;
+  } catch (err) {
+    console.error('[checkout] FedaPay error:', err);
+    return NextResponse.json({
+      error: 'Le service de paiement est temporairement indisponible. Réessayez dans quelques instants.',
+    }, { status: 503 });
+  }
 
   return NextResponse.json({ payment_url });
 }

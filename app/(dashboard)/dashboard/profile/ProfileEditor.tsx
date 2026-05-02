@@ -26,18 +26,19 @@ function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
     if (w) { const n = parseFloat(w); if (!isNaN(n) && n >= 600 && n <= 2400) setWidth(n); }
   }, []);
 
-  useEffect(() => {
-    function onMove(e: MouseEvent) {
-      if (!dragModeRef.current || !containerRef.current) return;
+  function getClientX(e: MouseEvent | TouchEvent) {
+    return 'touches' in e ? e.touches[0].clientX : e.clientX;
+  }
 
+  useEffect(() => {
+    function onMove(e: MouseEvent | TouchEvent) {
+      if (!dragModeRef.current || !containerRef.current) return;
+      const x = getClientX(e);
       if (dragModeRef.current === 'split') {
         const rect = containerRef.current.getBoundingClientRect();
-        const next = ((e.clientX - rect.left) / rect.width) * 100;
-        setPct(Math.max(25, Math.min(75, next)));
+        setPct(Math.max(25, Math.min(75, ((x - rect.left) / rect.width) * 100)));
       } else if (dragModeRef.current === 'width') {
-        const dx       = e.clientX - startXRef.current;
-        const proposed = startWidthRef.current + dx;
-        setWidth(Math.max(600, Math.min(2400, proposed)));
+        setWidth(Math.max(600, Math.min(2400, startWidthRef.current + x - startXRef.current)));
       }
     }
     function onUp() {
@@ -53,24 +54,32 @@ function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
     }
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
+    document.addEventListener('touchmove', onMove, { passive: true });
+    document.addEventListener('touchend', onUp);
     return () => {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onUp);
     };
   }, [pct, width]);
 
-  function onSplitDown() {
+  function onSplitDown(e: React.MouseEvent | React.TouchEvent) {
     dragModeRef.current = 'split';
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
+    if (!('touches' in e)) {
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
   }
 
-  function onWidthDown(e: React.MouseEvent) {
+  function onWidthDown(e: React.MouseEvent | React.TouchEvent) {
     dragModeRef.current = 'width';
-    startXRef.current = e.clientX;
+    startXRef.current = 'touches' in e ? e.touches[0].clientX : e.clientX;
     startWidthRef.current = width;
-    document.body.style.cursor = 'ew-resize';
-    document.body.style.userSelect = 'none';
+    if (!('touches' in e)) {
+      document.body.style.cursor = 'ew-resize';
+      document.body.style.userSelect = 'none';
+    }
   }
 
   return { pct, width, containerRef, onSplitDown, onWidthDown };
@@ -312,6 +321,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       {/* Middle drag handle (split ratio) */}
       <div
         onMouseDown={onSplitDown}
+        onTouchStart={onSplitDown}
         style={{
           width: 28,
           cursor: 'col-resize',
@@ -543,6 +553,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       {/* Right-edge resize handle (total width) */}
       <div
         onMouseDown={onWidthDown}
+        onTouchStart={onWidthDown}
         style={{
           width: 14,
           cursor: 'ew-resize',

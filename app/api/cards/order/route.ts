@@ -62,14 +62,24 @@ export async function POST(req: NextRequest) {
 
   const callbackUrl = `${appUrl}/api/webhooks/fedapay?uid=${user.uid}&cardType=${cardType}&edition=${encodeURIComponent(edition)}&source=card`;
 
-  const { payment_url } = await createTransaction({
-    amount,
-    currency:      'XOF',
-    description:   `${label} — We Connect`,
-    customerEmail: user.email ?? `${user.uid}@weconnect.cards`,
-    customerName:  user.name ?? delivery.fullName,
-    callbackUrl,
-  });
+  let payment_url: string;
+  try {
+    const result = await createTransaction({
+      amount,
+      currency:      'XOF',
+      description:   `${label} — We Connect`,
+      customerEmail: user.email ?? `${user.uid}@weconnect.cards`,
+      customerName:  user.name ?? delivery.fullName,
+      callbackUrl,
+      metadata:      { uid: user.uid, cardType },
+    });
+    payment_url = result.payment_url;
+  } catch (err) {
+    console.error('[cards/order] FedaPay error:', err);
+    return NextResponse.json({
+      error: 'Le service de paiement est temporairement indisponible. Réessayez dans quelques instants.',
+    }, { status: 503 });
+  }
 
   return NextResponse.json({ paymentUrl: payment_url });
 }
