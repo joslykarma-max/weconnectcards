@@ -384,6 +384,8 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   placeholder="Label"
                   value={editLabel}
                   onChange={(e) => setEditLabel(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
+                  aria-label="Label du lien"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -396,6 +398,8 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   placeholder="URL"
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
+                  aria-label="URL du lien"
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',
@@ -437,6 +441,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                 </div>
                 <button
                   onClick={() => startEdit(link)}
+                  aria-label={`Modifier le lien ${link.label}`}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
                     color: '#818CF8', padding: 4, flexShrink: 0,
@@ -444,7 +449,6 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
-                  title="Modifier"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -453,6 +457,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                 </button>
                 <button
                   onClick={() => deleteLink(link.id)}
+                  aria-label={`Supprimer le lien ${link.label}`}
                   style={{
                     background: 'none', border: 'none', cursor: 'pointer',
                     color: '#EF4444', padding: 4, flexShrink: 0,
@@ -460,7 +465,6 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
-                  title="Supprimer"
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <polyline points="3 6 5 6 21 6"/>

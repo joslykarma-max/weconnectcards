@@ -76,7 +76,4 @@ export const PLANS = {
   account_upgrade: { amount: 5_500, currency: 'XOF', label: 'Passage compte Pro' },
   // Réabonnement mensuel après la période gratuite
   monthly_sub: { amount: 2_000, currency: 'XOF', label: 'Abonnement mensuel' },
-  // ── Aliases pour compat code existant ──
-  essentiel: { amount: 10_000, currency: 'XOF', label: 'Carte Standard' },
-  pro_sub:   { amount:  2_000, currency: 'XOF', label: 'Abonnement mensuel' },
 } as const;

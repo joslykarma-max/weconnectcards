@@ -3,10 +3,9 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 // Card type → account plan mapping (Pro/Prestige cards auto-grant Pro account)
 const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
-  standard:  'essentiel',
-  essentiel: 'essentiel',
-  pro:       'pro',
-  prestige:  'pro',
+  standard: 'essentiel',
+  pro:      'pro',
+  prestige: 'pro',
 };
 
 export async function POST(req: NextRequest) {
