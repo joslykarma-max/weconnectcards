@@ -7,35 +7,48 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 
-const LS_KEY = 'profile-split-pct';
+const LS_SPLIT  = 'profile-split-pct';
+const LS_WIDTH  = 'profile-total-width';
 
-function useResizableSplit(initial = 50) {
-  const [pct, setPct]    = useState(initial);
-  const containerRef     = useRef<HTMLDivElement>(null);
-  const draggingRef      = useRef(false);
+function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
+  const [pct, setPct]       = useState(initialSplit);
+  const [width, setWidth]   = useState(initialWidth);
+  const containerRef        = useRef<HTMLDivElement>(null);
+  const dragModeRef         = useRef<'split' | 'width' | null>(null);
+  const startXRef           = useRef(0);
+  const startWidthRef       = useRef(0);
 
   useEffect(() => {
-    const stored = typeof window !== 'undefined' ? window.localStorage.getItem(LS_KEY) : null;
-    if (stored) {
-      const n = parseFloat(stored);
-      if (!isNaN(n) && n >= 20 && n <= 80) setPct(n);
-    }
+    if (typeof window === 'undefined') return;
+    const s = window.localStorage.getItem(LS_SPLIT);
+    if (s) { const n = parseFloat(s); if (!isNaN(n) && n >= 25 && n <= 75) setPct(n); }
+    const w = window.localStorage.getItem(LS_WIDTH);
+    if (w) { const n = parseFloat(w); if (!isNaN(n) && n >= 600 && n <= 2400) setWidth(n); }
   }, []);
 
   useEffect(() => {
     function onMove(e: MouseEvent) {
-      if (!draggingRef.current || !containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const next = ((e.clientX - rect.left) / rect.width) * 100;
-      const clamped = Math.max(25, Math.min(75, next));
-      setPct(clamped);
+      if (!dragModeRef.current || !containerRef.current) return;
+
+      if (dragModeRef.current === 'split') {
+        const rect = containerRef.current.getBoundingClientRect();
+        const next = ((e.clientX - rect.left) / rect.width) * 100;
+        setPct(Math.max(25, Math.min(75, next)));
+      } else if (dragModeRef.current === 'width') {
+        const dx       = e.clientX - startXRef.current;
+        const proposed = startWidthRef.current + dx;
+        setWidth(Math.max(600, Math.min(2400, proposed)));
+      }
     }
     function onUp() {
-      if (draggingRef.current) {
-        draggingRef.current = false;
+      if (dragModeRef.current) {
+        try {
+          if (dragModeRef.current === 'split') window.localStorage.setItem(LS_SPLIT, String(pct));
+          if (dragModeRef.current === 'width') window.localStorage.setItem(LS_WIDTH, String(width));
+        } catch {}
+        dragModeRef.current = null;
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
-        try { window.localStorage.setItem(LS_KEY, String(pct)); } catch {}
       }
     }
     document.addEventListener('mousemove', onMove);
@@ -44,15 +57,23 @@ function useResizableSplit(initial = 50) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-  }, [pct]);
+  }, [pct, width]);
 
-  function onHandleDown() {
-    draggingRef.current = true;
+  function onSplitDown() {
+    dragModeRef.current = 'split';
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   }
 
-  return { pct, containerRef, onHandleDown };
+  function onWidthDown(e: React.MouseEvent) {
+    dragModeRef.current = 'width';
+    startXRef.current = e.clientX;
+    startWidthRef.current = width;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }
+
+  return { pct, width, containerRef, onSplitDown, onWidthDown };
 }
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
@@ -199,10 +220,10 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     setSavingEdit(false);
   }
 
-  const { pct, containerRef, onHandleDown } = useResizableSplit(50);
+  const { pct, width, containerRef, onSplitDown, onWidthDown } = useResizableLayout(50, 1100);
 
   return (
-    <div ref={containerRef} style={{ maxWidth: 1100, display: 'flex', alignItems: 'stretch', gap: 0 }}>
+    <div ref={containerRef} style={{ width, maxWidth: '100%', display: 'flex', alignItems: 'stretch', gap: 0, position: 'relative' }}>
       {/* Profile form (left column) */}
       <div style={{ flex: `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
         <Card padding="md">
@@ -288,9 +309,9 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
         </Button>
       </div>
 
-      {/* Drag handle */}
+      {/* Middle drag handle (split ratio) */}
       <div
-        onMouseDown={onHandleDown}
+        onMouseDown={onSplitDown}
         style={{
           width: 28,
           cursor: 'col-resize',
@@ -301,7 +322,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
           justifyContent: 'center',
           userSelect: 'none',
         }}
-        title="Glisser pour redimensionner"
+        title="Redimensionner les colonnes"
       >
         <div style={{
           width: 4,
@@ -517,6 +538,33 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
             </a>
           </Card>
         )}
+      </div>
+
+      {/* Right-edge resize handle (total width) */}
+      <div
+        onMouseDown={onWidthDown}
+        style={{
+          width: 14,
+          cursor: 'ew-resize',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          userSelect: 'none',
+          marginLeft: 8,
+        }}
+        title="Élargir / rétrécir"
+      >
+        <div style={{
+          width: 4,
+          height: 60,
+          borderRadius: 2,
+          background: 'rgba(99,102,241,0.25)',
+          transition: 'background 0.2s',
+        }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
+        />
       </div>
     </div>
   );
