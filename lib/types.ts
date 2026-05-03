@@ -282,3 +282,21 @@ export interface QrScanDoc {
   device:     'mobile' | 'desktop' | 'unknown';
   userAgent?: string;
 }
+
+// ── Custom Module Requests ────────────────────────────────────────────────────
+// Collection: customModuleRequests/{autoId}
+export interface CustomModuleRequestDoc {
+  id:           string;
+  uid:          string;
+  email:        string;
+  displayName:  string;
+  moduleName:   string;
+  description:  string;
+  useCase:      string;
+  budget?:      string;
+  timeline?:    string;
+  status:       'pending' | 'in_review' | 'quoted' | 'in_progress' | 'delivered' | 'rejected';
+  adminNote?:   string;
+  createdAt:    string;
+  updatedAt:    string;
+}

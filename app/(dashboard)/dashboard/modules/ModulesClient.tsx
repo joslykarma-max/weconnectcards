@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Badge from '@/components/ui/Badge';
 
 interface Module {
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export default function ModulesClient({ modules, activeModules, profileId, isPro }: Props) {
+  const router = useRouter();
   const [states, setStates] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     activeModules.forEach((m) => { init[m.type] = m.isActive; });
@@ -140,6 +142,39 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
             </div>
           );
         })}
+      </div>
+
+      {/* Custom module card */}
+      <div style={{
+        marginTop: 24,
+        background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.05))',
+        border: '1px solid rgba(99,102,241,0.25)',
+        borderRadius: 8, padding: 24,
+        display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+      }}>
+        <span style={{ fontSize: 32, flexShrink: 0 }}>✦</span>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 4 }}>
+            Module sur mesure
+          </h3>
+          <p style={{ color: '#6B7280', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
+            Vous avez un besoin spécifique que nos modules existants ne couvrent pas ?
+            Décrivez-le — notre équipe développe votre module sur mesure et l&apos;intègre à votre profil.
+          </p>
+        </div>
+        <button
+          onClick={() => router.push('/dashboard/modules/custom')}
+          style={{
+            padding: '12px 24px',
+            background: 'linear-gradient(135deg, #4338CA, #6366F1)',
+            border: 'none', borderRadius: 8,
+            color: '#fff', fontFamily: 'Syne, sans-serif',
+            fontWeight: 700, fontSize: 14, cursor: 'pointer',
+            whiteSpace: 'nowrap', flexShrink: 0,
+          }}
+        >
+          Commander →
+        </button>
       </div>
     </div>
   );
