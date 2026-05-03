@@ -24,14 +24,20 @@ function uid() {
 const FOOD_EMOJIS = ['🍽️','🥗','🍗','🍔','🍕','🐟','🍜','🥘','🥩','🍱','🌮','🥙','🧆','🍤','🥚','🥤','🍺','🍷','☕','🍰','🧁','🍦','🍫','🧃','🫕'];
 const CAT_EMOJIS  = ['🥗','🍗','🍔','🐟','🥤','🍰','🌮','🥙','🍕','🥩','☕','🍺','🍜','🥘','🧁'];
 
-async function uploadImageFile(file: File): Promise<string | null> {
-  if (!file.type.startsWith('image/')) return null;
+async function uploadImageFile(file: File): Promise<{ url: string | null; error: string | null }> {
+  const ALLOWED = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!ALLOWED.includes(file.type)) return { url: null, error: 'Format non supporté (JPG, PNG, WEBP, GIF).' };
+  if (file.size > 5 * 1024 * 1024) return { url: null, error: 'Image trop lourde (max 5 Mo).' };
   const fd = new FormData();
   fd.append('file', file);
-  const res = await fetch('/api/upload', { method: 'POST', body: fd });
-  if (!res.ok) return null;
-  const { url } = await res.json() as { url: string };
-  return url;
+  try {
+    const res  = await fetch('/api/upload', { method: 'POST', body: fd });
+    const data = await res.json() as { url?: string; error?: string };
+    if (!res.ok) return { url: null, error: data.error ?? 'Échec du téléversement.' };
+    return { url: data.url ?? null, error: null };
+  } catch {
+    return { url: null, error: 'Erreur réseau — réessayez.' };
+  }
 }
 
 // ── Live preview ─────────────────────────────────────────────────────────────
@@ -218,7 +224,8 @@ export default function MenuDashboard({
   const [newCatEmoji,  setNewCatEmoji]  = useState('🍽️');
   const [addingItemTo, setAddingItemTo] = useState<string | null>(null);
   const [newItem, setNewItem] = useState({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' });
-  const [uploading, setUploading] = useState(false);
+  const [uploading,    setUploading]    = useState<'new' | 'update' | null>(null);
+  const [uploadError,  setUploadError]  = useState('');
 
   const newItemFileRef  = useRef<HTMLInputElement>(null);
   const updateImageRef  = useRef<HTMLInputElement>(null);
@@ -285,20 +292,24 @@ export default function MenuDashboard({
   async function handleNewItemImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
-    const url = await uploadImageFile(file);
-    setUploading(false);
-    if (url) setNewItem(p => ({ ...p, imageUrl: url }));
+    setUploadError('');
+    setUploading('new');
+    const { url, error } = await uploadImageFile(file);
+    setUploading(null);
+    if (error) setUploadError(error);
+    else if (url) setNewItem(p => ({ ...p, imageUrl: url }));
     e.target.value = '';
   }
 
   async function handleUpdateItemImage(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !updatingImageFor) return;
-    setUploading(true);
-    const url = await uploadImageFile(file);
-    setUploading(false);
-    if (url) updateItemImage(updatingImageFor, url);
+    setUploadError('');
+    setUploading('update');
+    const { url, error } = await uploadImageFile(file);
+    setUploading(null);
+    if (error) setUploadError(error);
+    else if (url) updateItemImage(updatingImageFor, url);
     setUpdatingImageFor(null);
     e.target.value = '';
   }
@@ -437,7 +448,7 @@ export default function MenuDashboard({
                             </div>
                           ) : (
                             <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-                              {uploading && updatingImageFor === item.id ? '⏳' : item.emoji}
+                              {uploading === 'update' && updatingImageFor === item.id ? '⏳' : item.emoji}
                             </div>
                           )}
                         </button>
@@ -496,12 +507,17 @@ export default function MenuDashboard({
                               </button>
                             </div>
                           ) : (
-                            <button onClick={() => newItemFileRef.current?.click()} disabled={uploading}
-                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 6, color: '#6B7280', cursor: uploading ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
-                              {uploading ? '⏳ Upload...' : '📸 Ajouter une photo'}
+                            <button onClick={() => { setUploadError(''); newItemFileRef.current?.click(); }} disabled={uploading === 'new'}
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 6, color: '#6B7280', cursor: uploading === 'new' ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                              {uploading === 'new' ? '⏳ Envoi...' : '📸 Ajouter une photo'}
                             </button>
                           )}
                         </div>
+                        {uploadError && (
+                          <p style={{ color: '#EF4444', fontSize: 12, background: 'rgba(239,68,68,0.07)', borderRadius: 5, padding: '7px 10px' }}>
+                            ⚠ {uploadError}
+                          </p>
+                        )}
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={() => addItem(cat.id)} disabled={!newItem.name.trim()}
                             style={{ flex: 1, padding: '10px', background: newItem.name.trim() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${newItem.name.trim() ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 6, color: newItem.name.trim() ? '#818CF8' : '#6B7280', cursor: newItem.name.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13 }}>
