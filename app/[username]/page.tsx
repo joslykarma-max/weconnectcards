@@ -94,17 +94,18 @@ export default async function ProfilePage({ params }: Props) {
   }).catch(() => {});
 
   const profile = {
-    id:          uid,
-    username:    profileData.username,
-    displayName: profileData.displayName,
-    title:       profileData.title   ?? null,
-    company:     profileData.company ?? null,
-    bio:         profileData.bio     ?? null,
-    avatar:      profileData.avatar  ?? null,
-    theme:       profileData.theme,
+    id:              uid,
+    username:        profileData.username,
+    displayName:     profileData.displayName,
+    title:           profileData.title           ?? null,
+    company:         profileData.company         ?? null,
+    bio:             profileData.bio             ?? null,
+    avatar:          profileData.avatar          ?? null,
+    backgroundImage: profileData.backgroundImage ?? null,
+    theme:           profileData.theme,
     links,
     modules,
-    user:        { name: profileData.displayName },
+    user:            { name: profileData.displayName },
   };
 
   return <ProfilePublic profile={profile} />;

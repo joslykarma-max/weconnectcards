@@ -23,6 +23,7 @@ type Profile = {
   company?: string | null;
   bio?: string | null;
   avatar?: string | null;
+  backgroundImage?: string | null;
   theme: string;
   links: Link[];
   modules: ActiveModule[];
@@ -150,9 +151,22 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
     setSubmitted(true);
   };
 
+  const bgStyle: React.CSSProperties = profile.backgroundImage
+    ? {
+        backgroundImage:    `url(${profile.backgroundImage})`,
+        backgroundSize:     'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
+      }
+    : { background: theme.bg };
+
   return (
-    <div style={{ minHeight: '100vh', background: theme.bg, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '48px 16px 100px' }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
+    <div style={{ minHeight: '100vh', ...bgStyle, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '48px 16px 100px', position: 'relative' }}>
+      {/* Dark overlay when background image is set */}
+      {profile.backgroundImage && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 0, pointerEvents: 'none' }} />
+      )}
+      <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
         {/* Avatar */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{

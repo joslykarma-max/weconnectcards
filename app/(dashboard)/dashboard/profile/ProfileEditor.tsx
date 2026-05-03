@@ -193,11 +193,14 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
-  const [links, setLinks]          = useState<Link[]>(profile?.links ?? []);
-  const [avatar, setAvatar]        = useState<string | null>(profile?.avatar ?? null);
-  const [uploading, setUploading]  = useState(false);
-  const fileInputRef               = useRef<HTMLInputElement>(null);
-  const [saving, setSaving]        = useState(false);
+  const [links, setLinks]             = useState<Link[]>(profile?.links ?? []);
+  const [avatar, setAvatar]           = useState<string | null>(profile?.avatar ?? null);
+  const [bgImage, setBgImage]         = useState<string | null>((profile as Record<string, unknown> & { backgroundImage?: string })?.backgroundImage ?? null);
+  const [uploading, setUploading]     = useState(false);
+  const [uploadingBg, setUploadingBg] = useState(false);
+  const fileInputRef                  = useRef<HTMLInputElement>(null);
+  const bgFileInputRef                = useRef<HTMLInputElement>(null);
+  const [saving, setSaving]           = useState(false);
   const [newLinkType, setNewLinkType] = useState('phone');
   const [newLinkValue, setNewLinkValue] = useState('');
   const [newLinkLabel, setNewLinkLabel] = useState(LINK_FORM_CONFIG['phone'].autoLabel);
@@ -214,6 +217,20 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
       else alert(data.error ?? 'Erreur lors de l\'upload.');
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function uploadBackground(file: File) {
+    setUploadingBg(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res  = await fetch('/api/upload?folder=backgrounds', { method: 'POST', body: fd });
+      const data = await res.json() as { url?: string; error?: string };
+      if (data.url) setBgImage(data.url);
+      else alert(data.error ?? 'Erreur lors de l\'upload.');
+    } finally {
+      setUploadingBg(false);
     }
   }
 
@@ -237,7 +254,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     await fetch('/api/profile', {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify(form),
+      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null }),
     });
     setSaving(false);
     setSaved(true);
@@ -360,7 +377,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 16 }}>
             Thème de carte
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
             {THEMES.map((t) => (
               <button
                 key={t.value}
@@ -385,6 +402,56 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                 )}
               </button>
             ))}
+          </div>
+
+          {/* Background image */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
+              Image de fond (optionnel)
+            </p>
+            <input
+              ref={bgFileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style={{ display: 'none' }}
+              onChange={(e) => { const f = e.target.files?.[0]; if (f) { void uploadBackground(f); } e.target.value = ''; }}
+            />
+            {bgImage ? (
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <div style={{
+                  width: 72, height: 48, borderRadius: 6, overflow: 'hidden', flexShrink: 0,
+                  backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    Image définie
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Button variant="secondary" size="sm" loading={uploadingBg} onClick={() => bgFileInputRef.current?.click()}>
+                      Changer
+                    </Button>
+                    <button onClick={() => setBgImage(null)}
+                      style={{ padding: '5px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 5, color: '#EF4444', fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
+                      Supprimer
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button onClick={() => bgFileInputRef.current?.click()} disabled={uploadingBg}
+                style={{
+                  width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)',
+                  borderRadius: 6, color: '#6B7280', cursor: uploadingBg ? 'wait' : 'pointer',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                }}>
+                {uploadingBg ? '⏳ Upload...' : '🖼 Ajouter une image de fond'}
+              </button>
+            )}
+            <p style={{ color: '#4B5563', fontSize: 11, marginTop: 8, fontFamily: 'DM Sans, sans-serif' }}>
+              Une overlay sombre est ajoutée automatiquement pour que le texte reste lisible.
+            </p>
           </div>
         </Card>
 

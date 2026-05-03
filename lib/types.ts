@@ -18,10 +18,11 @@ export interface ProfileDoc {
   title?:      string;
   company?:    string;
   bio?:        string;
-  avatar?:     string;
-  theme:       'midnight' | 'electric' | 'glass' | 'metal';
-  isPublic:    boolean;
-  updatedAt:   string;
+  avatar?:          string;
+  backgroundImage?: string;
+  theme:            'midnight' | 'electric' | 'glass' | 'metal';
+  isPublic:         boolean;
+  updatedAt:        string;
 }
 
 // Sub-collection: profiles/{uid}/links/{linkId}
