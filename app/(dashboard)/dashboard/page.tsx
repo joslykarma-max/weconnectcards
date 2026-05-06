@@ -9,16 +9,15 @@ async function getDashboardData(uid: string) {
 
   try {
     const [scansSnap, profileSnap, contactsSnap, clicksSnap] = await Promise.all([
-      adminDb.collection('scans').where('userId', '==', uid).get(),
+      adminDb.collection('scans').where('userId', '==', uid).where('scannedAt', '>=', thirtyDaysAgo).get(),
       adminDb.collection('profiles').doc(uid).get(),
       adminDb.collection('savedContacts').where('profileId', '==', uid).get(),
-      adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+      adminDb.collection('linkClicks').where('profileId', '==', uid).where('clickedAt', '>=', thirtyDaysAgo).get(),
     ]);
 
-    // Filter by date in memory — no composite index required
-    const allScans     = scansSnap.docs.map((d) => d.data() as ScanDoc).filter((s) => s.scannedAt >= thirtyDaysAgo);
+    const allScans     = scansSnap.docs.map((d) => d.data() as ScanDoc);
     const recentScans  = allScans;
-    const recentClicks = clicksSnap.docs.filter((d) => (d.data() as { clickedAt: string }).clickedAt >= thirtyDaysAgo);
+    const recentClicks = clicksSnap.docs;
     const profile      = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
 
     const sortedScans  = [...allScans].sort((a, b) => b.scannedAt.localeCompare(a.scannedAt));

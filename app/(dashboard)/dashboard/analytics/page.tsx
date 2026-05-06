@@ -6,17 +6,15 @@ import type { ScanDoc, LinkClickDoc, ProfileDoc, LinkDoc } from '@/lib/types';
 async function getAnalyticsData(uid: string) {
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Simple single-field queries — no composite index required
   const [scansSnap, clicksSnap, profileSnap, linksSnap] = await Promise.all([
-    adminDb.collection('scans').where('userId', '==', uid).get(),
-    adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+    adminDb.collection('scans').where('userId', '==', uid).where('scannedAt', '>=', ninetyDaysAgo).get(),
+    adminDb.collection('linkClicks').where('profileId', '==', uid).where('clickedAt', '>=', ninetyDaysAgo).get(),
     adminDb.collection('profiles').doc(uid).get(),
     adminDb.collection('profiles').doc(uid).collection('links').get(),
   ]);
 
-  // Filter by date in memory (safe until composite indexes are deployed)
-  const scans  = scansSnap.docs.map((d) => d.data() as ScanDoc).filter((s) => s.scannedAt >= ninetyDaysAgo).sort((a, b) => a.scannedAt.localeCompare(b.scannedAt));
-  const clicks = clicksSnap.docs.map((d) => d.data() as LinkClickDoc).filter((c) => c.clickedAt >= ninetyDaysAgo);
+  const scans  = scansSnap.docs.map((d) => d.data() as ScanDoc).sort((a, b) => a.scannedAt.localeCompare(b.scannedAt));
+  const clicks = clicksSnap.docs.map((d) => d.data() as LinkClickDoc);
   const profile = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
   const linksById = Object.fromEntries(
     linksSnap.docs.map((d) => [d.id, d.data() as LinkDoc])
