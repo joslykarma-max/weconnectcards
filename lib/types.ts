@@ -21,6 +21,7 @@ export interface ProfileDoc {
   avatar?:          string;
   backgroundImage?: string;
   theme:            'midnight' | 'electric' | 'glass' | 'metal';
+  displayMode?:     'classic' | 'grid' | 'card';
   isPublic:         boolean;
   updatedAt:        string;
 }

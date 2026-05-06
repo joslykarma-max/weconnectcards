@@ -87,6 +87,7 @@ function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
 }
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
+type DisplayMode = 'classic' | 'grid' | 'card';
 type Profile = {
   id: string;
   username: string;
@@ -96,8 +97,55 @@ type Profile = {
   bio?: string | null;
   avatar?: string | null;
   theme: string;
+  displayMode?: DisplayMode;
   links: Link[];
 } | null;
+
+const DISPLAY_MODES: { value: DisplayMode; label: string; desc: string; preview: React.ReactNode }[] = [
+  {
+    value: 'classic',
+    label: 'Classique',
+    desc: 'Liens en liste verticale',
+    preview: (
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <rect x="4" y="6" width="52" height="8" rx="3" fill="currentColor" opacity=".5"/>
+        <rect x="4" y="20" width="52" height="8" rx="3" fill="currentColor" opacity=".5"/>
+        <rect x="4" y="34" width="52" height="8" rx="3" fill="currentColor" opacity=".5"/>
+      </svg>
+    ),
+  },
+  {
+    value: 'grid',
+    label: 'Grille sociale',
+    desc: 'Icônes en grille colorée',
+    preview: (
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <rect x="4"  y="4"  width="16" height="16" rx="4" fill="currentColor" opacity=".6"/>
+        <rect x="22" y="4"  width="16" height="16" rx="4" fill="currentColor" opacity=".6"/>
+        <rect x="40" y="4"  width="16" height="16" rx="4" fill="currentColor" opacity=".6"/>
+        <rect x="4"  y="24" width="16" height="16" rx="4" fill="currentColor" opacity=".4"/>
+        <rect x="22" y="24" width="16" height="16" rx="4" fill="currentColor" opacity=".4"/>
+        <rect x="40" y="24" width="16" height="16" rx="4" fill="currentColor" opacity=".4"/>
+      </svg>
+    ),
+  },
+  {
+    value: 'card',
+    label: 'Carte Pro',
+    desc: 'Style carte de visite',
+    preview: (
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <rect x="4" y="4" width="52" height="22" rx="4" fill="currentColor" opacity=".3"/>
+        <circle cx="18" cy="15" r="8" fill="currentColor" opacity=".6"/>
+        <rect x="30" y="9"  width="22" height="4" rx="2" fill="currentColor" opacity=".5"/>
+        <rect x="30" y="16" width="16" height="3" rx="1.5" fill="currentColor" opacity=".35"/>
+        <rect x="4"  y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
+        <rect x="19" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
+        <rect x="34" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
+      </svg>
+    ),
+  },
+];
 
 const LINK_TYPES = [
   { value: 'phone',     label: 'Téléphone'  },
@@ -138,14 +186,14 @@ const LINK_FORM_CONFIG: Record<string, {
     buildUrl: (v) => `https://wa.me/${v.trim().replace(/[^0-9]/g, '')}`,
   },
   linkedin: {
-    inputLabel: 'Nom d\'utilisateur LinkedIn',
-    placeholder: 'votre-profil',
+    inputLabel: 'Lien du profil LinkedIn',
+    placeholder: 'https://linkedin.com/in/votre-profil',
     autoLabel: 'LinkedIn',
     buildUrl: (v) => /^https?:/.test(v) ? v : `https://linkedin.com/in/${v.trim().replace(/^\//, '')}`,
   },
   instagram: {
-    inputLabel: 'Nom d\'utilisateur Instagram',
-    placeholder: '@votre_compte',
+    inputLabel: 'Lien du profil Instagram',
+    placeholder: 'https://instagram.com/votre_compte',
     autoLabel: 'Instagram',
     buildUrl: (v) => /^https?:/.test(v) ? v : `https://instagram.com/${v.trim().replace(/^@/, '')}`,
   },
@@ -156,8 +204,8 @@ const LINK_FORM_CONFIG: Record<string, {
     buildUrl: (v) => v.trim(),
   },
   calendly: {
-    inputLabel: 'Nom d\'utilisateur Calendly',
-    placeholder: 'votre-nom',
+    inputLabel: 'Lien Calendly',
+    placeholder: 'https://calendly.com/votre-nom',
     autoLabel: 'Calendly',
     buildUrl: (v) => /^https?:/.test(v) ? v : `https://calendly.com/${v.trim().replace(/^\//, '')}`,
   },
@@ -193,6 +241,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(profile?.displayMode ?? 'classic');
   const [links, setLinks]             = useState<Link[]>(profile?.links ?? []);
   const [avatar, setAvatar]           = useState<string | null>(profile?.avatar ?? null);
   const [bgImage, setBgImage]         = useState<string | null>((profile as Record<string, unknown> & { backgroundImage?: string })?.backgroundImage ?? null);
@@ -254,7 +303,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     await fetch('/api/profile', {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null }),
+      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode }),
     });
     setSaving(false);
     setSaved(true);
@@ -404,6 +453,39 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
             ))}
           </div>
 
+          {/* Display mode selector */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16, marginTop: 4 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
+              Mode d'affichage
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {DISPLAY_MODES.map((m) => (
+                <button
+                  key={m.value}
+                  onClick={() => setDisplayMode(m.value)}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    padding: '12px 8px',
+                    border: `2px solid ${displayMode === m.value ? '#6366F1' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 8,
+                    background: displayMode === m.value ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.02)',
+                    cursor: 'pointer',
+                    color: displayMode === m.value ? '#818CF8' : '#6B7280',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {m.preview}
+                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11, color: displayMode === m.value ? '#818CF8' : '#9CA3AF' }}>
+                    {m.label}
+                  </span>
+                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#4B5563', textAlign: 'center', lineHeight: 1.3 }}>
+                    {m.desc}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Background image */}
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
@@ -523,7 +605,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   ))}
                 </select>
                 <input
-                  placeholder="Label"
+                  placeholder="Nom affiché"
                   value={editLabel}
                   onChange={(e) => setEditLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
@@ -537,11 +619,11 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   }}
                 />
                 <input
-                  placeholder="URL"
+                  placeholder={LINK_FORM_CONFIG[editType]?.placeholder ?? 'https://...'}
                   value={editUrl}
                   onChange={(e) => setEditUrl(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
-                  aria-label="URL du lien"
+                  aria-label={LINK_FORM_CONFIG[editType]?.inputLabel ?? 'URL du lien'}
                   style={{
                     background: 'rgba(255,255,255,0.05)',
                     border: '1px solid rgba(255,255,255,0.1)',

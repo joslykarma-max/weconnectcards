@@ -9,22 +9,22 @@ async function getDashboardData(uid: string) {
 
   try {
     const [scansSnap, profileSnap, contactsSnap, clicksSnap] = await Promise.all([
-      adminDb.collection('scans').where('userId', '==', uid).get(),
+      adminDb.collection('scans').where('userId', '==', uid).where('scannedAt', '>=', thirtyDaysAgo).get(),
       adminDb.collection('profiles').doc(uid).get(),
       adminDb.collection('savedContacts').where('profileId', '==', uid).get(),
-      adminDb.collection('linkClicks').where('profileId', '==', uid).get(),
+      adminDb.collection('linkClicks').where('profileId', '==', uid).where('clickedAt', '>=', thirtyDaysAgo).get(),
     ]);
 
     const allScans     = scansSnap.docs.map((d) => d.data() as ScanDoc);
-    const recentScans  = allScans.filter((s) => s.scannedAt >= thirtyDaysAgo);
-    const recentClicks = clicksSnap.docs.filter((d) => (d.data() as { clickedAt: string }).clickedAt >= thirtyDaysAgo);
+    const recentScans  = allScans;
+    const recentClicks = clicksSnap.docs;
     const profile      = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
 
     const sortedScans  = [...allScans].sort((a, b) => b.scannedAt.localeCompare(a.scannedAt));
 
     return {
       totalScans:     allScans.length,
-      recentScans:    recentScans.slice(0, 10),
+      recentScans:    allScans.slice(0, 10),
       recentAllScans: sortedScans.slice(0, 6),
       totalContacts:  contactsSnap.size,
       totalClicks:    recentClicks.length,
@@ -41,7 +41,7 @@ export default async function DashboardPage() {
   const { totalScans, recentAllScans, totalClicks, totalContacts, profile } =
     await getDashboardData(user.uid);
 
-  const engagement = totalScans > 0 ? Math.round((totalClicks / totalScans) * 100) : 0;
+  const engagement = totalScans > 0 ? Math.min(100, Math.round((totalClicks / totalScans) * 100)) : 0;
 
   const kpis = [
     { label: 'Scans totaux',         value: totalScans,        description: '30 derniers jours' },

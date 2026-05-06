@@ -11,14 +11,14 @@ export async function GET(
 
   // Resolve username → uid
   const usernameSnap = await adminDb.collection('usernames').doc(username).get();
-  if (!usernameSnap.exists) return NextResponse.redirect(`${baseUrl}/404`);
+  if (!usernameSnap.exists) return NextResponse.redirect(`${baseUrl}/`);
 
   const { uid } = usernameSnap.data() as { uid: string };
 
   // Check profile is public
   const profileSnap = await adminDb.collection('profiles').doc(uid).get();
   if (!profileSnap.exists || !(profileSnap.data() as { isPublic?: boolean }).isPublic) {
-    return NextResponse.redirect(`${baseUrl}/404`);
+    return NextResponse.redirect(`${baseUrl}/`);
   }
 
   const ua     = req.headers.get('user-agent') ?? '';

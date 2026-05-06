@@ -103,6 +103,7 @@ export default async function ProfilePage({ params }: Props) {
     avatar:          profileData.avatar          ?? null,
     backgroundImage: profileData.backgroundImage ?? null,
     theme:           profileData.theme,
+    displayMode:     profileData.displayMode ?? 'classic',
     links,
     modules,
     user:            { name: profileData.displayName },

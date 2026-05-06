@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 // Card type → account plan mapping (Pro/Prestige cards auto-grant Pro account)
 const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
@@ -8,8 +9,20 @@ const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
   prestige: 'pro',
 };
 
+function toSlug(raw: string): string {
+  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
+}
+
 export async function POST(req: NextRequest) {
-  const { name, email, password, username, plan = 'standard' } = await req.json() as {
+  if (!rateLimit(getClientIp(req), 5, 60_000)) {
+    return NextResponse.json({ error: 'Trop de tentatives. Réessaie dans une minute.' }, { status: 429 });
+  }
+
+  let body: unknown;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: 'Corps de requête invalide' }, { status: 400 }); }
+
+  const { name, email, password, username: rawUsername, plan = 'standard' } = body as {
     name: string;
     email: string;
     password: string;
@@ -17,11 +30,17 @@ export async function POST(req: NextRequest) {
     plan?: string;
   };
 
-  if (!name || !email || !password || !username) {
+  if (!name || !email || !password || !rawUsername) {
     return NextResponse.json({ error: 'Tous les champs sont requis.' }, { status: 400 });
   }
   if (password.length < 8) {
     return NextResponse.json({ error: 'Le mot de passe doit faire au moins 8 caractères.' }, { status: 400 });
+  }
+
+  // Sanitize and validate username server-side
+  const username = toSlug(rawUsername);
+  if (username.length < 3 || username.length > 30) {
+    return NextResponse.json({ error: "Le nom d'utilisateur doit faire entre 3 et 30 caractères." }, { status: 400 });
   }
 
   // Reserve username atomically — use a transaction to prevent race conditions
@@ -29,8 +48,6 @@ export async function POST(req: NextRequest) {
     await adminDb.runTransaction(async (tx) => {
       const snap = await tx.get(adminDb.collection('usernames').doc(username));
       if (snap.exists) throw new Error('USERNAME_TAKEN');
-      // We only reserve here; the actual set happens in the batch below
-      // (transaction read ensures no concurrent registration steals it)
     });
   } catch (err) {
     if ((err as Error).message === 'USERNAME_TAKEN') {
@@ -64,7 +81,7 @@ export async function POST(req: NextRequest) {
   batch.set(adminDb.collection('users').doc(uid), {
     email, displayName: name,
     plan:              accountPlan,
-    cardType:          plan, // standard | pro | prestige
+    cardType:          plan,
     subscriptionUntil: subscriptionUntil.toISOString(),
     createdAt:         now,
   });

@@ -32,11 +32,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.redirect(`${appUrl}${errDest}?payment=cancelled`);
     }
 
-    // 2. Anti-forgery: validate uid against transaction metadata when available
+    // 2. Anti-forgery: meta.uid MUST be present and match the URL param.
+    //    If it's absent the transaction has no owner proof — reject to prevent
+    //    an attacker replaying a valid transactionId with a different uid.
     type Meta = { uid?: string; cardType?: string; plan?: string };
     const meta = ((transaction as unknown as { metadata?: Meta }).metadata) ?? {};
-    if (meta.uid && meta.uid !== uid) {
-      console.error('[webhook/fedapay] uid mismatch', { paramUid: uid, metaUid: meta.uid });
+    if (!meta.uid || meta.uid !== uid) {
+      console.error('[webhook/fedapay] uid mismatch or missing', { paramUid: uid, metaUid: meta.uid });
       return NextResponse.redirect(`${appUrl}${errDest}?payment=error`);
     }
 

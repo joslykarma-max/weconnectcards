@@ -60,8 +60,10 @@ service cloud.firestore {
     }
 
     // ── Modules ───────────────────────────────────────────────────
+    // Public profiles are served via Admin SDK (server-side) — no client SDK needed.
+    // Only the owner or admin should read module configs (they contain stampCodes, etc.)
     match /modules/{moduleId} {
-      allow read:   if true; // needed for public profile
+      allow read:   if isOwner(resource.data.profileId) || isAdmin();
       allow write:  if isAdmin();
     }
 
@@ -90,7 +92,7 @@ service cloud.firestore {
 
     // ── Admins ────────────────────────────────────────────────────
     match /admins/{uid} {
-      allow read:  if isAuthed();
+      allow read:  if isOwner(uid) || isAdmin();
       allow write: if isAdmin();
     }
 
