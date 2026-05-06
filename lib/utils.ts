@@ -44,11 +44,12 @@ export function generateVCard(profile: {
     'BEGIN:VCARD',
     'VERSION:3.0',
     `FN:${esc(profile.displayName)}`,
-    profile.title   ? `TITLE:${esc(profile.title)}`   : null,
-    profile.company ? `ORG:${esc(profile.company)}`   : null,
-    phone           ? `TEL:${esc(phone)}`             : null,
-    email           ? `EMAIL:${esc(email)}`           : null,
+    profile.title   ? `TITLE:${esc(profile.title)}`              : null,
+    profile.company ? `ORG:${esc(profile.company)}`              : null,
+    phone           ? `TEL:${esc(phone)}`                        : null,
+    email           ? `EMAIL:${esc(email)}`                      : null,
     `URL:${esc(url)}`,
+    profile.avatar  ? `PHOTO;VALUE=URI:${profile.avatar}`        : null,
     'END:VCARD',
   ].filter(Boolean);
 
