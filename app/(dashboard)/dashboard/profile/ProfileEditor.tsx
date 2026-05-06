@@ -148,15 +148,23 @@ const DISPLAY_MODES: { value: DisplayMode; label: string; desc: string; preview:
 ];
 
 const LINK_TYPES = [
-  { value: 'phone',     label: 'Téléphone'  },
-  { value: 'email',     label: 'Email'      },
-  { value: 'whatsapp',  label: 'WhatsApp'   },
-  { value: 'linkedin',  label: 'LinkedIn'   },
-  { value: 'instagram', label: 'Instagram'  },
-  { value: 'website',   label: 'Site web'   },
-  { value: 'calendly',  label: 'Calendly'   },
-  { value: 'portfolio', label: 'Portfolio'  },
-  { value: 'custom',    label: 'Autre lien' },
+  { value: 'phone',     label: 'Téléphone'    },
+  { value: 'email',     label: 'Email'        },
+  { value: 'whatsapp',  label: 'WhatsApp'     },
+  { value: 'linkedin',  label: 'LinkedIn'     },
+  { value: 'instagram', label: 'Instagram'    },
+  { value: 'website',   label: 'Site web'     },
+  { value: 'location',  label: 'Localisation' },
+  { value: 'calendly',  label: 'Calendly'     },
+  { value: 'portfolio', label: 'Portfolio'    },
+  { value: 'custom',    label: 'Autre lien'   },
+];
+
+const VISIBILITY_FIELDS = [
+  { key: 'avatar',  label: 'Photo de profil' },
+  { key: 'title',   label: 'Titre / Poste'   },
+  { key: 'company', label: 'Entreprise'      },
+  { key: 'bio',     label: 'Bio'             },
 ];
 
 // Per-type form config: what to ask + how to build the stored URL
@@ -203,6 +211,12 @@ const LINK_FORM_CONFIG: Record<string, {
     autoLabel: 'Site web',
     buildUrl: (v) => v.trim(),
   },
+  location: {
+    inputLabel: 'Adresse ou lien Google Maps',
+    placeholder: 'Ex : Cotonou, Bénin ou https://maps.app.goo.gl/...',
+    autoLabel: 'Localisation',
+    buildUrl: (v) => /^https?:/.test(v.trim()) ? v.trim() : `https://maps.google.com/?q=${encodeURIComponent(v.trim())}`,
+  },
   calendly: {
     inputLabel: 'Lien Calendly',
     placeholder: 'https://calendly.com/votre-nom',
@@ -241,7 +255,14 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
-  const [displayMode, setDisplayMode] = useState<DisplayMode>(profile?.displayMode ?? 'classic');
+  const [displayMode, setDisplayMode]   = useState<DisplayMode>(profile?.displayMode ?? 'classic');
+  const [hiddenFields, setHiddenFields] = useState<string[]>((profile as Record<string, unknown> & { hiddenFields?: string[] })?.hiddenFields ?? []);
+
+  function toggleField(key: string) {
+    setHiddenFields((prev) =>
+      prev.includes(key) ? prev.filter((f) => f !== key) : [...prev, key]
+    );
+  }
   const [links, setLinks]             = useState<Link[]>(profile?.links ?? []);
   const [avatar, setAvatar]           = useState<string | null>(profile?.avatar ?? null);
   const [bgImage, setBgImage]         = useState<string | null>((profile as Record<string, unknown> & { backgroundImage?: string })?.backgroundImage ?? null);
@@ -303,7 +324,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     await fetch('/api/profile', {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode }),
+      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode, hiddenFields }),
     });
     setSaving(false);
     setSaved(true);
@@ -418,6 +439,40 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
             <Input label="Entreprise" value={form.company} onChange={set('company')} placeholder="Acme Corp" />
             <Textarea label="Bio" value={form.bio} onChange={set('bio')} placeholder="Une courte présentation..." style={{ minHeight: 80 }} />
             <Input label="Nom d'utilisateur" value={form.username} onChange={set('username')} hint={`weconnect.cards/${form.username || '…'}`} />
+          </div>
+
+          {/* Visibility toggles */}
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16, marginTop: 8 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
+              Champs visibles sur la page publique
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {VISIBILITY_FIELDS.map((f) => {
+                const visible = !hiddenFields.includes(f.key);
+                return (
+                  <div key={f.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: visible ? '#D1D5DB' : '#4B5563' }}>
+                      {f.label}
+                    </span>
+                    <button
+                      onClick={() => toggleField(f.key)}
+                      style={{
+                        width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', position: 'relative',
+                        background: visible ? '#6366F1' : 'rgba(255,255,255,0.1)',
+                        transition: 'background 0.2s',
+                        flexShrink: 0,
+                      }}
+                    >
+                      <span style={{
+                        position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%', background: '#fff',
+                        left: visible ? 21 : 3,
+                        transition: 'left 0.2s',
+                      }} />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </Card>
 

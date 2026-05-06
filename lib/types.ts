@@ -22,6 +22,7 @@ export interface ProfileDoc {
   backgroundImage?: string;
   theme:            'midnight' | 'electric' | 'glass' | 'metal';
   displayMode?:     'classic' | 'grid' | 'card';
+  hiddenFields?:    string[]; // 'avatar' | 'title' | 'company' | 'bio'
   isPublic:         boolean;
   updatedAt:        string;
 }

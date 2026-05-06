@@ -26,6 +26,7 @@ type Profile = {
   backgroundImage?: string | null;
   theme: string;
   displayMode?: 'classic' | 'grid' | 'card';
+  hiddenFields?: string[];
   links: Link[];
   modules: ActiveModule[];
   user: { name: string | null };
@@ -79,6 +80,12 @@ const LINK_ICONS: Record<string, React.ReactNode> = {
       <line x1="3" y1="10" x2="21" y2="10"/>
     </svg>
   ),
+  location: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
+      <circle cx="12" cy="10" r="3"/>
+    </svg>
+  ),
 };
 
 const defaultIcon = (
@@ -123,6 +130,10 @@ function ensureScheme(url: string, type?: string): string {
   if (/^[a-zA-Z][a-zA-Z0-9+\-.]*:/.test(url)) return url;
   if (type === 'phone') return `tel:${url}`;
   return `https://${url}`;
+}
+
+function isVisible(profile: Profile, field: string) {
+  return !(profile.hiddenFields ?? []).includes(field);
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -235,18 +246,22 @@ function LayoutClassic({ profile, theme, saveContactProps }: {
     <>
       {/* Avatar + header */}
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
-        <div style={{ margin: '0 auto 16px', width: 96 }}>
-          <Avatar src={profile.avatar} name={profile.displayName} size={96} />
-        </div>
+        {isVisible(profile, 'avatar') && (
+          <div style={{ margin: '0 auto 16px', width: 96 }}>
+            <Avatar src={profile.avatar} name={profile.displayName} size={96} />
+          </div>
+        )}
         <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6, letterSpacing: '-0.5px' }}>
           {profile.displayName}
         </h1>
-        {(profile.title || profile.company) && (
+        {(isVisible(profile, 'title') || isVisible(profile, 'company')) && (profile.title || profile.company) && (
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: '#9CA3AF', lineHeight: 1.5 }}>
-            {profile.title}{profile.title && profile.company && ' · '}{profile.company}
+            {isVisible(profile, 'title') ? profile.title : ''}
+            {isVisible(profile, 'title') && isVisible(profile, 'company') && profile.title && profile.company && ' · '}
+            {isVisible(profile, 'company') ? profile.company : ''}
           </p>
         )}
-        {profile.bio && (
+        {profile.bio && isVisible(profile, 'bio') && (
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#6B7280', lineHeight: 1.7, marginTop: 14, maxWidth: 320, margin: '14px auto 0' }}>
             {profile.bio}
           </p>
@@ -288,18 +303,22 @@ function LayoutGrid({ profile, theme, saveContactProps }: {
     <>
       {/* Avatar + header (compact) */}
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
-        <div style={{ margin: '0 auto 14px', width: 88 }}>
-          <Avatar src={profile.avatar} name={profile.displayName} size={88} />
-        </div>
+        {isVisible(profile, 'avatar') && (
+          <div style={{ margin: '0 auto 14px', width: 88 }}>
+            <Avatar src={profile.avatar} name={profile.displayName} size={88} />
+          </div>
+        )}
         <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4, letterSpacing: '-0.5px' }}>
           {profile.displayName}
         </h1>
-        {(profile.title || profile.company) && (
+        {(isVisible(profile, 'title') || isVisible(profile, 'company')) && (profile.title || profile.company) && (
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF' }}>
-            {profile.title}{profile.title && profile.company && ' · '}{profile.company}
+            {isVisible(profile, 'title') ? profile.title : ''}
+            {isVisible(profile, 'title') && isVisible(profile, 'company') && profile.title && profile.company && ' · '}
+            {isVisible(profile, 'company') ? profile.company : ''}
           </p>
         )}
-        {profile.bio && (
+        {profile.bio && isVisible(profile, 'bio') && (
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginTop: 10, maxWidth: 300, margin: '10px auto 0' }}>
             {profile.bio}
           </p>
@@ -345,21 +364,21 @@ function LayoutCard({ profile, theme, saveContactProps }: {
     <>
       {/* Business card header */}
       <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${theme.border}`, borderRadius: 16, padding: '24px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 20 }}>
-        <Avatar src={profile.avatar} name={profile.displayName} size={76} />
+        {isVisible(profile, 'avatar') && <Avatar src={profile.avatar} name={profile.displayName} size={76} />}
         <div style={{ flex: 1, minWidth: 0 }}>
           <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', letterSpacing: '-0.3px', margin: 0 }}>
             {profile.displayName}
           </h1>
-          {profile.title && (
+          {profile.title && isVisible(profile, 'title') && (
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: theme.accent, marginTop: 4 }}>{profile.title}</p>
           )}
-          {profile.company && (
+          {profile.company && isVisible(profile, 'company') && (
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', marginTop: 2 }}>{profile.company}</p>
           )}
         </div>
       </div>
 
-      {profile.bio && (
+      {profile.bio && isVisible(profile, 'bio') && (
         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#6B7280', lineHeight: 1.7, marginBottom: 16, paddingLeft: 4 }}>
           {profile.bio}
         </p>
