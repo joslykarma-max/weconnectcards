@@ -23,6 +23,8 @@ export interface ProfileDoc {
   theme:            'midnight' | 'electric' | 'glass' | 'metal';
   displayMode?:     'classic' | 'grid' | 'card';
   hiddenFields?:    string[]; // 'avatar' | 'title' | 'company' | 'bio'
+  inDirectory?:     boolean;
+  sector?:          string;
   isPublic:         boolean;
   updatedAt:        string;
 }

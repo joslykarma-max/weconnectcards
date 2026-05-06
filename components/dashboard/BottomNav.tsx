@@ -76,6 +76,11 @@ const MORE_ITEMS = [
     icon:  '👁️',
   },
   {
+    href:  '/annuaire',
+    label: 'Annuaire',
+    icon:  '📒',
+  },
+  {
     href:  '/dashboard/settings',
     label: 'Paramètres',
     icon:  '⚙️',

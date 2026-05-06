@@ -7,6 +7,7 @@ import { Input, Textarea } from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
+import { SECTORS } from '@/lib/sectors';
 
 const LS_SPLIT  = 'profile-split-pct';
 const LS_WIDTH  = 'profile-total-width';
@@ -257,6 +258,8 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   });
   const [displayMode, setDisplayMode]   = useState<DisplayMode>(profile?.displayMode ?? 'classic');
   const [hiddenFields, setHiddenFields] = useState<string[]>((profile as Record<string, unknown> & { hiddenFields?: string[] })?.hiddenFields ?? []);
+  const [inDirectory, setInDirectory]   = useState<boolean>((profile as Record<string, unknown> & { inDirectory?: boolean })?.inDirectory ?? false);
+  const [sector, setSector]             = useState<string>((profile as Record<string, unknown> & { sector?: string })?.sector ?? '');
 
   function toggleField(key: string) {
     setHiddenFields((prev) =>
@@ -324,7 +327,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     await fetch('/api/profile', {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode, hiddenFields }),
+      body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode, hiddenFields, inDirectory, sector: sector || null }),
     });
     setSaving(false);
     setSaved(true);
@@ -590,6 +593,77 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
               Une overlay sombre est ajoutée automatiquement pour que le texte reste lisible.
             </p>
           </div>
+        </Card>
+
+        {/* Annuaire */}
+        <Card padding="md">
+          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 4 }}>
+            Annuaire We Connect
+          </h3>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', marginBottom: 16 }}>
+            Apparaissez dans l'annuaire public des membres du réseau.
+          </p>
+
+          {/* Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: inDirectory ? 16 : 0 }}>
+            <div>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#F8F9FC', fontWeight: 600 }}>
+                Visible dans l'annuaire
+              </p>
+              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                {inDirectory ? "Votre profil est visible dans l'annuaire" : "Votre profil est masqué de l'annuaire"}
+              </p>
+            </div>
+            <button
+              onClick={() => setInDirectory((v) => !v)}
+              style={{
+                width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', flexShrink: 0,
+                background: inDirectory ? 'linear-gradient(90deg, #6366F1, #06B6D4)' : 'rgba(255,255,255,0.1)',
+                position: 'relative', transition: 'background 0.2s',
+              }}
+            >
+              <span style={{
+                position: 'absolute', top: 3, left: inDirectory ? 23 : 3,
+                width: 18, height: 18, borderRadius: '50%', background: '#fff',
+                transition: 'left 0.2s', display: 'block',
+              }} />
+            </button>
+          </div>
+
+          {/* Sector selector — only when visible */}
+          {inDirectory && (
+            <div>
+              <label style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF', display: 'block', marginBottom: 6 }}>
+                Secteur d'activité
+              </label>
+              <select
+                value={sector}
+                onChange={(e) => setSector(e.target.value)}
+                style={{
+                  width: '100%', padding: '10px 12px',
+                  background: 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${sector ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                  borderRadius: 8, color: sector ? '#F8F9FC' : '#6B7280',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 14,
+                  outline: 'none', cursor: 'pointer', appearance: 'none',
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'right 12px center',
+                  paddingRight: 36,
+                }}
+              >
+                <option value="" style={{ background: '#181B26', color: '#6B7280' }}>Choisir un secteur…</option>
+                {SECTORS.map((s) => (
+                  <option key={s} value={s} style={{ background: '#181B26' }}>{s}</option>
+                ))}
+              </select>
+              {!sector && (
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#EF4444', marginTop: 6 }}>
+                  Sélectionnez un secteur pour apparaître dans les filtres de l'annuaire.
+                </p>
+              )}
+            </div>
+          )}
         </Card>
 
         <Button variant="gradient" size="lg" loading={saving} onClick={saveProfile} style={{ width: '100%' }}>
