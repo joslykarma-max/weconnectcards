@@ -439,7 +439,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
             Informations du profil
           </h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input label="Nom affiché" value={form.displayName} onChange={set('displayName')} placeholder="Sophie Martin" />
+            <Input label="Titre" value={form.displayName} onChange={set('displayName')} placeholder="Sophie Martin" />
             <Input label="Titre / Poste" value={form.title} onChange={set('title')} placeholder="CEO & Founder" />
             <Input label="Entreprise" value={form.company} onChange={set('company')} placeholder="Acme Corp" />
             <Textarea label="Bio" value={form.bio} onChange={set('bio')} placeholder="Une courte présentation..." style={{ minHeight: 80 }} />
@@ -736,7 +736,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   ))}
                 </select>
                 <input
-                  placeholder="Nom affiché"
+                  placeholder="Titre"
                   value={editLabel}
                   onChange={(e) => setEditLabel(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
@@ -899,7 +899,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
                   {/* Label (editable, pre-filled with auto-label) */}
                   <div>
                     <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1.5, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>
-                      Nom affiché
+                      Titre
                     </p>
                     <input
                       placeholder="Ex: Mon WhatsApp pro"
