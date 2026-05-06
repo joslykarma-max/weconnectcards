@@ -99,6 +99,8 @@ type Profile = {
   avatar?: string | null;
   theme: string;
   displayMode?: DisplayMode;
+  hiddenFields?: string[];
+  isPublic?: boolean;
   links: Link[];
 } | null;
 
@@ -924,29 +926,43 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
           </div>
         </Card>
 
-        {/* Preview */}
+        {/* Live preview */}
         {profile?.username && (
           <Card padding="sm">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 14 }}>
-              Aperçu
-            </p>
-            <a
-              href={`/${profile.username}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                color: '#818CF8', textDecoration: 'none',
-                fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                <polyline points="15 3 21 3 21 9"/>
-                <line x1="10" y1="14" x2="21" y2="3"/>
-              </svg>
-              weconnect.cards/{profile.username}
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
+                Aperçu — {displayMode === 'classic' ? 'Classique' : displayMode === 'grid' ? 'Grille sociale' : 'Carte Pro'}
+              </p>
+              <a
+                href={`/${profile.username}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textDecoration: 'none', textTransform: 'uppercase' }}
+              >
+                Ouvrir ↗
+              </a>
+            </div>
+
+            {profile.isPublic ? (
+              <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <iframe
+                  key={displayMode}
+                  src={`/${profile.username}?mode=${displayMode}`}
+                  style={{ width: '100%', height: 480, border: 'none', display: 'block' }}
+                  title="Aperçu profil"
+                />
+              </div>
+            ) : (
+              <div style={{
+                height: 200, borderRadius: 8, border: '1px dashed rgba(255,255,255,0.1)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
+              }}>
+                <span style={{ fontSize: 28 }}>🔒</span>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', textAlign: 'center', maxWidth: 200 }}>
+                  Activez le profil public dans <a href="/dashboard/preview" style={{ color: '#818CF8' }}>Aperçu carte</a> pour voir la prévisualisation.
+                </p>
+              </div>
+            )}
           </Card>
         )}
       </div>

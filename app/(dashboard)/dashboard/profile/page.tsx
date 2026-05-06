@@ -18,11 +18,14 @@ export default async function ProfilePage() {
     id:          user.uid,
     username:    profileData.username,
     displayName: profileData.displayName,
-    title:       profileData.title   ?? null,
-    company:     profileData.company ?? null,
-    bio:         profileData.bio     ?? null,
-    avatar:      profileData.avatar  ?? null,
+    title:       profileData.title       ?? null,
+    company:     profileData.company     ?? null,
+    bio:         profileData.bio         ?? null,
+    avatar:      profileData.avatar      ?? null,
     theme:       profileData.theme,
+    displayMode: profileData.displayMode ?? 'classic',
+    hiddenFields: profileData.hiddenFields ?? [],
+    isPublic:    profileData.isPublic,
     links,
   } : null;
 

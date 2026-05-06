@@ -19,7 +19,8 @@ const MODULE_META: Record<string, { emoji: string; name: string }> = {
 };
 
 interface Props {
-  params: Promise<{ username: string }>;
+  params:       Promise<{ username: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -45,8 +46,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProfilePage({ params }: Props) {
+export default async function ProfilePage({ params, searchParams }: Props) {
   const { username } = await params;
+  const { mode } = await searchParams;
+  const previewMode = (mode === 'classic' || mode === 'grid' || mode === 'card') ? mode : null;
 
   const usernameSnap = await adminDb.collection('usernames').doc(username).get();
   if (!usernameSnap.exists) notFound();
@@ -81,17 +84,19 @@ export default async function ProfilePage({ params }: Props) {
         .map((t) => ({ type: t, ...MODULE_META[t] }))
     : [];
 
-  // Log the visit (fire-and-forget)
-  const headersList = await headers();
-  const ua     = headersList.get('user-agent') ?? '';
-  const device = getDeviceFromUA(ua);
+  // Log the visit (fire-and-forget) — skip for preview mode
+  if (!previewMode) {
+    const headersList = await headers();
+    const ua     = headersList.get('user-agent') ?? '';
+    const device = getDeviceFromUA(ua);
 
-  adminDb.collection('scans').add({
-    userId:    uid,
-    device,
-    userAgent: ua.slice(0, 512),
-    scannedAt: new Date().toISOString(),
-  }).catch(() => {});
+    adminDb.collection('scans').add({
+      userId:    uid,
+      device,
+      userAgent: ua.slice(0, 512),
+      scannedAt: new Date().toISOString(),
+    }).catch(() => {});
+  }
 
   const profile = {
     id:              uid,
@@ -103,7 +108,7 @@ export default async function ProfilePage({ params }: Props) {
     avatar:          profileData.avatar          ?? null,
     backgroundImage: profileData.backgroundImage ?? null,
     theme:           profileData.theme,
-    displayMode:     profileData.displayMode  ?? 'classic',
+    displayMode:     previewMode ?? profileData.displayMode  ?? 'classic',
     hiddenFields:    profileData.hiddenFields ?? [],
     links,
     modules,
