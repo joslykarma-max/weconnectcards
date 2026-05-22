@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -148,7 +147,7 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
                             <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 10px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8, transition: 'border-color 0.2s' }}>
                               {item.imageUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <Image src={item.imageUrl} alt={item.name} width={52} height={52} style={{ borderRadius: 6, objectFit: 'cover', flexShrink: 0 }} />
+                                <img src={item.imageUrl} alt={item.name} style={{ width: 52, height: 52, borderRadius: 6, objectFit: 'cover', flexShrink: 0, display: 'block' }} />
                               ) : (
                                 <span style={{ fontSize: 24, flexShrink: 0 }}>{item.emoji}</span>
                               )}
@@ -442,10 +441,8 @@ export default function MenuDashboard({
                           onClick={() => { setUpdatingImageFor(item.id); updateImageRef.current?.click(); }}
                           style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}>
                           {item.imageUrl ? (
-                            <div style={{ width: 40, height: 40, borderRadius: 6, overflow: 'hidden', position: 'relative' }}>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <Image src={item.imageUrl} alt="" fill style={{ objectFit: 'cover' }} />
-                            </div>
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={item.imageUrl} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
                           ) : (
                             <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                               {uploading === 'update' && updatingImageFor === item.id ? '⏳' : item.emoji}
@@ -500,7 +497,7 @@ export default function MenuDashboard({
                           {newItem.imageUrl ? (
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <Image src={newItem.imageUrl} alt="" width={44} height={44} style={{ borderRadius: 6, objectFit: 'cover' }} />
+                              <img src={newItem.imageUrl} alt="" style={{ width: 44, height: 44, borderRadius: 6, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
                               <button onClick={() => setNewItem(p => ({ ...p, imageUrl: '' }))}
                                 style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>
                                 Supprimer

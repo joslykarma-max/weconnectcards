@@ -349,10 +349,8 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
                       return (
                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: item.imageUrl ? '12px 16px' : '14px 16px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, transition: 'border-color 0.2s' }}>
                           {item.imageUrl ? (
-                            <div style={{ width: 72, height: 72, borderRadius: 8, overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <Image src={item.imageUrl} alt={item.name} fill style={{ objectFit: 'cover' }} />
-                            </div>
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={item.imageUrl} alt={item.name} style={{ width: 72, height: 72, borderRadius: 8, objectFit: 'cover', flexShrink: 0, display: 'block' }} />
                           ) : (
                             <span style={{ fontSize: 32, flexShrink: 0 }}>{item.emoji}</span>
                           )}
