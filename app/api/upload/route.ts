@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
 import admin from 'firebase-admin';
 import { getSession } from '@/lib/session';
 import '@/lib/firebase-admin';
@@ -25,16 +24,13 @@ export async function POST(req: NextRequest) {
 
   const bucket  = admin.storage().bucket();
   const fileRef = bucket.file(path);
-  const token   = randomUUID();
 
   try {
     await fileRef.save(buffer, {
-      metadata: {
-        contentType: file.type,
-        metadata: { firebaseStorageDownloadTokens: token },
-      },
+      metadata: { contentType: file.type },
       resumable: false,
     });
+    await fileRef.makePublic();
   } catch (err) {
     console.error('[upload] save failed:', err);
     return NextResponse.json({
@@ -42,6 +38,6 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 
-  const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
+  const url = `https://storage.googleapis.com/${bucket.name}/${path}`;
   return NextResponse.json({ url });
 }

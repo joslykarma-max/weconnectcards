@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { randomUUID } from 'crypto';
 import { requireAuth } from '@/lib/session';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 
@@ -25,16 +24,12 @@ export async function POST(req: NextRequest) {
   const filePath  = `avatars/${user.uid}-${Date.now()}.${ext}`;
   const bucket    = adminStorage.bucket();
   const fileRef   = bucket.file(filePath);
-  const token     = randomUUID();
-
   try {
     await fileRef.save(buffer, {
-      metadata: {
-        contentType: file.type,
-        metadata: { firebaseStorageDownloadTokens: token },
-      },
+      metadata: { contentType: file.type },
       resumable: false,
     });
+    await fileRef.makePublic();
   } catch (err) {
     console.error('[avatar] upload failed:', err);
     return NextResponse.json({
@@ -42,7 +37,7 @@ export async function POST(req: NextRequest) {
     }, { status: 500 });
   }
 
-  const avatarUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(filePath)}?alt=media&token=${token}`;
+  const avatarUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
 
   await adminDb.collection('profiles').doc(user.uid).set(
     { avatar: avatarUrl, updatedAt: new Date().toISOString() },
