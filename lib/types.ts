@@ -249,6 +249,28 @@ export interface MemberCardDoc {
   nfcId?:      string;    // linked physical NFC card ID
 }
 
+// ── Restaurant Orders ─────────────────────────────────────────────────────────
+export interface OrderItem {
+  id:    string;
+  name:  string;
+  qty:   number;
+  price: number;
+  emoji: string;
+}
+
+// Collection: orders/{autoId}
+export interface OrderDoc {
+  id:          string;
+  profileId:   string;
+  tableNumber: string;
+  items:       OrderItem[];
+  total:       number;
+  currency:    string;
+  note:        string;
+  status:      'pending' | 'preparing' | 'served';
+  createdAt:   string;
+}
+
 // Collection: modules/{uid}_{type}
 export interface ModuleDoc {
   profileId: string;

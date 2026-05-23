@@ -250,13 +250,22 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
 type PubMenuItem = { id: string; name: string; description: string; price: number; emoji: string; available: boolean; imageUrl?: string };
 type PubMenuCat  = { id: string; name: string; emoji: string; items: PubMenuItem[] };
 
-function MenuModule({ config, username }: { config: Record<string, unknown>; username: string }) {
+function MenuModule({ config, username, profileId, tableNumber }: {
+  config:       Record<string, unknown>;
+  username:     string;
+  profileId:    string;
+  tableNumber?: string;
+}) {
   const categories  = (config.categories as PubMenuCat[] | undefined) ?? [];
   const currency    = String(config.currency || 'FCFA');
   const whatsapp    = String(config.whatsapp || '').replace(/\D/g, '');
 
-  const [selectedCat, setSelectedCat] = useState<string>('all');
-  const [cart, setCart]               = useState<Record<string, number>>({});
+  const [selectedCat,  setSelectedCat]  = useState<string>('all');
+  const [cart,         setCart]         = useState<Record<string, number>>({});
+  const [orderPhase,   setOrderPhase]   = useState<'browse' | 'confirm' | 'done'>('browse');
+  const [note,         setNote]         = useState('');
+  const [submitting,   setSubmitting]   = useState(false);
+  const [orderId,      setOrderId]      = useState('');
 
   const allItems  = categories.flatMap(c => c.items.filter(i => i.available !== false));
   const displayedCats = selectedCat === 'all' ? categories : categories.filter(c => c.id === selectedCat);
@@ -281,10 +290,126 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
 
   function orderOnWhatsApp() {
     const lines   = cartItems.map(({ item, qty }) => `• ${qty}x ${item.name} — ${(qty * item.price).toLocaleString('fr-FR')} ${currency}`).join('\n');
-    const message = `Bonjour ! Je souhaite commander :\n\n${lines}\n\nTOTAL : ${cartTotal.toLocaleString('fr-FR')} ${currency}\n\nMerci 🙏`;
+    const tableStr = tableNumber ? `\nTable n°${tableNumber}` : '';
+    const message = `Bonjour ! Je souhaite commander :${tableStr}\n\n${lines}\n\nTOTAL : ${cartTotal.toLocaleString('fr-FR')} ${currency}\n\nMerci 🙏`;
     window.open(`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`, '_blank');
   }
 
+  async function submitOrder() {
+    setSubmitting(true);
+    try {
+      const res = await fetch('/api/menu/order', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profileId,
+          tableNumber: tableNumber!,
+          items: cartItems.map(({ item, qty }) => ({
+            id: item.id, name: item.name, qty, price: item.price, emoji: item.emoji,
+          })),
+          total:    cartTotal,
+          currency,
+          note:     note.trim(),
+        }),
+      });
+      const data = await res.json() as { id?: string; error?: string };
+      if (!res.ok) throw new Error(data.error ?? 'Erreur');
+      setOrderId(data.id ?? '');
+      setOrderPhase('done');
+    } catch {
+      // stay on confirm, show nothing
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  /* ── Confirmation screen ─────────────────────────────────────────────────── */
+  if (orderPhase === 'done') {
+    return (
+      <Shell backHref={`/${username}`}>
+        <div style={{ textAlign: 'center', padding: '40px 0' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>✅</div>
+          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Commande envoyée !</h2>
+          <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 28 }}>
+            Votre commande pour la <strong style={{ color: '#F8F9FC' }}>Table {tableNumber}</strong> a bien été reçue. Le serveur vous apportera vos plats.
+          </p>
+          <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 18, textAlign: 'left', marginBottom: 24 }}>
+            {cartItems.map(({ item, qty }, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', borderBottom: i < cartItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+                <span style={{ color: '#F8F9FC', fontSize: 13 }}>{item.emoji} {qty}× {item.name}</span>
+                <span style={{ color: '#818CF8', fontFamily: 'Space Mono, monospace', fontSize: 12 }}>{(item.price * qty).toLocaleString('fr-FR')}</span>
+              </div>
+            ))}
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, marginTop: 4 }}>
+              <span style={{ color: '#9CA3AF', fontSize: 13 }}>Total</span>
+              <span style={{ color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontWeight: 700, fontSize: 14 }}>{cartTotal.toLocaleString('fr-FR')} {currency}</span>
+            </div>
+          </div>
+          <button
+            onClick={() => { setCart({}); setNote(''); setOrderPhase('browse'); setOrderId(''); }}
+            style={{ padding: '12px 28px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+          >
+            Ajouter d&apos;autres plats →
+          </button>
+          {orderId && <p style={{ color: '#374151', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 16 }}>#{orderId.slice(-6).toUpperCase()}</p>}
+        </div>
+      </Shell>
+    );
+  }
+
+  /* ── Confirm / note screen ────────────────────────────────────────────────── */
+  if (orderPhase === 'confirm' && tableNumber) {
+    return (
+      <Shell backHref={`/${username}`}>
+        <button onClick={() => setOrderPhase('browse')}
+          style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 14, marginBottom: 24, display: 'flex', alignItems: 'center', gap: 8, padding: 0, fontFamily: 'DM Sans, sans-serif' }}>
+          ← Retour au menu
+        </button>
+
+        <div style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 10, padding: '12px 16px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 20 }}>🪑</span>
+          <div>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase' }}>Votre table</p>
+            <p style={{ color: '#F8F9FC', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>Table {tableNumber}</p>
+          </div>
+        </div>
+
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 16 }}>Récapitulatif</h2>
+        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+          {cartItems.map(({ item, qty }, i) => (
+            <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: i < cartItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
+              <span style={{ color: '#F8F9FC', fontSize: 14 }}>{item.emoji} <strong style={{ fontFamily: 'Space Mono, monospace', color: '#818CF8' }}>{qty}×</strong> {item.name}</span>
+              <span style={{ color: '#9CA3AF', fontFamily: 'Space Mono, monospace', fontSize: 12 }}>{(item.price * qty).toLocaleString('fr-FR')}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+            <span style={{ color: '#9CA3AF', fontFamily: 'DM Sans, sans-serif', fontSize: 14 }}>Total</span>
+            <span style={{ color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontWeight: 700, fontSize: 15 }}>{cartTotal.toLocaleString('fr-FR')} {currency}</span>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 24 }}>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Note / Instructions (optionnel)</p>
+          <textarea
+            value={note}
+            onChange={e => setNote(e.target.value)}
+            placeholder="Ex : sans oignon, allergie noix, cuisson bien cuit..."
+            rows={3}
+            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '12px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none', resize: 'none', boxSizing: 'border-box' }}
+          />
+        </div>
+
+        <button
+          onClick={submitOrder}
+          disabled={submitting}
+          style={{ width: '100%', padding: '15px', background: submitting ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: submitting ? '#6B7280' : '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+          {submitting ? 'Envoi en cours...' : `🛎️ Commander à Table ${tableNumber}`}
+        </button>
+      </Shell>
+    );
+  }
+
+  /* ── Browse / main view ───────────────────────────────────────────────────── */
   return (
     <Shell backHref={`/${username}`}>
       {/* Header */}
@@ -297,8 +422,17 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
         {!!config.openHours && <p style={{ color: '#6B7280', fontSize: 13, fontFamily: 'Space Mono, monospace' }}>🕐 {String(config.openHours)}</p>}
       </div>
 
+      {/* Table badge */}
+      {tableNumber && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 16 }}>🪑</span>
+            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#818CF8' }}>Table {tableNumber}</span>
+          </div>
+        </div>
+      )}
+
       {categories.length === 0 ? (
-        /* Legacy view — no categories configured yet */
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {!!config.menuUrl && (
             <a href={String(config.menuUrl)} target="_blank" rel="noopener noreferrer"
@@ -334,7 +468,7 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
           </div>
 
           {/* Items by category */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: cartCount > 0 ? 104 : 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 28, paddingBottom: cartCount > 0 ? 110 : 0 }}>
             {displayedCats
               .filter(cat => cat.items.some(i => i.available !== false))
               .map(cat => (
@@ -395,7 +529,12 @@ function MenuModule({ config, username }: { config: Record<string, unknown>; use
                     {cartTotal.toLocaleString('fr-FR')} {currency}
                   </span>
                 </div>
-                {whatsapp ? (
+                {tableNumber ? (
+                  <button onClick={() => setOrderPhase('confirm')}
+                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    🛎️ Commander — Table {tableNumber}
+                  </button>
+                ) : whatsapp ? (
                   <button onClick={orderOnWhatsApp}
                     style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                     💬 Envoyer la commande
@@ -1458,18 +1597,19 @@ interface MemberCardProp {
 }
 
 export default function ModulePublicClient({
-  type, username, profileId = '', config, holderCard = null, memberCard = null,
+  type, username, profileId = '', config, holderCard = null, memberCard = null, tableNumber,
 }: {
-  type:        string;
-  username:    string;
-  profileId?:  string;
-  config:      Record<string, unknown>;
-  holderCard?: HolderCard | null;
-  memberCard?: MemberCardProp | null;
+  type:          string;
+  username:      string;
+  profileId?:    string;
+  config:        Record<string, unknown>;
+  holderCard?:   HolderCard | null;
+  memberCard?:   MemberCardProp | null;
+  tableNumber?:  string;
 }) {
   switch (type) {
     case 'loyalty':     return <LoyaltyModule     config={config} username={username} profileId={profileId} />;
-    case 'menu':        return <MenuModule         config={config} username={username} />;
+    case 'menu':        return <MenuModule         config={config} username={username} profileId={profileId} tableNumber={tableNumber} />;
     case 'review':      return <ReviewModule       config={config} username={username} />;
     case 'portfolio':   return <PortfolioModule    config={config} username={username} />;
     case 'event':       return <EventModule        config={config} username={username} profileId={profileId} />;

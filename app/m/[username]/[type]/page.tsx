@@ -6,7 +6,7 @@ import type { ModuleDoc, AccessCardDoc, MemberCardDoc } from '@/lib/types';
 
 interface Props {
   params:      Promise<{ username: string; type: string }>;
-  searchParams: Promise<{ card?: string }>;
+  searchParams: Promise<{ card?: string; table?: string }>;
 }
 
 const MODULE_TITLES: Record<string, string> = {
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ModulePublicPage({ params, searchParams }: Props) {
   const { username, type } = await params;
-  const { card: cardId }   = await searchParams;
+  const { card: cardId, table: tableNumber } = await searchParams;
 
   const usernameSnap = await adminDb.collection('usernames').doc(username).get();
   if (!usernameSnap.exists) notFound();
@@ -65,6 +65,7 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
       config={moduleData.config ?? {}}
       holderCard={holderCard}
       memberCard={memberCard}
+      tableNumber={tableNumber}
     />
   );
 }

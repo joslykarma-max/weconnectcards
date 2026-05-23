@@ -1,11 +1,14 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import QRCode from 'qrcode';
 import Card from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import type { MenuItem, MenuCategory } from '@/lib/types';
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
 
 type Info = {
   restaurantName: string;
@@ -14,6 +17,7 @@ type Info = {
   whatsapp:       string;
   currency:       string;
   menuUrl:        string;
+  tableCount:     number;
 };
 
 function uid() {
@@ -37,6 +41,64 @@ async function uploadImageFile(file: File): Promise<{ url: string | null; error:
   } catch {
     return { url: null, error: 'Erreur réseau — réessayez.' };
   }
+}
+
+// ── Table QR codes ────────────────────────────────────────────────────────────
+function TableQRSection({ username, tableCount }: { username: string; tableCount: number }) {
+  const [qrUrls, setQrUrls] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (tableCount <= 0 || !username) { setQrUrls([]); return; }
+    const count = Math.min(tableCount, 99);
+    Promise.all(
+      Array.from({ length: count }, (_, i) =>
+        QRCode.toDataURL(`${APP_URL}/m/${username}/menu?table=${i + 1}`, {
+          color: { dark: '#F8F9FC', light: '#00000000' },
+          width: 200, margin: 1,
+          errorCorrectionLevel: 'M',
+        }),
+      ),
+    ).then(setQrUrls).catch(() => {});
+  }, [tableCount, username]);
+
+  if (tableCount <= 0 || !username) return null;
+
+  return (
+    <Card padding="md">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>QR Codes Tables</h3>
+        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', letterSpacing: 1 }}>{tableCount} table{tableCount > 1 ? 's' : ''}</span>
+      </div>
+      <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 16 }}>Imprimez et posez chaque QR sur la table correspondante. Le client scanne → voit le menu → passe sa commande directement.</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 }}>
+        {Array.from({ length: tableCount }, (_, i) => {
+          const n   = i + 1;
+          const url = qrUrls[i];
+          return (
+            <div key={n} style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              {url ? (
+                <img src={url} alt={`QR Table ${n}`} style={{ width: 90, height: 90, imageRendering: 'pixelated', background: '#23263A', borderRadius: 6 }} />
+              ) : (
+                <div style={{ width: 90, height: 90, background: 'rgba(255,255,255,0.04)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ color: '#374151', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>...</span>
+                </div>
+              )}
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, color: '#F8F9FC' }}>Table {n}</p>
+              {url && (
+                <a
+                  href={url}
+                  download={`table-${n}-qr.png`}
+                  style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', textDecoration: 'none', letterSpacing: 1, textTransform: 'uppercase' }}
+                >
+                  Télécharger ↓
+                </a>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
 }
 
 // ── Live preview ─────────────────────────────────────────────────────────────
@@ -206,9 +268,11 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
 export default function MenuDashboard({
   initialInfo,
   initialCategories,
+  username = '',
 }: {
   initialInfo:       Info;
   initialCategories: MenuCategory[];
+  username?:         string;
 }) {
   const router = useRouter();
   const [info, setInfo]             = useState<Info>(initialInfo);
@@ -363,11 +427,24 @@ export default function MenuDashboard({
                 </div>
               </div>
               <Input label="Lien menu PDF (optionnel)" placeholder="https://drive.google.com/..." value={info.menuUrl} onChange={setInfoField('menuUrl')} hint="En complément du menu digital" />
+              <div>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Nombre de tables</p>
+                <input
+                  type="number" min={0} max={99}
+                  value={info.tableCount || ''}
+                  onChange={e => setInfo(p => ({ ...p, tableCount: Math.min(99, Math.max(0, Number(e.target.value) || 0)) }))}
+                  placeholder="0"
+                  style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                />
+                <p style={{ color: '#6B7280', fontSize: 11, marginTop: 5 }}>Génère un QR code par table ci-dessous</p>
+              </div>
             </div>
           </Card>
           <Button variant="gradient" size="lg" loading={saving} onClick={save} style={{ width: '100%' }}>
             {saved ? '✓ Sauvegardé !' : 'Sauvegarder'}
           </Button>
+
+          <TableQRSection username={username} tableCount={info.tableCount || 0} />
         </div>
 
         {/* Col 2: editor */}

@@ -134,10 +134,14 @@ function MenuDashboard({ stats, username }: { stats: NonNullable<OverviewProps['
           <StatPill label="Plats"      value={stats.totalItems}      accent="#F59E0B" />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Link href="/dashboard/modules/menu/restaurant"
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 7, textDecoration: 'none', color: '#F59E0B', fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 600 }}>
+              📊 Dashboard restaurant →
+            </Link>
           {publicUrl && (
             <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 7, textDecoration: 'none', color: '#F59E0B', fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500 }}>
-              🔗 Voir le menu public ↗
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 7, textDecoration: 'none', color: '#9CA3AF', fontFamily: 'DM Sans, sans-serif', fontSize: 12 }}>
+              🔗 Menu public ↗
             </a>
           )}
           {stats.whatsapp && (
