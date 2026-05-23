@@ -157,7 +157,7 @@ function MenuDashboard({ stats, username }: { stats: NonNullable<OverviewProps['
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
             { href: '/dashboard/modules/menu', icon: '✏️', label: 'Modifier le menu',     desc: 'Plats, catégories, prix' },
-            { href: '/dashboard/qrcode',       icon: '⬛', label: 'QR Code du menu',       desc: 'Générer et partager' },
+            { href: '/dashboard/modules/menu/tables', icon: '⬛', label: 'QR Codes tables',  desc: 'Gérer les QR par table' },
             { href: '/dashboard/analytics',    icon: '📊', label: 'Voir les stats',        desc: 'Scans et clics' },
           ].map(a => (
             <Link key={a.label} href={a.href} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', background: 'var(--t-row)', border: 'var(--t-border-full)', borderRadius: 6, textDecoration: 'none' }}>
