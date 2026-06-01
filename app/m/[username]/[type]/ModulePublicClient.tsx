@@ -1591,11 +1591,11 @@ function AgencyModule({ config, username, profileId, agentData }: {
 }) {
   const [tracked, setTracked] = useState(false);
 
-  const agencyName   = String(config.agencyName  || 'Inas Travel');
-  const appClientUrl = String(config.appClientUrl || '');
-  const appDriverUrl = String(config.appDriverUrl || '');
-  const contactPhone = String(config.contactPhone || '').replace(/\D/g, '');
-  const contactLabel = String(config.contactLabel || 'Allo Inas');
+  const agencyName    = String(config.agencyName   || 'Inas Travel');
+  const appClientUrl  = String(config.appClientUrl || '');
+  const appDriverUrl  = String(config.appDriverUrl || '');
+  const contactPhone  = String(config.contactPhone || config.contactWhatsapp || '').replace(/\D/g, '');
+  const contactLabel  = String(config.contactLabel || 'Allo Inas');
 
   useEffect(() => {
     if (!agentData || tracked) return;
@@ -1622,7 +1622,7 @@ function AgencyModule({ config, username, profileId, agentData }: {
   const links = [
     appClientUrl && { icon: '📱', label: 'Télécharger App Client',    color: '#6366F1', bg: 'rgba(99,102,241,0.12)',  border: 'rgba(99,102,241,0.3)',  action: 'app_client' as const, url: appClientUrl },
     appDriverUrl && { icon: '🚗', label: 'Télécharger App Chauffeur', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', action: 'app_driver' as const, url: appDriverUrl },
-    contactPhone && { icon: '📞', label: contactLabel,                 color: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', action: 'contact'    as const, url: `tel:${contactPhone}` },
+    contactPhone && { icon: '💬', label: contactLabel,                 color: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', action: 'contact'    as const, url: `https://wa.me/${contactPhone}` },
   ].filter(Boolean) as { icon: string; label: string; color: string; bg: string; border: string; action: 'app_client' | 'app_driver' | 'contact'; url: string }[];
 
   return (

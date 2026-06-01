@@ -272,11 +272,11 @@ export default function AgencyDashboard({
                 hint="URL de téléchargement de l'app chauffeur"
               />
               <Input
-                label="Téléphone contact direct"
+                label="WhatsApp contact direct"
                 value={config.contactPhone}
                 onChange={e => setConfig(p => ({ ...p, contactPhone: e.target.value }))}
-                placeholder="+229 01 00 00 00 00"
-                hint="Numéro composé quand le client appuie sur le bouton contact"
+                placeholder="+22901000000"
+                hint="Numéro WhatsApp (sans espaces) — ex: +22901234567"
               />
               <Input
                 label="Libellé du bouton contact"
