@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
@@ -42,11 +42,29 @@ function Avatar({ name, email, size = 40 }: { name?: string; email: string; size
   );
 }
 
-function AgentAvatar({ name, size = 40 }: { name: string; size?: number }) {
+function AgentAvatar({ name, photoUrl, size = 40, onClick }: { name: string; photoUrl?: string; size?: number; onClick?: () => void }) {
   const initials = name.split(' ').filter(w => /^[A-ZÀ-Ÿ]/u.test(w)).slice(0, 2).map(w => w[0]).join('') || '?';
   return (
-    <div style={{ width: size, height: size, borderRadius: '50%', background: 'linear-gradient(135deg, #4338CA, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: size * 0.35, color: '#fff', flexShrink: 0 }}>
-      {initials}
+    <div
+      onClick={onClick}
+      title={onClick ? 'Changer la photo' : undefined}
+      style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, position: 'relative', cursor: onClick ? 'pointer' : 'default', overflow: 'hidden' }}
+    >
+      {photoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={photoUrl} alt={name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      ) : (
+        <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #4338CA, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: size * 0.35, color: '#fff' }}>
+          {initials}
+        </div>
+      )}
+      {onClick && (
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.opacity = '1'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.opacity = '0'; }}>
+          <span style={{ fontSize: size * 0.35, color: '#fff' }}>📷</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -113,8 +131,11 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
   // Actions
   const [removing,     setRemoving]     = useState<string | null>(null);
   const [changingRole, setChangingRole] = useState<string | null>(null);
-  const [removingAgent,setRemovingAgent]= useState<string | null>(null);
-  const [qrModal,      setQrModal]      = useState<{ mit: string; name: string } | null>(null);
+  const [removingAgent,  setRemovingAgent]  = useState<string | null>(null);
+  const [qrModal,        setQrModal]        = useState<{ mit: string; name: string } | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState<string | null>(null);
+  const photoInputRef  = useRef<HTMLInputElement>(null);
+  const pendingMitRef  = useRef<string | null>(null);
 
   if (!isPro) {
     return (
@@ -198,6 +219,36 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
     setRemovingAgent(null);
   }
 
+  function openPhotoUpload(mit: string) {
+    pendingMitRef.current = mit;
+    photoInputRef.current?.click();
+  }
+
+  async function handlePhotoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const mit  = pendingMitRef.current;
+    if (!file || !mit) return;
+    e.target.value = '';
+
+    setUploadingPhoto(mit);
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const uploadRes = await fetch('/api/upload?folder=agentPhotos', { method: 'POST', body: fd });
+      const { url, error } = await uploadRes.json() as { url?: string; error?: string };
+      if (error || !url) { setUploadingPhoto(null); return; }
+
+      await fetch('/api/agency/agents', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mit, photoUrl: url }),
+      });
+      setAgents(p => p.map(a => a.mit === mit ? { ...a, photoUrl: url } : a));
+    } finally {
+      setUploadingPhoto(null);
+      pendingMitRef.current = null;
+    }
+  }
+
   async function changeRole(id: string, role: 'admin' | 'member') {
     setChangingRole(id);
     await fetch('/api/team', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: id, role }) });
@@ -207,6 +258,7 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
 
   return (
     <div style={{ maxWidth: 900, display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <input ref={photoInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhotoFile} />
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
@@ -324,9 +376,10 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
               {agents.map(agent => {
                 const stats = agentStats(agent.mit);
                 const total = stats.page_view + stats.app_client + stats.app_driver + stats.contact;
+                const isUploading = uploadingPhoto === agent.mit;
                 return (
-                  <div key={agent.mit} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap' }}>
-                    <AgentAvatar name={agent.fullName} />
+                  <div key={agent.mit} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 16px', borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', flexWrap: 'wrap', opacity: isUploading ? 0.6 : 1, transition: 'opacity 0.2s' }}>
+                    <AgentAvatar name={agent.fullName} photoUrl={agent.photoUrl} onClick={() => !isUploading && openPhotoUpload(agent.mit)} />
                     <div style={{ flex: '1 1 160px', minWidth: 0 }}>
                       <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.fullName}</p>
                       <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 1 }}>{agent.function}</p>
@@ -511,7 +564,7 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
                   return (
                     <div key={agent.mit} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px', padding: '12px 16px', gap: 8, borderRadius: 8, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                        <AgentAvatar name={agent.fullName} size={32} />
+                        <AgentAvatar name={agent.fullName} photoUrl={agent.photoUrl} size={32} />
                         <div style={{ minWidth: 0 }}>
                           <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.fullName}</p>
                           <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace' }}>{agent.mit}</p>

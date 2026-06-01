@@ -33,6 +33,24 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ agent });
 }
 
+// PATCH — update agent fields (e.g. photoUrl)
+export async function PATCH(req: NextRequest) {
+  const user = await requireAuth();
+  const { mit, photoUrl } = await req.json() as { mit: string; photoUrl: string };
+
+  if (!mit || !photoUrl) return NextResponse.json({ error: 'MIT et photoUrl requis.' }, { status: 400 });
+
+  const docId = `${user.uid}_${mit}`;
+  const snap  = await adminDb.collection('agentCards').doc(docId).get();
+
+  if (!snap.exists || (snap.data() as AgentCardDoc).profileId !== user.uid) {
+    return NextResponse.json({ error: 'Non autorisé.' }, { status: 403 });
+  }
+
+  await adminDb.collection('agentCards').doc(docId).update({ photoUrl });
+  return NextResponse.json({ ok: true });
+}
+
 // DELETE — remove an agent
 export async function DELETE(req: NextRequest) {
   const user = await requireAuth();
