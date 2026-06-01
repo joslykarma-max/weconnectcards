@@ -2,11 +2,11 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase-admin';
 import ModulePublicClient from './ModulePublicClient';
-import type { ModuleDoc, AccessCardDoc, MemberCardDoc } from '@/lib/types';
+import type { ModuleDoc, AccessCardDoc, MemberCardDoc, AgentCardDoc } from '@/lib/types';
 
 interface Props {
   params:      Promise<{ username: string; type: string }>;
-  searchParams: Promise<{ card?: string; table?: string }>;
+  searchParams: Promise<{ card?: string; table?: string; agent?: string }>;
 }
 
 const MODULE_TITLES: Record<string, string> = {
@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ModulePublicPage({ params, searchParams }: Props) {
   const { username, type } = await params;
-  const { card: cardId, table: tableNumber } = await searchParams;
+  const { card: cardId, table: tableNumber, agent: agentMit } = await searchParams;
 
   const usernameSnap = await adminDb.collection('usernames').doc(username).get();
   if (!usernameSnap.exists) notFound();
@@ -46,6 +46,7 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
   // Load card-specific data for modules that support multi-card
   let holderCard: AccessCardDoc | null = null;
   let memberCard: MemberCardDoc | null = null;
+  let agentData:  AgentCardDoc  | null = null;
 
   if (cardId) {
     if (type === 'access') {
@@ -57,6 +58,11 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
     }
   }
 
+  if (type === 'agency' && agentMit) {
+    const snap = await adminDb.collection('agentCards').doc(`${uid}_${agentMit}`).get();
+    if (snap.exists) agentData = snap.data() as AgentCardDoc;
+  }
+
   return (
     <ModulePublicClient
       type={type}
@@ -66,6 +72,7 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
       holderCard={holderCard}
       memberCard={memberCard}
       tableNumber={tableNumber}
+      agentData={agentData}
     />
   );
 }

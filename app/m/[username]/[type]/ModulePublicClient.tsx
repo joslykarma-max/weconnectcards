@@ -1578,6 +1578,138 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
   );
 }
 
+// ─── AGENCY ──────────────────────────────────────────────────────────────────
+interface AgentData {
+  id: string; fullName: string; function: string; mit: string; phone: string; photoUrl?: string;
+}
+
+function AgencyModule({ config, username, profileId, agentData }: {
+  config:     Record<string, unknown>;
+  username:   string;
+  profileId:  string;
+  agentData?: AgentData | null;
+}) {
+  const [tracked, setTracked] = useState(false);
+
+  const agencyName   = String(config.agencyName  || 'Inas Travel');
+  const appClientUrl = String(config.appClientUrl || '');
+  const appDriverUrl = String(config.appDriverUrl || '');
+  const contactPhone = String(config.contactPhone || '').replace(/\D/g, '');
+  const contactLabel = String(config.contactLabel || 'Allo Inas');
+
+  useEffect(() => {
+    if (!agentData || tracked) return;
+    setTracked(true);
+    fetch('/api/agency/event', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profileId, agentId: agentData.id, action: 'page_view' }),
+    }).catch(() => {});
+  }, [agentData, profileId, tracked]);
+
+  function logAndOpen(action: 'app_client' | 'app_driver' | 'contact', url: string) {
+    if (agentData) {
+      fetch('/api/agency/event', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profileId, agentId: agentData.id, action }),
+      }).catch(() => {});
+    }
+    window.open(url, '_blank', 'noopener');
+  }
+
+  const initials = agentData?.fullName
+    .split(' ').filter(w => /^[A-ZÀ-Ÿ]/.test(w)).slice(0, 2).map(w => w[0]).join('') || '?';
+
+  const links = [
+    appClientUrl && { icon: '📱', label: 'Télécharger App Client',    color: '#6366F1', bg: 'rgba(99,102,241,0.12)',  border: 'rgba(99,102,241,0.3)',  action: 'app_client' as const, url: appClientUrl },
+    appDriverUrl && { icon: '🚗', label: 'Télécharger App Chauffeur', color: '#F59E0B', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)', action: 'app_driver' as const, url: appDriverUrl },
+    contactPhone && { icon: '📞', label: contactLabel,                 color: '#10B981', bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.3)', action: 'contact'    as const, url: `tel:${contactPhone}` },
+  ].filter(Boolean) as { icon: string; label: string; color: string; bg: string; border: string; action: 'app_client' | 'app_driver' | 'contact'; url: string }[];
+
+  return (
+    <Shell backHref={`/${username}`}>
+      {/* Agency header */}
+      <div style={{ textAlign: 'center', marginBottom: 24 }}>
+        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 10 }}>
+          {agencyName}
+        </p>
+      </div>
+
+      {/* Agent card */}
+      {agentData ? (
+        <div style={{ background: 'linear-gradient(135deg, #181B26, #12141C)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 16, padding: 28, marginBottom: 24, position: 'relative', overflow: 'hidden' }}>
+          {/* Decorative circle */}
+          <div style={{ position: 'absolute', top: -30, right: -30, width: 140, height: 140, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.12), transparent)' }} />
+
+          {/* Avatar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 20 }}>
+            {agentData.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={agentData.photoUrl} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(99,102,241,0.4)', flexShrink: 0 }} />
+            ) : (
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #4338CA, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#fff', flexShrink: 0 }}>
+                {initials}
+              </div>
+            )}
+            <div style={{ minWidth: 0 }}>
+              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 17, color: '#F8F9FC', lineHeight: 1.3, marginBottom: 4 }}>
+                {agentData.fullName}
+              </p>
+              <p style={{ color: '#818CF8', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                {agentData.function}
+              </p>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 8 }}>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', minWidth: 28 }}>MIT</span>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 13, color: '#F8F9FC', letterSpacing: 1 }}>{agentData.mit}</span>
+            </div>
+            <a href={`tel:${agentData.phone.replace(/\s/g, '')}`}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, textDecoration: 'none' }}>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', minWidth: 28 }}>TÉL</span>
+              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#10B981', fontWeight: 600 }}>{agentData.phone}</span>
+            </a>
+          </div>
+        </div>
+      ) : (
+        <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 24, marginBottom: 24, textAlign: 'center' }}>
+          <p style={{ color: '#6B7280', fontSize: 14 }}>Agent non identifié</p>
+        </div>
+      )}
+
+      {/* Agency action links */}
+      {links.length > 0 && (
+        <>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>Services</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {links.map(l => (
+              <button
+                key={l.action}
+                onClick={() => logAndOpen(l.action, l.url)}
+                style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '15px 20px', background: l.bg, border: `1px solid ${l.border}`, borderRadius: 12, cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              >
+                <span style={{ fontSize: 22, flexShrink: 0 }}>{l.icon}</span>
+                <span style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: 15, color: l.color }}>
+                  {l.label}
+                </span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={l.color} strokeWidth="2" style={{ marginLeft: 'auto', flexShrink: 0, opacity: 0.6 }}><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+
+      {links.length === 0 && (
+        <p style={{ color: '#6B7280', fontSize: 13, textAlign: 'center', marginTop: 20 }}>
+          Module en cours de configuration.
+        </p>
+      )}
+    </Shell>
+  );
+}
+
 // ─── ROUTER ──────────────────────────────────────────────────────────────────
 interface HolderCard {
   id:          string;
@@ -1596,8 +1728,13 @@ interface MemberCardProp {
   photoUrl?:   string;
 }
 
+interface AgentDataProp {
+  id: string; fullName: string; function: string; mit: string; phone: string; photoUrl?: string;
+}
+
 export default function ModulePublicClient({
-  type, username, profileId = '', config, holderCard = null, memberCard = null, tableNumber,
+  type, username, profileId = '', config, holderCard = null, memberCard = null,
+  tableNumber, agentData = null,
 }: {
   type:          string;
   username:      string;
@@ -1606,6 +1743,7 @@ export default function ModulePublicClient({
   holderCard?:   HolderCard | null;
   memberCard?:   MemberCardProp | null;
   tableNumber?:  string;
+  agentData?:    AgentDataProp | null;
 }) {
   switch (type) {
     case 'loyalty':     return <LoyaltyModule     config={config} username={username} profileId={profileId} />;
@@ -1617,6 +1755,7 @@ export default function ModulePublicClient({
     case 'member':      return <MemberModule       config={config} username={username} memberCard={memberCard} />;
     case 'access':      return <AccessModule       config={config} username={username} profileId={profileId} holderCard={holderCard} />;
     case 'medical':     return <MedicalModule      config={config} username={username} />;
+    case 'agency':      return <AgencyModule       config={config} username={username} profileId={profileId} agentData={agentData} />;
     default:            return null;
   }
 }

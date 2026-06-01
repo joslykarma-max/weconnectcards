@@ -249,6 +249,31 @@ export interface MemberCardDoc {
   nfcId?:      string;    // linked physical NFC card ID
 }
 
+// ── Agency Module ─────────────────────────────────────────────────────────────
+
+// Collection: agentCards/{profileId}_{mit}
+export interface AgentCardDoc {
+  id:         string;   // MIT number used as stable ID
+  profileId:  string;
+  fullName:   string;
+  function:   string;
+  mit:        string;
+  phone:      string;
+  photoUrl?:  string;
+  isActive:   boolean;
+  createdAt:  string;
+}
+
+// Collection: agentEvents/{autoId}
+export interface AgentEventDoc {
+  id:        string;
+  profileId: string;
+  agentId:   string;   // MIT
+  action:    'page_view' | 'app_client' | 'app_driver' | 'contact';
+  timestamp: string;
+  userAgent?: string;
+}
+
 // ── Restaurant Orders ─────────────────────────────────────────────────────────
 export interface OrderItem {
   id:    string;
