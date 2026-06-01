@@ -13,6 +13,7 @@ const MODULES = [
   { type: 'certificate', name: 'Certificat Authenticité',  emoji: '🦋', desc: 'Vérification produit', pro: true },
   { type: 'member',      name: 'Carte Membre',             emoji: '🎫', desc: 'Adhésions et niveaux', pro: true },
   { type: 'portfolio',   name: 'Portfolio Artiste',        emoji: '🎵', desc: 'Galerie média et streaming', pro: false },
+  { type: 'agency',     name: 'Module Agence',            emoji: '🏢', desc: 'Carte agent, suivi téléchargements & stats', pro: true },
 ] as const;
 
 export default async function ModulesPage() {
