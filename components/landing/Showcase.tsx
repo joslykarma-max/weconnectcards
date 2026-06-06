@@ -25,7 +25,7 @@ export default function Showcase() {
   const tab = TABS[active];
 
   return (
-    <section style={{ padding: '100px 40px', background: '#F8FAFC', position: 'relative', overflow: 'hidden' }}>
+    <section style={{ padding: '100px 40px', background: 'linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%)', position: 'relative', overflow: 'hidden' }}>
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.5 }} />
 
       <div ref={ref} style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(40px)', transition: 'all 0.8s cubic-bezier(0.23,1,0.32,1)' }}>
@@ -47,7 +47,7 @@ export default function Showcase() {
         </div>
 
         {/* Preview */}
-        <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.08)', background: '#FFFFFF', boxShadow: '0 40px 80px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04)' }}>
+        <div style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', border: `2px solid ${tab.accent}30`, background: '#FFFFFF', boxShadow: `0 40px 100px rgba(0,0,0,0.15), 0 0 0 1px ${tab.accent}15, 0 0 60px ${tab.accent}10` }}>
           {/* Browser chrome */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '14px 20px', background: '#F1F5F9', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
             <div style={{ display: 'flex', gap: 6 }}>

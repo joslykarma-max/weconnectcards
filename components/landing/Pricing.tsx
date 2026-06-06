@@ -34,7 +34,8 @@ const plans = [
 export default function Pricing() {
   const { ref: headerRef, visible: headerVisible } = useScrollReveal();
   return (
-    <section id="pricing" className="section-responsive" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
+    <section id="pricing" className="section-responsive" style={{ padding: '100px 40px', background: '#F8FAFC', position: 'relative' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
       <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 64, opacity: headerVisible ? 1 : 0, transform: headerVisible ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.7s cubic-bezier(0.23,1,0.32,1)' }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>Tarifs</p>
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-1px', color: '#0F172A', marginBottom: 20 }}>Choisis ta carte. Construis ton image.</h2>
@@ -47,18 +48,24 @@ export default function Pricing() {
             key={plan.key}
             style={{
               background: plan.badge === 'Le plus populaire'
-                ? 'linear-gradient(180deg, #FAFBFF 0%, #FFFFFF 100%)'
+                ? 'linear-gradient(160deg, #EEF2FF 0%, #FFFFFF 60%)'
+                : plan.badge === 'Premium'
+                ? 'linear-gradient(160deg, #FFFBEB 0%, #FFFFFF 60%)'
                 : '#FFFFFF',
-              border: plan.badge
-                ? `1.5px solid ${plan.color}35`
+              border: plan.badge === 'Le plus populaire'
+                ? '2px solid rgba(99,102,241,0.4)'
+                : plan.badge === 'Premium'
+                ? '2px solid rgba(245,158,11,0.35)'
                 : '1px solid #E2E8F0',
               borderRadius: 16,
               padding: 32,
               position: 'relative',
               transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
               boxShadow: plan.badge === 'Le plus populaire'
-                ? `0 8px 40px rgba(99,102,241,0.12), 0 0 0 1px rgba(99,102,241,0.12)`
-                : '0 1px 4px rgba(0,0,0,0.06)',
+                ? '0 20px 60px rgba(99,102,241,0.18), 0 0 0 1px rgba(99,102,241,0.08)'
+                : plan.badge === 'Premium'
+                ? '0 12px 40px rgba(245,158,11,0.12)'
+                : '0 4px 16px rgba(0,0,0,0.06)',
               display: 'flex', flexDirection: 'column',
             }}
           >
@@ -141,6 +148,7 @@ export default function Pricing() {
         L&apos;achat d&apos;une carte Pro ou Prestige active automatiquement un compte Pro.
         <br/>L&apos;upgrade à 5 500 FCFA est à usage unique pour les détenteurs de carte Standard.
       </p>
+      </div>
     </section>
   );
 }

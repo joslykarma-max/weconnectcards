@@ -21,9 +21,9 @@ function ModuleCard({ mod, delay }: { mod: typeof MODULES[0]; delay: number }) {
     <div ref={ref} style={{ opacity: visible ? 1 : 0, transform: visible ? 'translateY(0) scale(1)' : 'translateY(28px) scale(0.96)', transition: `all 0.65s cubic-bezier(0.23,1,0.32,1) ${delay}ms` }}>
       <Link
         href={`/modules/${mod.slug}`}
-        style={{ display: 'block', background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: '24px 20px', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)', position: 'relative', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
-        onMouseEnter={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${mod.accent}40`; el.style.background = '#FAFBFF'; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = `0 16px 40px rgba(0,0,0,0.08), 0 0 0 1px ${mod.accent}20`; }}
-        onMouseLeave={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = '#E2E8F0'; el.style.background = '#FFFFFF'; el.style.transform = 'translateY(0)'; el.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'; }}
+        style={{ display: 'block', background: `${mod.accent}07`, border: `1px solid ${mod.accent}22`, borderRadius: 12, padding: '24px 20px', textDecoration: 'none', transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)', position: 'relative', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+        onMouseEnter={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${mod.accent}55`; el.style.background = `${mod.accent}12`; el.style.transform = 'translateY(-5px)'; el.style.boxShadow = `0 16px 40px rgba(0,0,0,0.1), 0 0 0 1px ${mod.accent}30`; }}
+        onMouseLeave={(e) => { const el = e.currentTarget as HTMLAnchorElement; el.style.borderColor = `${mod.accent}22`; el.style.background = `${mod.accent}07`; el.style.transform = 'translateY(0)'; el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.05)'; }}
       >
         <div style={{ position: 'absolute', top: 14, right: 14, width: 6, height: 6, borderRadius: '50%', background: mod.accent, opacity: 0.4 }} />
         <div style={{ width: 48, height: 48, borderRadius: 12, background: `${mod.accent}10`, border: `1px solid ${mod.accent}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14, fontSize: 22 }}>{mod.emoji}</div>
@@ -38,7 +38,7 @@ function ModuleCard({ mod, delay }: { mod: typeof MODULES[0]; delay: number }) {
 export default function Modules() {
   const { ref: headerRef, visible: headerVisible } = useScrollReveal(0.1);
   return (
-    <section id="modules" style={{ padding: '100px 40px', background: '#F8FAFC', position: 'relative', overflow: 'hidden' }}>
+    <section id="modules" style={{ padding: '100px 40px', background: 'linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%)', position: 'relative', overflow: 'hidden' }}>
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.5 }} />
       <div style={{ maxWidth: 1280, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 64, opacity: headerVisible ? 1 : 0, transform: headerVisible ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.7s cubic-bezier(0.23,1,0.32,1)' }}>

@@ -16,33 +16,36 @@ export default function CTA() {
   const { ref, visible } = useScrollReveal(0.1);
 
   return (
-    <section style={{ padding: '120px 40px', position: 'relative', overflow: 'hidden', textAlign: 'center', background: '#F8FAFC' }}>
-      {/* Subtle animated gradient */}
-      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(99,102,241,0.05) 0%, rgba(6,182,212,0.04) 50%, rgba(139,92,246,0.05) 100%)', backgroundSize: '400% 400%', animation: 'gradMove 12s ease-in-out infinite', pointerEvents: 'none' }} />
+    <section style={{ padding: '120px 40px', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'linear-gradient(135deg, #1e1b4b 0%, #0F172A 40%, #0c1a2e 100%)' }}>
+      {/* Grid */}
+      <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
 
-      {/* Soft glows */}
-      <div style={{ position: 'absolute', top: '30%', left: '20%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', animation: 'orb1 18s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', bottom: '20%', right: '15%', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.06) 0%, transparent 70%)', filter: 'blur(55px)', pointerEvents: 'none', animation: 'orb2 22s ease-in-out infinite' }} />
+      {/* Glows */}
+      <div style={{ position: 'absolute', top: '20%', left: '15%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', animation: 'orb1 18s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.14) 0%, transparent 70%)', filter: 'blur(55px)', pointerEvents: 'none', animation: 'orb2 22s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', top: '50%', right: '30%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', animation: 'orb3 15s ease-in-out infinite' }} />
 
       <div ref={ref} style={{ position: 'relative', zIndex: 1, maxWidth: 720, margin: '0 auto', opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(40px)', transition: 'all 0.9s cubic-bezier(0.23,1,0.32,1)' }}>
         {/* Social proof */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0, marginBottom: 32 }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 0, marginBottom: 40 }}>
           {PROOF.map((p, i) => (
-            <div key={p.city} title={p.city} style={{ width: 40, height: 40, borderRadius: '50%', background: '#FFFFFF', border: '2px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginLeft: i === 0 ? 0 : -10, zIndex: PROOF.length - i, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}>
+            <div key={p.city} title={p.city} style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, marginLeft: i === 0 ? 0 : -10, zIndex: PROOF.length - i, boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
               {p.emoji}
             </div>
           ))}
-          <span style={{ marginLeft: 16, fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#64748B' }}>+10 000 professionnels nous font confiance</span>
+          <span style={{ marginLeft: 16, fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF' }}>+10 000 professionnels nous font confiance</span>
         </div>
 
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 28 }}>Rejoignez-les maintenant</p>
+        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#818CF8', textTransform: 'uppercase', marginBottom: 24 }}>
+          Rejoignez-les maintenant
+        </p>
 
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(48px, 6vw, 80px)', letterSpacing: '-2px', lineHeight: 1, color: '#0F172A', marginBottom: 28 }}>
+        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(48px, 6vw, 80px)', letterSpacing: '-2px', lineHeight: 1, color: '#F8F9FC', marginBottom: 28 }}>
           Faites le{' '}
           <span className="text-gradient">premier geste.</span>
         </h2>
 
-        <p style={{ color: '#64748B', fontSize: 18, lineHeight: 1.7, marginBottom: 48, maxWidth: 560, margin: '0 auto 48px' }}>
+        <p style={{ color: '#9CA3AF', fontSize: 18, lineHeight: 1.7, marginBottom: 52, maxWidth: 560, margin: '0 auto 52px' }}>
           Zéro papier. Zéro friction. Juste votre profil, sur leur téléphone. La carte qui évolue avec vous.
         </p>
 
@@ -58,6 +61,7 @@ export default function CTA() {
           </Link>
         </div>
 
+        {/* Trust indicators */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 0, flexWrap: 'wrap' }}>
           {[
             { icon: '📍', value: 'Cotonou, Bénin',  label: 'Siège social' },
@@ -65,10 +69,10 @@ export default function CTA() {
             { icon: '🔒', value: 'SSL + Firebase',  label: 'Données sécurisées' },
             { icon: '💬', value: 'Support 24/7',    label: 'Pour les Pro' },
           ].map((item, i) => (
-            <div key={item.label} style={{ textAlign: 'center', padding: '0 24px', borderLeft: i > 0 ? '1px solid #E2E8F0' : 'none' }}>
+            <div key={item.label} style={{ textAlign: 'center', padding: '0 24px', borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.08)' : 'none' }}>
               <div style={{ fontSize: 20, marginBottom: 6 }}>{item.icon}</div>
-              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#0F172A', marginBottom: 4 }}>{item.value}</div>
-              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase' }}>{item.label}</div>
+              <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 4 }}>{item.value}</div>
+              <div style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase' }}>{item.label}</div>
             </div>
           ))}
         </div>

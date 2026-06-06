@@ -156,8 +156,8 @@ function CardDeck() {
 
 export default function Hero() {
   return (
-    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: 80, background: '#FFFFFF' }}>
-      <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.6 }} />
+    <section style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', paddingTop: 80, background: 'linear-gradient(150deg, #EEF2FF 0%, #E0F2FE 55%, #F0FFF4 100%)' }}>
+      <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.7 }} />
       <FloatingOrbs />
 
       <div className="hero-grid" style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 40px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center', width: '100%', position: 'relative', zIndex: 1 }}>

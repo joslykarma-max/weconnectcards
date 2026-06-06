@@ -31,7 +31,7 @@ function HeroFeatureCard({ feature, delay }: { feature: typeof HERO_FEATURES[0];
   return (
     <div
       ref={ref}
-      style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 16, padding: 36, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(36px)', transition: `all 0.75s cubic-bezier(0.23,1,0.32,1) ${delay}ms`, position: 'relative', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+      style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderTop: `3px solid ${feature.accent}`, borderRadius: 16, padding: 36, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(36px)', transition: `all 0.75s cubic-bezier(0.23,1,0.32,1) ${delay}ms`, position: 'relative', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.07)' }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = `${feature.accent}35`; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 20px 60px rgba(0,0,0,0.08), 0 0 0 1px ${feature.accent}20`; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#E2E8F0'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; }}
     >
@@ -60,7 +60,7 @@ function GridFeatureCard({ feature, delay }: { feature: typeof GRID_FEATURES[0];
   return (
     <div
       ref={ref}
-      style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 28, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(28px)', transition: `all 0.7s cubic-bezier(0.23,1,0.32,1) ${delay}ms`, cursor: 'default', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}
+      style={{ background: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: 12, padding: 28, opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(28px)', transition: `all 0.7s cubic-bezier(0.23,1,0.32,1) ${delay}ms`, cursor: 'default', boxShadow: '0 4px 16px rgba(0,0,0,0.07)' }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = `${feature.accent}35`; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-4px)'; (e.currentTarget as HTMLDivElement).style.boxShadow = `0 16px 40px rgba(0,0,0,0.08)`; }}
       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.borderColor = '#E2E8F0'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)'; }}
     >
@@ -74,7 +74,8 @@ function GridFeatureCard({ feature, delay }: { feature: typeof GRID_FEATURES[0];
 export default function Features() {
   const { ref: headerRef, visible: headerVisible } = useScrollReveal();
   return (
-    <section id="features" className="section-responsive" style={{ padding: '100px 40px', maxWidth: 1280, margin: '0 auto' }}>
+    <section id="features" className="section-responsive" style={{ padding: '100px 40px', background: '#F5F3FF', position: 'relative' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
       <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 72, opacity: headerVisible ? 1 : 0, transform: headerVisible ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.7s cubic-bezier(0.23,1,0.32,1)' }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>Pourquoi We Connect</p>
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-1px', color: '#0F172A', marginBottom: 20 }}>Tout ce dont vous avez besoin.</h2>
@@ -85,6 +86,7 @@ export default function Features() {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
         {GRID_FEATURES.map((f, i) => (<GridFeatureCard key={f.title} feature={f} delay={i * 80} />))}
+      </div>
       </div>
     </section>
   );

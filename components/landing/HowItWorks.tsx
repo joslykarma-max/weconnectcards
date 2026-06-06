@@ -141,7 +141,7 @@ function StepRow({ step, index }: { step: typeof STEPS[0]; index: number }) {
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section-responsive" style={{ padding: '100px 40px', background: '#FFFFFF', position: 'relative', overflow: 'hidden' }}>
+    <section id="how-it-works" className="section-responsive" style={{ padding: '100px 40px', background: 'linear-gradient(180deg, #EEF2FF 0%, #FFFFFF 30%, #FFFFFF 70%, #F0F9FF 100%)', position: 'relative', overflow: 'hidden' }}>
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(99,102,241,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
