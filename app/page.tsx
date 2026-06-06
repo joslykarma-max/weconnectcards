@@ -10,7 +10,7 @@ import Footer     from '@/components/landing/Footer';
 
 export default function LandingPage() {
   return (
-    <>
+    <div style={{ background: '#FFFFFF' }}>
       <Nav />
       <main>
         <Hero />
@@ -22,6 +22,6 @@ export default function LandingPage() {
         <CTA />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }
