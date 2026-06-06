@@ -173,6 +173,66 @@ body {
 .delay-500 { animation-delay: 0.5s; }
 .delay-600 { animation-delay: 0.6s; }
 
+/* ── Scroll-reveal ───────────────────────────────────────────── */
+@keyframes revealUp    { from { opacity:0; transform:translateY(40px);  } to { opacity:1; transform:translateY(0);  } }
+@keyframes revealLeft  { from { opacity:0; transform:translateX(40px);  } to { opacity:1; transform:translateX(0);  } }
+@keyframes revealRight { from { opacity:0; transform:translateX(-40px); } to { opacity:1; transform:translateX(0);  } }
+@keyframes revealScale { from { opacity:0; transform:scale(0.90);       } to { opacity:1; transform:scale(1);       } }
+
+/* ── Hero background orbs ────────────────────────────────────── */
+@keyframes orb1 {
+  0%,100% { transform:translate(0,0); }
+  30%      { transform:translate(55px,-65px); }
+  70%      { transform:translate(-40px,30px); }
+}
+@keyframes orb2 {
+  0%,100% { transform:translate(0,0); }
+  40%      { transform:translate(-60px,40px); }
+  75%      { transform:translate(35px,-55px); }
+}
+@keyframes orb3 {
+  0%,100% { transform:translate(0,0); }
+  55%      { transform:translate(55px,60px); }
+}
+
+/* ── Scan notification toast ─────────────────────────────────── */
+@keyframes toastIn {
+  0%       { opacity:0; transform:translateX(50px) scale(0.95); }
+  12%,72%  { opacity:1; transform:translateX(0)    scale(1);    }
+  100%     { opacity:0; transform:translateX(-15px) scale(0.98);}
+}
+
+/* ── Live dot pulse ──────────────────────────────────────────── */
+@keyframes livePulse {
+  0%,100% { box-shadow:0 0 0 0   rgba(34,197,94,0.6); }
+  50%      { box-shadow:0 0 0 8px rgba(34,197,94,0);   }
+}
+
+/* ── Animated gradient background ───────────────────────────── */
+@keyframes gradMove {
+  0%,100% { background-position:0% 50%;   }
+  50%      { background-position:100% 50%; }
+}
+
+/* ── Showcase tab underline ──────────────────────────────────── */
+@keyframes tabLine {
+  from { transform:scaleX(0); }
+  to   { transform:scaleX(1); }
+}
+
+/* ── Image slide fade ────────────────────────────────────────── */
+@keyframes imgFadeIn {
+  from { opacity:0; transform:scale(1.03) translateY(8px); }
+  to   { opacity:1; transform:scale(1)    translateY(0);   }
+}
+
+/* ── Number counter pop ──────────────────────────────────────── */
+@keyframes numPop {
+  0%   { opacity:0; transform:scale(0.7) translateY(10px); }
+  60%  { transform:scale(1.15) translateY(-2px); }
+  100% { opacity:1; transform:scale(1)   translateY(0);    }
+}
+
 /* ─── NFC Card 3D ────────────────────────────────────────────────── */
 .card-3d {
   transform-style: preserve-3d;
