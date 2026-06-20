@@ -187,43 +187,84 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
   async function invite() {
     if (!inviteEmail.trim()) { setInviteError('Entrez un email.'); return; }
     setInviting(true); setInviteError(''); setInviteSuccess('');
-    const res  = await fetch('/api/team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: inviteEmail, role: inviteRole }) });
-    const data = await res.json() as { error?: string; member?: Member };
-    if (!res.ok) { setInviteError(data.error ?? 'Erreur.'); } else {
-      setMembers(p => [...p, { ...data.member!, stats: null }]);
-      setInviteEmail('');
-      setInviteSuccess(`Invitation envoyée à ${inviteEmail}`);
-      setTimeout(() => setInviteSuccess(''), 4000);
+    try {
+      const res  = await fetch('/api/team', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: inviteEmail, role: inviteRole }) });
+      const data = await res.json() as { error?: string; member?: Member };
+      if (!res.ok) { setInviteError(data.error ?? 'Erreur.'); } else {
+        setMembers(p => [...p, { ...data.member!, stats: null }]);
+        setInviteEmail('');
+        setInviteSuccess(`Invitation envoyée à ${inviteEmail}`);
+        setTimeout(() => setInviteSuccess(''), 4000);
+      }
+    } catch {
+      setInviteError('Erreur réseau. Réessayez.');
+    } finally {
+      setInviting(false);
     }
-    setInviting(false);
   }
 
   async function addAgent() {
     if (!agentForm.fullName.trim()) { setAgentError('Nom requis.'); return; }
     setAddingAgent(true); setAgentError(''); setAgentSuccess('');
-    const res  = await fetch('/api/agency/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(agentForm) });
-    const data = await res.json() as { error?: string; agent?: AgentCardDoc };
-    if (!res.ok) { setAgentError(data.error ?? 'Erreur.'); } else {
-      setAgents(p => [...p, data.agent!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
-      setAgentForm({ fullName: '', function: '', mit: '', phone: '', zone: '' });
-      setAgentSuccess(`Agent ${data.agent!.fullName} ajouté.`);
-      setTimeout(() => setAgentSuccess(''), 4000);
+    try {
+      const res  = await fetch('/api/agency/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(agentForm) });
+      const data = await res.json() as { error?: string; agent?: AgentCardDoc };
+      if (!res.ok) { setAgentError(data.error ?? 'Erreur.'); } else {
+        setAgents(p => [...p, data.agent!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
+        setAgentForm({ fullName: '', function: '', mit: '', phone: '', zone: '' });
+        setAgentSuccess(`Agent ${data.agent!.fullName} ajouté.`);
+        setTimeout(() => setAgentSuccess(''), 4000);
+      }
+    } catch {
+      setAgentError('Erreur réseau. Réessayez.');
+    } finally {
+      setAddingAgent(false);
     }
-    setAddingAgent(false);
   }
 
-  // Parses pasted text — one agent per line, columns separated by tab or comma.
-  // Accepted column orders: "Nom, Prénom, Numéro, Zone" or "Nom complet, Numéro, Zone".
+  // Parses pasted text — one agent per line (or wrapped across two if the phone is on its own line).
+  // Supports tab/comma-separated spreadsheet pastes AND free-form lines like
+  // "1-ADAHE PRICILIA 0152523982 Aïtchedji" or "0162018621aconvile" (phone glued to the city).
   function parseBulkText(text: string) {
-    const rows = text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
-      const cols = (line.includes('\t') ? line.split('\t') : line.split(',')).map(c => c.trim());
-      if (cols.length >= 4) {
-        const [nom, prenom, numero, zone] = cols;
-        return { fullName: `${nom} ${prenom}`.trim(), phone: numero ?? '', zone: zone ?? '' };
+    const rawLines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+    // Merge a line with no phone number into the next line (name and phone/city split across lines).
+    const PHONE_RE = /(\d[\d ]{6,12}\d)/;
+    const merged: string[] = [];
+    for (let i = 0; i < rawLines.length; i++) {
+      const line = rawLines[i];
+      if (!PHONE_RE.test(line) && i + 1 < rawLines.length && PHONE_RE.test(rawLines[i + 1])) {
+        merged.push(`${line} ${rawLines[i + 1]}`);
+        i++;
+      } else {
+        merged.push(line);
       }
-      const [fullName, numero, zone] = cols;
-      return { fullName: fullName ?? '', phone: numero ?? '', zone: zone ?? '' };
+    }
+
+    const rows = merged.map(line => {
+      // Spreadsheet-style paste (tab or comma separated).
+      if (line.includes('\t') || (line.split(',').length >= 3)) {
+        const cols = (line.includes('\t') ? line.split('\t') : line.split(',')).map(c => c.trim());
+        if (cols.length >= 4) {
+          const [nom, prenom, numero, zone] = cols;
+          return { fullName: `${nom} ${prenom}`.trim(), phone: numero ?? '', zone: zone ?? '' };
+        }
+        const [fullName, numero, zone] = cols;
+        return { fullName: fullName ?? '', phone: numero ?? '', zone: zone ?? '' };
+      }
+
+      // Free-form line: strip leading numbering ("1-", "10 -", "20 "), find the phone number,
+      // name = everything before it, zone = everything after it (phone may be glued to the zone).
+      const cleaned = line.replace(/^\s*\d+\s*[-.)]?\s*/, '');
+      const match   = cleaned.match(/(\d[\d ]{6,12}\d)(.*)$/);
+      if (!match) return { fullName: cleaned.trim(), phone: '', zone: '' };
+
+      const phone     = match[1].replace(/\s+/g, '');
+      const fullName  = cleaned.slice(0, match.index).trim().replace(/\s+/g, ' ');
+      const zone      = match[2].trim();
+      return { fullName, phone, zone };
     }).filter(r => r.fullName);
+
     setBulkRows(rows);
     setBulkError(''); setBulkSuccess('');
   }
@@ -235,15 +276,20 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
   async function importBulk() {
     if (bulkRows.length === 0) { setBulkError('Aucun agent à importer.'); return; }
     setImportingBulk(true); setBulkError(''); setBulkSuccess('');
-    const res  = await fetch('/api/agency/agents/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agents: bulkRows }) });
-    const data = await res.json() as { error?: string; agents?: AgentCardDoc[]; count?: number };
-    if (!res.ok) { setBulkError(data.error ?? 'Erreur.'); } else {
-      setAgents(p => [...p, ...data.agents!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
-      setBulkSuccess(`${data.count} agent${data.count! > 1 ? 's' : ''} importé${data.count! > 1 ? 's' : ''}.`);
-      setBulkRows([]); setBulkText('');
-      setTimeout(() => setBulkSuccess(''), 5000);
+    try {
+      const res  = await fetch('/api/agency/agents/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agents: bulkRows }) });
+      const data = await res.json() as { error?: string; agents?: AgentCardDoc[]; count?: number };
+      if (!res.ok) { setBulkError(data.error ?? 'Erreur.'); } else {
+        setAgents(p => [...p, ...data.agents!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
+        setBulkSuccess(`${data.count} agent${data.count! > 1 ? 's' : ''} importé${data.count! > 1 ? 's' : ''}.`);
+        setBulkRows([]); setBulkText('');
+        setTimeout(() => setBulkSuccess(''), 5000);
+      }
+    } catch {
+      setBulkError('Erreur réseau ou serveur. Réessayez.');
+    } finally {
+      setImportingBulk(false);
     }
-    setImportingBulk(false);
   }
 
   async function removeMember(id: string) {

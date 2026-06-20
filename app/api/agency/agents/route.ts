@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import type { AgentCardDoc } from '@/lib/types';
-
-// Generates a unique-ish agent code from phone digits (or random) — used when no MIT is supplied.
-export function generateAgentCode(phone?: string): string {
-  const fromPhone = (phone ?? '').replace(/\D/g, '').slice(-6);
-  const suffix    = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${fromPhone || 'AG'}${suffix}`;
-}
+import { generateAgentCode } from '@/lib/agentCode';
 
 // POST — add a new agent
 export async function POST(req: NextRequest) {

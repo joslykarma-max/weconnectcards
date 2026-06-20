@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import type { AgentCardDoc } from '@/lib/types';
-import { generateAgentCode } from '@/app/api/agency/agents/route';
+import { generateAgentCode } from '@/lib/agentCode';
 
 interface BulkInput {
   fullName: string;
