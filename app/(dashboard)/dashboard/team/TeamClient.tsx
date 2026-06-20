@@ -123,10 +123,17 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
   const [inviteSuccess, setInviteSuccess] = useState('');
 
   // Add agent
-  const [agentForm,    setAgentForm]    = useState({ fullName: '', function: '', mit: '', phone: '' });
+  const [agentForm,    setAgentForm]    = useState({ fullName: '', function: '', mit: '', phone: '', zone: '' });
   const [addingAgent,  setAddingAgent]  = useState(false);
   const [agentError,   setAgentError]   = useState('');
   const [agentSuccess, setAgentSuccess] = useState('');
+
+  // Bulk import agents
+  const [bulkText,    setBulkText]    = useState('');
+  const [bulkRows,     setBulkRows]    = useState<{ fullName: string; phone: string; zone: string }[]>([]);
+  const [importingBulk, setImportingBulk] = useState(false);
+  const [bulkError,    setBulkError]    = useState('');
+  const [bulkSuccess,  setBulkSuccess]  = useState('');
 
   // Actions
   const [removing,     setRemoving]     = useState<string | null>(null);
@@ -192,17 +199,51 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
   }
 
   async function addAgent() {
-    if (!agentForm.fullName.trim() || !agentForm.mit.trim()) { setAgentError('Nom et MIT requis.'); return; }
+    if (!agentForm.fullName.trim()) { setAgentError('Nom requis.'); return; }
     setAddingAgent(true); setAgentError(''); setAgentSuccess('');
     const res  = await fetch('/api/agency/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(agentForm) });
     const data = await res.json() as { error?: string; agent?: AgentCardDoc };
     if (!res.ok) { setAgentError(data.error ?? 'Erreur.'); } else {
       setAgents(p => [...p, data.agent!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
-      setAgentForm({ fullName: '', function: '', mit: '', phone: '' });
+      setAgentForm({ fullName: '', function: '', mit: '', phone: '', zone: '' });
       setAgentSuccess(`Agent ${data.agent!.fullName} ajouté.`);
       setTimeout(() => setAgentSuccess(''), 4000);
     }
     setAddingAgent(false);
+  }
+
+  // Parses pasted text — one agent per line, columns separated by tab or comma.
+  // Accepted column orders: "Nom, Prénom, Numéro, Zone" or "Nom complet, Numéro, Zone".
+  function parseBulkText(text: string) {
+    const rows = text.split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const cols = (line.includes('\t') ? line.split('\t') : line.split(',')).map(c => c.trim());
+      if (cols.length >= 4) {
+        const [nom, prenom, numero, zone] = cols;
+        return { fullName: `${nom} ${prenom}`.trim(), phone: numero ?? '', zone: zone ?? '' };
+      }
+      const [fullName, numero, zone] = cols;
+      return { fullName: fullName ?? '', phone: numero ?? '', zone: zone ?? '' };
+    }).filter(r => r.fullName);
+    setBulkRows(rows);
+    setBulkError(''); setBulkSuccess('');
+  }
+
+  function removeBulkRow(idx: number) {
+    setBulkRows(p => p.filter((_, i) => i !== idx));
+  }
+
+  async function importBulk() {
+    if (bulkRows.length === 0) { setBulkError('Aucun agent à importer.'); return; }
+    setImportingBulk(true); setBulkError(''); setBulkSuccess('');
+    const res  = await fetch('/api/agency/agents/bulk', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agents: bulkRows }) });
+    const data = await res.json() as { error?: string; agents?: AgentCardDoc[]; count?: number };
+    if (!res.ok) { setBulkError(data.error ?? 'Erreur.'); } else {
+      setAgents(p => [...p, ...data.agents!].sort((a, b) => a.fullName.localeCompare(b.fullName)));
+      setBulkSuccess(`${data.count} agent${data.count! > 1 ? 's' : ''} importé${data.count! > 1 ? 's' : ''}.`);
+      setBulkRows([]); setBulkText('');
+      setTimeout(() => setBulkSuccess(''), 5000);
+    }
+    setImportingBulk(false);
   }
 
   async function removeMember(id: string) {
@@ -382,8 +423,12 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
                     <AgentAvatar name={agent.fullName} photoUrl={agent.photoUrl} onClick={() => !isUploading && openPhotoUpload(agent.mit)} />
                     <div style={{ flex: '1 1 160px', minWidth: 0 }}>
                       <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{agent.fullName}</p>
-                      <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 1 }}>{agent.function}</p>
-                      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', marginTop: 2, letterSpacing: 1 }}>MIT: {agent.mit}</p>
+                      <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 1 }}>
+                        {agent.function}
+                        {agent.function && agent.zone && ' · '}
+                        {agent.zone && <span style={{ color: '#F59E0B' }}>📍 {agent.zone}</span>}
+                      </p>
+                      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', marginTop: 2, letterSpacing: 1 }}>{agent.mit}</p>
                     </div>
                     {/* Mini stats */}
                     <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
@@ -481,18 +526,60 @@ export default function TeamClient({ teamName: initialName, members: initialMemb
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>Nom complet *</label><input value={agentForm.fullName} onChange={e => setAgentForm(p => ({ ...p, fullName: e.target.value }))} placeholder="Mme Dupont Marie" style={inputStyle} /></div>
-                <div><label style={labelStyle}>Fonction</label><input value={agentForm.function} onChange={e => setAgentForm(p => ({ ...p, function: e.target.value }))} placeholder="Stagiaire — Agent de réservation" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Zone</label><input value={agentForm.zone} onChange={e => setAgentForm(p => ({ ...p, zone: e.target.value }))} placeholder="Cotonou Centre" style={inputStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <div><label style={labelStyle}>N° MIT *</label><input value={agentForm.mit} onChange={e => setAgentForm(p => ({ ...p, mit: e.target.value }))} placeholder="02657IT324940" style={inputStyle} /></div>
                 <div><label style={labelStyle}>Téléphone</label><input value={agentForm.phone} onChange={e => setAgentForm(p => ({ ...p, phone: e.target.value }))} placeholder="+229 01 00 00 00 00" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Fonction (optionnel)</label><input value={agentForm.function} onChange={e => setAgentForm(p => ({ ...p, function: e.target.value }))} placeholder="Agent commercial" style={inputStyle} /></div>
               </div>
+              <div><label style={labelStyle}>N° MIT (optionnel — généré si vide)</label><input value={agentForm.mit} onChange={e => setAgentForm(p => ({ ...p, mit: e.target.value }))} placeholder="02657IT324940" style={inputStyle} /></div>
               {agentError   && <p style={{ color: '#EF4444', fontSize: 13, background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: 6 }}>{agentError}</p>}
               {agentSuccess && <p style={{ color: '#10B981', fontSize: 13, background: 'rgba(16,185,129,0.08)', padding: '10px 14px', borderRadius: 6 }}>✓ {agentSuccess}</p>}
               <Button variant="gradient" size="md" loading={addingAgent} onClick={addAgent} style={{ width: '100%', background: 'linear-gradient(135deg, #4338CA, #6366F1)' }}>
                 Ajouter l&apos;agent
               </Button>
             </div>
+          </div>
+
+          {/* Bulk import agents */}
+          <div style={{ background: '#12141C', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, padding: 24 }}>
+            <p style={{ ...labelStyle, marginBottom: 4, color: '#F59E0B' }}>📋 Import en masse — agents commerciaux</p>
+            <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 18 }}>
+              Collez votre liste — une ligne par agent. Format : <strong style={{ color: '#9CA3AF' }}>Nom, Prénom, Numéro, Zone</strong> (séparés par une tabulation ou une virgule). Vous pouvez coller directement depuis Excel / Google Sheets.
+            </p>
+
+            <textarea
+              value={bulkText}
+              onChange={e => { setBulkText(e.target.value); parseBulkText(e.target.value); }}
+              placeholder={'Dupont, Marie, +229 01 23 45 67, Cotonou Centre\nKoffi, Jean, +229 09 87 65 43, Abomey-Calavi\n...'}
+              rows={6}
+              style={{ ...inputStyle, fontFamily: 'Space Mono, monospace', fontSize: 12, resize: 'vertical', marginBottom: 14 }}
+            />
+
+            {bulkRows.length > 0 && (
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ ...labelStyle, marginBottom: 8 }}>{bulkRows.length} agent{bulkRows.length > 1 ? 's' : ''} détecté{bulkRows.length > 1 ? 's' : ''}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 220, overflowY: 'auto' }}>
+                  {bulkRows.map((row, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 6, background: 'rgba(245,158,11,0.04)', border: '1px solid rgba(245,158,11,0.12)' }}>
+                      <span style={{ flex: '1 1 140px', color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.fullName}</span>
+                      <span style={{ flex: '0 1 130px', color: '#9CA3AF', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>{row.phone || '—'}</span>
+                      <span style={{ flex: '0 1 130px', color: '#F59E0B', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>{row.zone || '—'}</span>
+                      <button onClick={() => removeBulkRow(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', opacity: 0.6, padding: 4, flexShrink: 0 }}>
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {bulkError   && <p style={{ color: '#EF4444', fontSize: 13, background: 'rgba(239,68,68,0.08)', padding: '10px 14px', borderRadius: 6, marginBottom: 12 }}>{bulkError}</p>}
+            {bulkSuccess && <p style={{ color: '#10B981', fontSize: 13, background: 'rgba(16,185,129,0.08)', padding: '10px 14px', borderRadius: 6, marginBottom: 12 }}>✓ {bulkSuccess}</p>}
+
+            <Button variant="gradient" size="md" loading={importingBulk} disabled={bulkRows.length === 0} onClick={importBulk} style={{ width: '100%', background: 'linear-gradient(135deg, #F59E0B, #FBBF24)' }}>
+              Importer {bulkRows.length > 0 ? `${bulkRows.length} agent${bulkRows.length > 1 ? 's' : ''}` : 'les agents'}
+            </Button>
           </div>
         </div>
       )}

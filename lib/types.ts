@@ -259,6 +259,7 @@ export interface AgentCardDoc {
   function:   string;
   mit:        string;
   phone:      string;
+  zone?:      string;
   photoUrl?:  string;
   isActive:   boolean;
   createdAt:  string;

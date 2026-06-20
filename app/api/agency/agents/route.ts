@@ -3,19 +3,27 @@ import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import type { AgentCardDoc } from '@/lib/types';
 
+// Generates a unique-ish agent code from phone digits (or random) — used when no MIT is supplied.
+export function generateAgentCode(phone?: string): string {
+  const fromPhone = (phone ?? '').replace(/\D/g, '').slice(-6);
+  const suffix    = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${fromPhone || 'AG'}${suffix}`;
+}
+
 // POST — add a new agent
 export async function POST(req: NextRequest) {
   const user = await requireAuth();
   const body = await req.json() as {
-    fullName: string; function: string; mit: string; phone: string;
+    fullName: string; function?: string; mit?: string; phone?: string; zone?: string;
   };
 
-  const { fullName, function: fn, mit, phone } = body;
-  if (!fullName?.trim() || !mit?.trim()) {
-    return NextResponse.json({ error: 'Nom et MIT requis.' }, { status: 400 });
+  const { fullName, function: fn, mit, phone, zone } = body;
+  if (!fullName?.trim()) {
+    return NextResponse.json({ error: 'Nom requis.' }, { status: 400 });
   }
 
-  const safeMit = mit.trim().replace(/[^a-zA-Z0-9]/g, '');
+  const rawMit  = mit?.trim() || generateAgentCode(phone);
+  const safeMit = rawMit.replace(/[^a-zA-Z0-9]/g, '') || generateAgentCode(phone);
   const docId   = `${user.uid}_${safeMit}`;
 
   const agent: AgentCardDoc = {
@@ -25,6 +33,7 @@ export async function POST(req: NextRequest) {
     function:  fn?.trim() ?? '',
     mit:       safeMit,
     phone:     phone?.trim() ?? '',
+    zone:      zone?.trim() || undefined,
     isActive:  true,
     createdAt: new Date().toISOString(),
   };
