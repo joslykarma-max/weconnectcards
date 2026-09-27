@@ -6,11 +6,18 @@ import type { CardDoc, ProfileDoc, UserDoc } from '@/lib/types';
 export default async function CardPage() {
   const user = await requireAuth();
 
-  const [cardsSnap, profileSnap, userSnap] = await Promise.all([
+  const [cardsSnap, profileSnap, userSnap, ownProfilesSnap] = await Promise.all([
     adminDb.collection('cards').where('userId', '==', user.uid).get(),
     adminDb.collection('profiles').doc(user.uid).get(),
     adminDb.collection('users').doc(user.uid).get(),
+    adminDb.collection('profiles').where('uid', '==', user.uid).get(),
   ]);
+
+  const usernameByProfile = new Map(
+    ownProfilesSnap.docs.map((d) => [d.id, (d.data() as ProfileDoc).username]),
+  );
+  // Older main profiles may lack the uid field
+  if (profileSnap.exists) usernameByProfile.set(user.uid, (profileSnap.data() as ProfileDoc).username);
 
   const cards = cardsSnap.docs
     .map((d) => {
@@ -24,6 +31,8 @@ export default async function CardPage() {
         activatedAt:    data.activatedAt    ?? null,
         delivery:       data.delivery       ?? null,
         selectedModule: data.selectedModule ?? null,
+        profileId:      data.profileId      ?? null,
+        profileUsername: data.profileId ? (usernameByProfile.get(data.profileId) ?? null) : null,
       };
     })
     .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt));

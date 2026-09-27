@@ -21,7 +21,7 @@ export async function GET(
     return NextResponse.redirect(`${base}/activate?nfc=${id}`);
   }
 
-  const profileSnap = await adminDb.collection('profiles').doc(card.userId).get();
+  const profileSnap = await adminDb.collection('profiles').doc(card.profileId ?? card.userId).get();
   if (!profileSnap.exists) {
     return NextResponse.redirect(`${base}/dashboard`);
   }
@@ -35,6 +35,7 @@ export async function GET(
   const logScan = () => adminDb.collection('scans').add({
     userId:    card.userId,
     nfcId:     id,
+    ...(card.profileId && card.profileId !== card.userId ? { profileId: card.profileId } : {}),
     device:    'nfc',
     userAgent: req.headers.get('user-agent')?.slice(0, 512) ?? '',
     scannedAt: new Date().toISOString(),

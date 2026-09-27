@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase-admin';
+import { resolveUsername } from '@/lib/profiles';
 import ProfilePublic from '@/components/profile/ProfilePublic';
 import { getDeviceFromUA } from '@/lib/utils';
 import { headers } from 'next/headers';
@@ -26,11 +27,10 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
 
-  const usernameSnap = await adminDb.collection('usernames').doc(username).get();
-  if (!usernameSnap.exists) return { title: 'Profil introuvable — We Connect' };
+  const resolved = await resolveUsername(username);
+  if (!resolved) return { title: 'Profil introuvable — We Connect' };
 
-  const { uid } = usernameSnap.data() as { uid: string };
-  const profileSnap = await adminDb.collection('profiles').doc(uid).get();
+  const profileSnap = await adminDb.collection('profiles').doc(resolved.profileId).get();
   if (!profileSnap.exists) return { title: 'Profil introuvable — We Connect' };
 
   const profile = profileSnap.data() as ProfileDoc;
@@ -51,15 +51,15 @@ export default async function ProfilePage({ params, searchParams }: Props) {
   const { mode } = await searchParams;
   const previewMode = (mode === 'classic' || mode === 'grid' || mode === 'card') ? mode : null;
 
-  const usernameSnap = await adminDb.collection('usernames').doc(username).get();
-  if (!usernameSnap.exists) notFound();
+  const resolved = await resolveUsername(username);
+  if (!resolved) notFound();
 
-  const { uid } = usernameSnap.data() as { uid: string };
+  const { uid, profileId } = resolved;
 
   const [profileSnap, userSnap, linksSnap, modulesSnap] = await Promise.all([
-    adminDb.collection('profiles').doc(uid).get(),
+    adminDb.collection('profiles').doc(profileId).get(),
     adminDb.collection('users').doc(uid).get(),
-    adminDb.collection('profiles').doc(uid).collection('links').get(),
+    adminDb.collection('profiles').doc(profileId).collection('links').get(),
     adminDb.collection('modules').where('profileId', '==', uid).where('isActive', '==', true).get(),
   ]);
 
@@ -92,6 +92,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
 
     adminDb.collection('scans').add({
       userId:    uid,
+      ...(profileId !== uid ? { profileId } : {}),
       device,
       userAgent: ua.slice(0, 512),
       scannedAt: new Date().toISOString(),

@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { getOwnedProfileId } from '@/lib/profiles';
 
 export async function POST(req: NextRequest) {
-  const user = await requireAuth();
+  const user      = await requireAuth();
+  const profileId = await getOwnedProfileId(user.uid, new URL(req.url).searchParams.get('profileId'));
+  if (!profileId) return NextResponse.json({ error: 'Profil introuvable.' }, { status: 404 });
 
   const formData = await req.formData();
   const file     = formData.get('file') as File | null;
@@ -39,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   const avatarUrl = `https://storage.googleapis.com/${bucket.name}/${filePath}`;
 
-  await adminDb.collection('profiles').doc(user.uid).set(
+  await adminDb.collection('profiles').doc(profileId).set(
     { avatar: avatarUrl, updatedAt: new Date().toISOString() },
     { merge: true },
   );

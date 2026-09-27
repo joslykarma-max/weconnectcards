@@ -26,6 +26,8 @@ type Card = {
   activatedAt?:   string | null;
   delivery?:      DeliveryInfo | null;
   selectedModule?: string | null;
+  profileId?:      string | null;
+  profileUsername?: string | null;
 };
 
 type Profile = {
@@ -840,6 +842,93 @@ function ModulePickerModal({
   );
 }
 
+// ─── Activate Card Modal ──────────────────────────────────────────────────────
+
+function ActivateCardModal({
+  card,
+  onClose,
+  onActivated,
+}: {
+  card: Card;
+  onClose: () => void;
+  onActivated: () => void;
+}) {
+  const [code, setCode]     = useState(card.nfcId ?? '');
+  const [saving, setSaving] = useState(false);
+  const [error, setError]   = useState('');
+  const edStyle = EDITION_STYLES[card.edition] ?? EDITION_STYLES.midnight;
+
+  async function handleActivate() {
+    if (!code.trim()) { setError('Entre le code NFC de cette carte.'); return; }
+    setSaving(true);
+    setError('');
+    const res  = await fetch('/api/activate', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ nfcId: code, cardId: card.id }),
+    });
+    const data = await res.json() as { error?: string };
+    if (!res.ok) { setError(data.error ?? 'Erreur.'); setSaving(false); return; }
+    onActivated();
+  }
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'var(--t-surface)', border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 16, width: '100%', maxWidth: 440, padding: 32, position: 'relative',
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t-text-muted)', fontSize: 20 }}
+        >
+          ✕
+        </button>
+
+        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+          Activer cette carte
+        </h3>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20, fontFamily: 'DM Sans, sans-serif' }}>
+          {edStyle.name} · Commandée le{' '}
+          {new Date(card.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+          <br />
+          Entre le code NFC imprimé dans l&apos;emballage de cette carte.
+        </p>
+
+        <input
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="WC-XXXXXX"
+          autoFocus
+          style={{
+            width: '100%', marginBottom: 10,
+            background: 'rgba(255,255,255,0.03)',
+            border: `1px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: 8, padding: '10px 14px',
+            color: 'var(--t-text)', fontFamily: 'Space Mono, monospace',
+            fontSize: 13, letterSpacing: 3, outline: 'none', boxSizing: 'border-box',
+          }}
+        />
+        {error && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10 }}>{error}</p>}
+
+        <Button variant="gradient" size="md" loading={saving} onClick={handleActivate} style={{ width: '100%' }}>
+          {saving ? 'Activation...' : 'Activer ma carte ⚡'}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Payment success banner ───────────────────────────────────────────────────
 
 function PaymentSuccessBanner() {
@@ -886,6 +975,23 @@ function CardsClientInner({ cards, profile, userPlan }: {
   const router = useRouter();
   const [orderOpen, setOrderOpen]     = useState(false);
   const [modulePicker, setModulePicker] = useState<Card | null>(null);
+  const [activateTarget, setActivateTarget] = useState<Card | null>(null);
+  const [openingProfile, setOpeningProfile] = useState<string | null>(null);
+
+  async function openCardProfile(card: Card) {
+    setOpeningProfile(card.id);
+    const res  = await fetch('/api/cards/profile', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cardId: card.id }),
+    });
+    const data = await res.json() as { profileId?: string; isMain?: boolean; error?: string };
+    if (!res.ok || !data.profileId) {
+      setOpeningProfile(null);
+      alert(data.error ?? 'Impossible d\'ouvrir le profil de cette carte.');
+      return;
+    }
+    router.push(data.isMain ? '/dashboard/profile' : `/dashboard/profile?profile=${data.profileId}`);
+  }
   const [nfcCode, setNfcCode]         = useState('');
   const [activating, setActivating]   = useState(false);
   const [activateError, setActivateError] = useState('');
@@ -941,13 +1047,23 @@ function CardsClientInner({ cards, profile, userPlan }: {
             const status   = STATUS_BADGE[card.status] ?? STATUS_BADGE.pending;
             const edStyle  = EDITION_STYLES[card.edition] ?? EDITION_STYLES.midnight;
             const canPickModule = isEssentiel && card.status === 'active';
+            const canActivate   = card.status === 'pending' || card.status === 'shipped';
 
             return (
-              <div key={card.id} style={{
-                background: 'var(--t-surface)',
-                border: `1px solid ${card.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: 10, padding: '16px 20px',
-              }}>
+              <div
+                key={card.id}
+                role="button"
+                tabIndex={0}
+                title="Configurer le profil de cette carte"
+                onClick={() => openCardProfile(card)}
+                onKeyDown={(e) => { if (e.key === 'Enter') openCardProfile(card); }}
+                style={{
+                  background: 'var(--t-surface)',
+                  border: `1px solid ${card.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)'}`,
+                  borderRadius: 10, padding: '16px 20px', cursor: 'pointer',
+                  opacity: openingProfile === card.id ? 0.6 : 1,
+                }}
+              >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                   <div style={{
                     width: 40, height: 28, borderRadius: 6, flexShrink: 0,
@@ -967,6 +1083,11 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       {edStyle.name} · Commandée le{' '}
                       {new Date(card.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </p>
+                    <p style={{ color: '#818CF8', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                      👤 {card.profileUsername
+                        ? `Profil : /${card.profileUsername}`
+                        : 'Profil non configuré — clique pour le créer'}
+                    </p>
                     {card.delivery && (
                       <p style={{ color: 'var(--t-text-muted)', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
                         📦 {card.delivery.city}, {COUNTRIES[card.delivery.country]?.label ?? card.delivery.country}
@@ -983,6 +1104,22 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       </p>
                     )}
                   </div>
+                  <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <Button
+                    variant="ghost" size="sm"
+                    loading={openingProfile === card.id}
+                    onClick={() => openCardProfile(card)}
+                  >
+                    👤 Configurer le profil
+                  </Button>
+                  {canActivate && (
+                    <Button
+                      variant="gradient" size="sm"
+                      onClick={() => setActivateTarget(card)}
+                    >
+                      Activer cette carte ⚡
+                    </Button>
+                  )}
                   {canPickModule && (
                     <Button
                       variant="ghost" size="sm"
@@ -990,7 +1127,7 @@ function CardsClientInner({ cards, profile, userPlan }: {
                     >
                       {card.selectedModule
                         ? `Module: ${MODULES.find((m) => m.id === card.selectedModule)?.label ?? card.selectedModule}`
-                        : '🔧 Choisir mon module'}
+                        : '🔧 Choisir le module'}
                     </Button>
                   )}
                   {card.selectedModule && card.status === 'active' && (
@@ -998,6 +1135,7 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       ✓ Activée
                     </span>
                   )}
+                  </div>
                 </div>
               </div>
             );
@@ -1081,6 +1219,19 @@ function CardsClientInner({ cards, profile, userPlan }: {
 
       {/* Modals */}
       {orderOpen && <OrderModal profile={profile} onClose={() => setOrderOpen(false)} />}
+      {activateTarget && (
+        <ActivateCardModal
+          card={activateTarget}
+          onClose={() => setActivateTarget(null)}
+          onActivated={() => {
+            const activated = activateTarget;
+            setActivateTarget(null);
+            // Essentiel: enchaîne directement sur la configuration du module
+            if (isEssentiel) setModulePicker({ ...activated, status: 'active' });
+            router.refresh();
+          }}
+        />
+      )}
       {modulePicker && (
         <ModulePickerModal
           card={modulePicker}

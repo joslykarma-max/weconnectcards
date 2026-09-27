@@ -18,6 +18,17 @@ export async function DELETE() {
   const username    = profileSnap.exists ? (profileSnap.data() as { username?: string }).username : null;
   if (username) batch.delete(adminDb.collection('usernames').doc(username));
 
+  // Card-specific profiles (+ their links and usernames)
+  const cardProfilesSnap = await adminDb.collection('profiles').where('uid', '==', uid).get();
+  for (const d of cardProfilesSnap.docs) {
+    if (d.id === uid) continue;
+    const cardLinksSnap = await d.ref.collection('links').get();
+    cardLinksSnap.docs.forEach((l) => batch.delete(l.ref));
+    const cardUsername = (d.data() as { username?: string }).username;
+    if (cardUsername) batch.delete(adminDb.collection('usernames').doc(cardUsername));
+    batch.delete(d.ref);
+  }
+
   // User doc
   batch.delete(adminDb.collection('users').doc(uid));
 

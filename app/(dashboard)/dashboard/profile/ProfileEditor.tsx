@@ -248,8 +248,18 @@ const THEMES = [
   { value: 'metal',    label: 'Metal',    bg: 'linear-gradient(135deg, #111827, #1f2937)' },
 ];
 
-export default function ProfileEditor({ profile }: { profile: Profile }) {
+type ProfileOption = { id: string; label: string; username: string };
+
+export default function ProfileEditor({ profile, profileId, isMain, profiles }: {
+  profile:   Profile;
+  profileId: string;
+  isMain:    boolean;
+  profiles:  ProfileOption[];
+}) {
   const router = useRouter();
+  // Targets the edited profile in API calls (main profile needs no param)
+  const q = isMain ? '' : `profileId=${encodeURIComponent(profileId)}`;
+  const withQ = (url: string) => q ? `${url}${url.includes('?') ? '&' : '?'}${q}` : url;
   const [form, setForm] = useState({
     displayName: profile?.displayName ?? '',
     title:       profile?.title ?? '',
@@ -280,13 +290,14 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   const [newLinkValue, setNewLinkValue] = useState('');
   const [newLinkLabel, setNewLinkLabel] = useState(LINK_FORM_CONFIG['phone'].autoLabel);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   async function uploadAvatar(file: File) {
     setUploading(true);
     try {
       const fd = new FormData();
       fd.append('file', file);
-      const res  = await fetch('/api/profile/avatar', { method: 'POST', body: fd });
+      const res  = await fetch(withQ('/api/profile/avatar'), { method: 'POST', body: fd });
       const data = await res.json() as { url?: string; error?: string };
       if (data.url) setAvatar(data.url);
       else alert(data.error ?? 'Erreur lors de l\'upload.');
@@ -326,12 +337,19 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
 
   async function saveProfile() {
     setSaving(true);
-    await fetch('/api/profile', {
+    setSaveError('');
+    const res = await fetch(withQ('/api/profile'), {
       method:  'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ ...form, backgroundImage: bgImage ?? null, displayMode, hiddenFields, inDirectory, sector: sector || null }),
     });
     setSaving(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({})) as { error?: string };
+      setSaveError(d.error ?? 'Erreur lors de l\'enregistrement.');
+      return;
+    }
+    router.refresh();
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
@@ -340,7 +358,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     if (!newLinkValue.trim() || !newLinkLabel.trim()) return;
     const cfg = LINK_FORM_CONFIG[newLinkType] ?? LINK_FORM_CONFIG['custom'];
     const url = cfg.buildUrl(newLinkValue);
-    const res = await fetch('/api/links', {
+    const res = await fetch(withQ('/api/links'), {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ type: newLinkType, label: newLinkLabel, url }),
@@ -358,7 +376,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   }
 
   async function deleteLink(id: string) {
-    await fetch(`/api/links?id=${id}`, { method: 'DELETE' });
+    await fetch(withQ(`/api/links?id=${id}`), { method: 'DELETE' });
     setLinks((prev) => prev.filter((l) => l.id !== id));
   }
 
@@ -384,7 +402,7 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
   async function saveEdit(id: string) {
     if (!editLabel.trim() || !editUrl.trim()) return;
     setSavingEdit(true);
-    const res = await fetch('/api/links', {
+    const res = await fetch(withQ('/api/links'), {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, type: editType, label: editLabel, url: editUrl }),
     });
@@ -402,6 +420,34 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
     <div ref={containerRef} style={{ width, maxWidth: '100%', display: 'flex', alignItems: 'stretch', gap: 0, position: 'relative' }}>
       {/* Profile form (left column) */}
       <div style={{ flex: `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+        {profiles.length > 1 && (
+          <Card padding="md">
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>
+              Profil en cours d&apos;édition
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {profiles.map((p) => {
+                const current = p.id === profileId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}
+                    style={{
+                      padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+                      background: current ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${current ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
+                      color: current ? '#818CF8' : '#9CA3AF',
+                      fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: current ? 600 : 400,
+                    }}
+                  >
+                    {p.label}
+                    <span style={{ display: 'block', fontSize: 11, opacity: 0.7 }}>/{p.username}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        )}
         <Card padding="md">
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
             Photo de profil
@@ -671,6 +717,9 @@ export default function ProfileEditor({ profile }: { profile: Profile }) {
         <Button variant="gradient" size="lg" loading={saving} onClick={saveProfile} style={{ width: '100%' }}>
           {saved ? '✓ Sauvegardé !' : saving ? 'Sauvegarde...' : 'Sauvegarder le profil'}
         </Button>
+        {saveError && (
+          <p style={{ color: '#F87171', fontSize: 13, fontFamily: 'DM Sans, sans-serif', marginTop: -8 }}>{saveError}</p>
+        )}
       </div>
 
       {/* Middle drag handle (split ratio) */}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { resolveUsername } from '@/lib/profiles';
 import { getDeviceFromUA } from '@/lib/utils';
 
 export async function GET(
@@ -10,13 +11,13 @@ export async function GET(
   const baseUrl = process.env.NEXT_PUBLIC_URL ?? 'http://localhost:3000';
 
   // Resolve username → uid
-  const usernameSnap = await adminDb.collection('usernames').doc(username).get();
-  if (!usernameSnap.exists) return NextResponse.redirect(`${baseUrl}/`);
+  const resolved = await resolveUsername(username);
+  if (!resolved) return NextResponse.redirect(`${baseUrl}/`);
 
-  const { uid } = usernameSnap.data() as { uid: string };
+  const { uid, profileId } = resolved;
 
   // Check profile is public
-  const profileSnap = await adminDb.collection('profiles').doc(uid).get();
+  const profileSnap = await adminDb.collection('profiles').doc(profileId).get();
   if (!profileSnap.exists || !(profileSnap.data() as { isPublic?: boolean }).isPublic) {
     return NextResponse.redirect(`${baseUrl}/`);
   }
@@ -26,6 +27,7 @@ export async function GET(
 
   adminDb.collection('scans').add({
     userId:    uid,
+    ...(profileId !== uid ? { profileId } : {}),
     device,
     userAgent: ua.slice(0, 512),
     scannedAt: new Date().toISOString(),

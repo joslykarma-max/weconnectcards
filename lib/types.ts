@@ -10,7 +10,7 @@ export interface UserDoc {
   updatedAt?:        string;
 }
 
-// Collection: profiles/{uid}
+// Collection: profiles/{uid} (main profile) or profiles/{autoId} (card profile, cardId set)
 export interface ProfileDoc {
   uid:         string;
   username:    string;
@@ -26,6 +26,7 @@ export interface ProfileDoc {
   inDirectory?:     boolean;
   sector?:          string;
   isPublic:         boolean;
+  cardId?:          string; // set on a card-specific profile
   updatedAt:        string;
 }
 
@@ -102,6 +103,7 @@ export interface CardDoc {
   selectedModule?: string;
   accessCardId?:   string;
   memberCardId?:   string;
+  profileId?:      string; // dedicated profile; absent → main profile (profiles/{userId})
 }
 
 // Collection: pendingOrders/{uid}
