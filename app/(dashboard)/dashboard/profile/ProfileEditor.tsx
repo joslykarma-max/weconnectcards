@@ -12,6 +12,19 @@ import { SECTORS } from '@/lib/sectors';
 const LS_SPLIT  = 'profile-split-pct';
 const LS_WIDTH  = 'profile-total-width';
 
+/** True below the breakpoint — the editor then stacks into a single column. */
+function useIsMobile(breakpoint = 900) {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, [breakpoint]);
+  return isMobile;
+}
+
 function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
   const [pct, setPct]       = useState(initialSplit);
   const [width, setWidth]   = useState(initialWidth);
@@ -415,11 +428,16 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
   }
 
   const { pct, width, containerRef, onSplitDown, onWidthDown } = useResizableLayout(50, 1100);
+  const isMobile = useIsMobile();
 
   return (
-    <div ref={containerRef} style={{ width, maxWidth: '100%', display: 'flex', alignItems: 'stretch', gap: 0, position: 'relative' }}>
+    <div ref={containerRef} style={{
+      width: isMobile ? '100%' : width, maxWidth: '100%', display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row', alignItems: 'stretch',
+      gap: isMobile ? 20 : 0, position: 'relative',
+    }}>
       {/* Profile form (left column) */}
-      <div style={{ flex: `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
+      <div style={{ flex: isMobile ? '1 1 auto' : `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
         {profiles.length > 1 && (
           <Card padding="md">
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>
@@ -434,6 +452,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
                     onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}
                     style={{
                       padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
+                      flex: isMobile ? '1 1 140px' : undefined, minWidth: 0, overflowWrap: 'anywhere',
                       background: current ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
                       border: `1px solid ${current ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
                       color: current ? '#818CF8' : '#9CA3AF',
@@ -452,7 +471,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
           <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
             Photo de profil
           </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 4, flexWrap: 'wrap' }}>
             <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #06B6D4)', padding: 2, flexShrink: 0 }}>
               <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#12141C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {avatar ? (
@@ -615,7 +634,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
                   <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     Image définie
                   </p>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     <Button variant="secondary" size="sm" loading={uploadingBg} onClick={() => bgFileInputRef.current?.click()}>
                       Changer
                     </Button>
@@ -653,7 +672,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
           </p>
 
           {/* Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: inDirectory ? 16 : 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: inDirectory ? 16 : 0 }}>
             <div>
               <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#F8F9FC', fontWeight: 600 }}>
                 Visible dans l'annuaire
@@ -723,7 +742,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
       </div>
 
       {/* Middle drag handle (split ratio) */}
-      <div
+      {!isMobile && <div
         onMouseDown={onSplitDown}
         onTouchStart={onSplitDown}
         style={{
@@ -748,7 +767,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
         />
-      </div>
+      </div>}
 
       {/* Links */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
@@ -997,7 +1016,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
                 <iframe
                   key={displayMode}
                   src={`/${profile.username}?mode=${displayMode}`}
-                  style={{ width: '100%', height: 480, border: 'none', display: 'block' }}
+                  style={{ width: '100%', height: isMobile ? 560 : 480, border: 'none', display: 'block' }}
                   title="Aperçu profil"
                 />
               </div>
@@ -1017,7 +1036,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
       </div>
 
       {/* Right-edge resize handle (total width) */}
-      <div
+      {!isMobile && <div
         onMouseDown={onWidthDown}
         onTouchStart={onWidthDown}
         style={{
@@ -1042,7 +1061,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
           onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
           onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
         />
-      </div>
+      </div>}
     </div>
   );
 }
