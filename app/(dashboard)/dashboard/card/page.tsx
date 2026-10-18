@@ -19,6 +19,8 @@ export default async function CardPage() {
   // Older main profiles may lack the uid field
   if (profileSnap.exists) usernameByProfile.set(user.uid, (profileSnap.data() as ProfileDoc).username);
 
+  const nfcById = new Map(cardsSnap.docs.map((d) => [d.id, (d.data() as CardDoc).nfcId ?? null]));
+
   const cards = cardsSnap.docs
     .map((d) => {
       const data = d.data() as CardDoc;
@@ -33,6 +35,11 @@ export default async function CardPage() {
         selectedModule: data.selectedModule ?? null,
         profileId:      data.profileId      ?? null,
         profileUsername: data.profileId ? (usernameByProfile.get(data.profileId) ?? null) : null,
+        deactivatedAt:      data.deactivatedAt      ?? null,
+        deactivationReason: data.deactivationReason ?? null,
+        replacedBy:         data.replacedBy         ?? null,
+        replacedByNfc:      data.replacedBy ? (nfcById.get(data.replacedBy) ?? null) : null,
+        replacesNfc:        data.replaces   ? (nfcById.get(data.replaces)   ?? null) : null,
       };
     })
     .sort((a, b) => b.orderedAt.localeCompare(a.orderedAt));

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { DEACTIVATION_REASONS } from '@/lib/cards';
+import type { DeactivationReason } from '@/lib/types';
 
 type DeliveryInfo = {
   fullName: string;
@@ -38,6 +40,7 @@ export type AdminCard = {
   orderedAt: string;
   activatedAt?: string | null;
   delivery?: DeliveryInfo | null;
+  deactivationReason?: DeactivationReason | null;
   user: { displayName: string; email: string; plan: string; username?: string } | null;
 };
 
@@ -54,6 +57,7 @@ const STATUS_COLORS: Record<string, string> = {
   shipped:  '#F59E0B',
   active:   '#10B981',
   inactive: '#6B7280',
+  deactivated: '#F87171',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -61,6 +65,7 @@ const STATUS_LABELS: Record<string, string> = {
   shipped:  'Expédiée',
   active:   'Activée',
   inactive: 'Inactive',
+  deactivated: 'Désactivée',
 };
 
 const TABS = ['pending', 'shipped', 'active', 'all'] as const;
@@ -331,6 +336,11 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
                   {card.status === 'active' && (
                     <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#10B981', letterSpacing: 1, textTransform: 'uppercase' }}>
                       ✓ Active
+                    </span>
+                  )}
+                  {card.status === 'deactivated' && (
+                    <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#F87171', letterSpacing: 1, textTransform: 'uppercase' }}>
+                      {card.deactivationReason ? DEACTIVATION_REASONS[card.deactivationReason] : 'Désactivée'}
                     </span>
                   )}
                   {/* Edit button for all non-pending cards */}

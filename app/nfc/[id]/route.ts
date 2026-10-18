@@ -18,6 +18,11 @@ export async function GET(
 
   const card = snap.docs[0].data() as CardDoc;
 
+  // Switched off by its owner (lost, stolen…) — never reveal the profile
+  if (card.status === 'deactivated') {
+    return NextResponse.redirect(`${base}/carte-perdue`);
+  }
+
   if (card.status !== 'active' || !card.userId) {
     return NextResponse.redirect(`${base}/activate?nfc=${id}`);
   }

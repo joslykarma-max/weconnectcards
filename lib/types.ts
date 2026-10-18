@@ -96,7 +96,7 @@ export interface CardDoc {
   pvcColor?:       'white' | 'black';
   customization?:  CardCustomization;
   nfcId?:          string;
-  status:          'in_stock' | 'pending' | 'shipped' | 'active' | 'inactive';
+  status:          'in_stock' | 'pending' | 'shipped' | 'active' | 'inactive' | 'deactivated';
   orderedAt?:      string;
   stockedAt?:      string;
   activatedAt?:    string;
@@ -105,7 +105,15 @@ export interface CardDoc {
   accessCardId?:   string;
   memberCardId?:   string;
   profileId?:      string; // dedicated profile; absent → main profile (profiles/{userId})
+  // "Changer ma carte": the owner switched this card off, then links a replacement
+  deactivatedAt?:      string;
+  deactivationReason?: DeactivationReason;
+  deactivationNote?:   string;
+  replacedBy?:         string; // id of the card that took over this one
+  replaces?:           string; // id of the card this one took over
 }
+
+export type DeactivationReason = 'lost' | 'stolen' | 'damaged' | 'other';
 
 // Collection: pendingOrders/{uid}
 export interface PendingOrderDoc {

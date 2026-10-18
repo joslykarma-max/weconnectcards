@@ -33,6 +33,7 @@ export default async function AdminCardsPage() {
       orderedAt:     c.orderedAt ?? new Date(0).toISOString(),
       activatedAt:   c.activatedAt ?? null,
       delivery:      c.delivery ?? null,
+      deactivationReason: c.deactivationReason ?? null,
       user: userMap[c.userId!]
         ? {
             displayName: userMap[c.userId!].displayName,

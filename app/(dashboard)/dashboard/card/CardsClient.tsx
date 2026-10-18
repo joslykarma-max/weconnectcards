@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import LogoSymbol from '@/components/logo/LogoSymbol';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import { DEACTIVATION_REASONS } from '@/lib/cards';
+import type { DeactivationReason } from '@/lib/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -28,6 +30,11 @@ type Card = {
   selectedModule?: string | null;
   profileId?:      string | null;
   profileUsername?: string | null;
+  deactivatedAt?:      string | null;
+  deactivationReason?: DeactivationReason | null;
+  replacedBy?:         string | null;
+  replacedByNfc?:      string | null;
+  replacesNfc?:        string | null;
 };
 
 type Profile = {
@@ -53,6 +60,7 @@ const STATUS_BADGE: Record<string, { variant: BadgeVariant; label: string; desc:
   pending:  { variant: 'warning',  label: 'En attente',      desc: 'En cours de préparation'          },
   shipped:  { variant: 'electric', label: 'En transit',      desc: 'Expédiée, livraison en cours'     },
   inactive: { variant: 'neutral',  label: 'Expirée',         desc: 'Carte désactivée'                 },
+  deactivated: { variant: 'danger', label: 'Désactivée',     desc: 'Remplacée ou en attente de remplacement' },
 };
 
 const COUNTRIES = {
@@ -929,6 +937,206 @@ function ActivateCardModal({
   );
 }
 
+// ─── Replace Card Modal ("Changer ma carte") ──────────────────────────────────
+
+function ReplaceCardModal({
+  card,
+  initialStep,
+  onClose,
+  onChanged,
+}: {
+  card: Card;
+  initialStep: 'reason' | 'code';
+  onClose: () => void;
+  onChanged: () => void;
+}) {
+  const [step, setStep]               = useState(initialStep);
+  const [reason, setReason]           = useState<DeactivationReason | ''>('');
+  const [note, setNote]               = useState('');
+  const [code, setCode]               = useState('');
+  const [saving, setSaving]           = useState(false);
+  const [error, setError]             = useState('');
+  const [justDeactivated, setJustDeactivated] = useState(false);
+  const [done, setDone]               = useState(false);
+
+  async function post(url: string, body: Record<string, unknown>) {
+    setSaving(true);
+    setError('');
+    const res  = await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({})) as { error?: string };
+    setSaving(false);
+    if (!res.ok) { setError(data.error ?? 'Erreur.'); return false; }
+    return true;
+  }
+
+  async function handleDeactivate() {
+    if (!reason) { setError('Choisis un motif.'); return; }
+    if (reason === 'other' && !note.trim()) { setError('Précise le motif.'); return; }
+    if (await post('/api/cards/deactivate', { cardId: card.id, reason, note })) {
+      setJustDeactivated(true);
+      setStep('code');
+      onChanged();
+    }
+  }
+
+  async function handleReplace() {
+    if (!code.trim()) { setError('Entre le code NFC de ta nouvelle carte.'); return; }
+    if (await post('/api/cards/replace', { cardId: card.id, nfcId: code })) {
+      setDone(true);
+      onChanged();
+    }
+  }
+
+  const oldLabel = card.nfcId ? `la carte ${card.nfcId}` : 'l\'ancienne carte';
+  const text: React.CSSProperties = { color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 };
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 1000,
+        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          background: 'var(--t-surface)', border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 16, width: '100%', maxWidth: 460, padding: 32, position: 'relative',
+          maxHeight: 'calc(100vh - 32px)', overflowY: 'auto',
+        }}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Fermer"
+          style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t-text-muted)', fontSize: 20 }}
+        >
+          ✕
+        </button>
+
+        {done ? (
+          <>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+              Nouvelle carte connectée ✅
+            </h3>
+            <p style={text}>
+              Ta nouvelle carte affiche maintenant ton profil, tes liens et tes modules.
+            </p>
+            <Button variant="gradient" size="md" onClick={onClose} style={{ width: '100%' }}>
+              Terminer
+            </Button>
+          </>
+        ) : step === 'reason' ? (
+          <>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+              Changer ma carte
+            </h3>
+            <p style={text}>Pourquoi changes-tu {oldLabel} ?</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 12 }}>
+              {(Object.entries(DEACTIVATION_REASONS) as [DeactivationReason, string][]).map(([value, label]) => (
+                <button
+                  key={value}
+                  onClick={() => { setReason(value); setError(''); }}
+                  style={{
+                    padding: '10px 12px', borderRadius: 8, cursor: 'pointer',
+                    background: reason === value ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                    border: `1.5px solid ${reason === value ? '#6366F1' : 'rgba(255,255,255,0.08)'}`,
+                    color: 'var(--t-text)', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
+                    fontWeight: reason === value ? 600 : 400,
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            {reason === 'other' && (
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                maxLength={300}
+                placeholder="Précise le motif…"
+                style={{
+                  width: '100%', minHeight: 70, marginBottom: 12, resize: 'vertical',
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: 8, padding: '10px 14px', color: 'var(--t-text)',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+            )}
+
+            <div style={{
+              background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)',
+              borderRadius: 8, padding: '10px 14px', marginBottom: 16,
+              color: 'var(--t-text-muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6,
+            }}>
+              L&apos;ancienne carte sera désactivée tout de suite : la taper affichera
+              « Cette carte a été perdue, contactez We Connect ». Ton profil, tes liens et
+              tes modules sont conservés et passeront sur ta nouvelle carte.
+            </div>
+
+            {error && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10 }}>{error}</p>}
+
+            <Button variant="danger" size="md" loading={saving} onClick={handleDeactivate} style={{ width: '100%' }}>
+              {saving ? 'Désactivation...' : 'Désactiver l\'ancienne carte'}
+            </Button>
+          </>
+        ) : (
+          <>
+            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+              Connecter ma nouvelle carte
+            </h3>
+            {justDeactivated && (
+              <p style={{ color: '#10B981', fontSize: 12, marginBottom: 8, fontFamily: 'DM Sans, sans-serif' }}>
+                ✓ Ancienne carte désactivée.
+              </p>
+            )}
+            <p style={text}>
+              Entre le code NFC imprimé dans l&apos;emballage de ta nouvelle carte.
+              Elle reprendra le profil, les liens et les modules de {oldLabel}.
+            </p>
+
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              placeholder="WC-XXXXXX"
+              autoFocus
+              style={{
+                width: '100%', marginBottom: 10,
+                background: 'rgba(255,255,255,0.03)',
+                border: `1px solid ${error ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 8, padding: '10px 14px',
+                color: 'var(--t-text)', fontFamily: 'Space Mono, monospace',
+                fontSize: 13, letterSpacing: 3, outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            {error && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10 }}>{error}</p>}
+
+            <Button variant="gradient" size="md" loading={saving} onClick={handleReplace} style={{ width: '100%' }}>
+              {saving ? 'Connexion...' : 'Connecter ma nouvelle carte ⚡'}
+            </Button>
+            <button
+              onClick={onClose}
+              style={{
+                display: 'block', width: '100%', marginTop: 12, background: 'none', border: 'none',
+                cursor: 'pointer', color: 'var(--t-text-muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif',
+              }}
+            >
+              Plus tard — je la connecterai depuis « Mes cartes »
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Payment success banner ───────────────────────────────────────────────────
 
 function PaymentSuccessBanner() {
@@ -976,9 +1184,11 @@ function CardsClientInner({ cards, profile, userPlan }: {
   const [orderOpen, setOrderOpen]     = useState(false);
   const [modulePicker, setModulePicker] = useState<Card | null>(null);
   const [activateTarget, setActivateTarget] = useState<Card | null>(null);
+  const [replaceTarget, setReplaceTarget]   = useState<{ card: Card; step: 'reason' | 'code' } | null>(null);
   const [openingProfile, setOpeningProfile] = useState<string | null>(null);
 
   async function openCardProfile(card: Card) {
+    if (card.status === 'deactivated') return;
     setOpeningProfile(card.id);
     const res  = await fetch('/api/cards/profile', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1048,20 +1258,21 @@ function CardsClientInner({ cards, profile, userPlan }: {
             const edStyle  = EDITION_STYLES[card.edition] ?? EDITION_STYLES.midnight;
             const canPickModule = isEssentiel && card.status === 'active';
             const canActivate   = card.status === 'pending' || card.status === 'shipped';
+            const isDeactivated = card.status === 'deactivated';
 
             return (
               <div
                 key={card.id}
-                role="button"
-                tabIndex={0}
-                title="Configurer le profil de cette carte"
+                role={isDeactivated ? undefined : 'button'}
+                tabIndex={isDeactivated ? undefined : 0}
+                title={isDeactivated ? undefined : 'Configurer le profil de cette carte'}
                 onClick={() => openCardProfile(card)}
                 onKeyDown={(e) => { if (e.key === 'Enter') openCardProfile(card); }}
                 style={{
                   background: 'var(--t-surface)',
                   border: `1px solid ${card.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 10, padding: '16px 20px', cursor: 'pointer',
-                  opacity: openingProfile === card.id ? 0.6 : 1,
+                  borderRadius: 10, padding: '16px 20px', cursor: isDeactivated ? 'default' : 'pointer',
+                  opacity: openingProfile === card.id ? 0.6 : isDeactivated ? 0.75 : 1,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -1083,11 +1294,28 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       {edStyle.name} · Commandée le{' '}
                       {new Date(card.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </p>
-                    <p style={{ color: '#818CF8', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
-                      👤 {card.profileUsername
-                        ? `Profil : /${card.profileUsername}`
-                        : 'Profil non configuré — clique pour le créer'}
-                    </p>
+                    {isDeactivated ? (
+                      <p style={{ color: '#F87171', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                        {card.deactivationReason ? `${DEACTIVATION_REASONS[card.deactivationReason]} — ` : ''}
+                        désactivée{card.deactivatedAt
+                          ? ` le ${new Date(card.deactivatedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}`
+                          : ''}
+                        {card.replacedBy
+                          ? ` · remplacée par ${card.replacedByNfc ?? 'une nouvelle carte'}`
+                          : ' · nouvelle carte pas encore connectée'}
+                      </p>
+                    ) : (
+                      <p style={{ color: '#818CF8', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                        👤 {card.profileUsername
+                          ? `Profil : /${card.profileUsername}`
+                          : 'Profil non configuré — clique pour le créer'}
+                      </p>
+                    )}
+                    {card.replacesNfc && card.status === 'active' && (
+                      <p style={{ color: 'var(--t-text-muted)', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                        🔄 Remplace la carte {card.replacesNfc}
+                      </p>
+                    )}
                     {card.delivery && (
                       <p style={{ color: 'var(--t-text-muted)', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
                         📦 {card.delivery.city}, {COUNTRIES[card.delivery.country]?.label ?? card.delivery.country}
@@ -1105,13 +1333,31 @@ function CardsClientInner({ cards, profile, userPlan }: {
                     )}
                   </div>
                   <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-                  <Button
-                    variant="ghost" size="sm"
-                    loading={openingProfile === card.id}
-                    onClick={() => openCardProfile(card)}
-                  >
-                    👤 Configurer le profil
-                  </Button>
+                  {!isDeactivated && (
+                    <Button
+                      variant="ghost" size="sm"
+                      loading={openingProfile === card.id}
+                      onClick={() => openCardProfile(card)}
+                    >
+                      👤 Configurer le profil
+                    </Button>
+                  )}
+                  {card.status === 'active' && (
+                    <Button
+                      variant="secondary" size="sm"
+                      onClick={() => setReplaceTarget({ card, step: 'reason' })}
+                    >
+                      🔄 Changer ma carte
+                    </Button>
+                  )}
+                  {isDeactivated && !card.replacedBy && (
+                    <Button
+                      variant="gradient" size="sm"
+                      onClick={() => setReplaceTarget({ card, step: 'code' })}
+                    >
+                      Connecter ma nouvelle carte ⚡
+                    </Button>
+                  )}
                   {canActivate && (
                     <Button
                       variant="gradient" size="sm"
@@ -1230,6 +1476,14 @@ function CardsClientInner({ cards, profile, userPlan }: {
             if (isEssentiel) setModulePicker({ ...activated, status: 'active' });
             router.refresh();
           }}
+        />
+      )}
+      {replaceTarget && (
+        <ReplaceCardModal
+          card={replaceTarget.card}
+          initialStep={replaceTarget.step}
+          onClose={() => setReplaceTarget(null)}
+          onChanged={() => router.refresh()}
         />
       )}
       {modulePicker && (

@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Cette carte est déjà liée à un autre compte.' }, { status: 409 });
   }
 
+  // A card switched off through "Changer ma carte" stays off
+  if (codeData?.status === 'deactivated') {
+    return NextResponse.json({ error: 'Cette carte a été désactivée.' }, { status: 400 });
+  }
+
   // ── Activation of a specific card chosen by the user ────────────────────────
   if (cardId) {
     const targetRef  = adminDb.collection('cards').doc(cardId);
@@ -31,6 +36,9 @@ export async function POST(req: NextRequest) {
 
     if (!target || target.userId !== user.uid) {
       return NextResponse.json({ error: 'Carte introuvable.' }, { status: 404 });
+    }
+    if (target.status === 'deactivated') {
+      return NextResponse.json({ error: 'Cette carte a été désactivée.' }, { status: 400 });
     }
     if (target.status === 'active') {
       return NextResponse.json({ success: true, alreadyLinked: true });

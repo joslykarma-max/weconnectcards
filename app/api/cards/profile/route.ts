@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
   if (!card || card.userId !== user.uid) {
     return NextResponse.json({ error: 'Carte introuvable.' }, { status: 404 });
   }
+  if (card.status === 'deactivated') {
+    return NextResponse.json({ error: 'Cette carte a été désactivée.' }, { status: 400 });
+  }
 
   if (card.profileId) return NextResponse.json({ profileId: card.profileId, isMain: card.profileId === user.uid });
 
