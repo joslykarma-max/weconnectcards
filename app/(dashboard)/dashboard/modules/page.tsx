@@ -4,7 +4,8 @@ import ModulesClient from './ModulesClient';
 import type { ModuleDoc, UserDoc } from '@/lib/types';
 
 const MODULES = [
-  { type: 'loyalty',     name: 'Carte de fidélité',       emoji: '🎯', desc: 'Tampons digitaux et récompenses clients', pro: false },
+  { type: 'profile',     name: 'Profil digital',          emoji: '👤', desc: 'Carte de visite digitale : contact, liens et bio', pro: false },
+  { type: 'loyalty',    name: 'Carte de fidélité',       emoji: '🎯', desc: 'Tampons digitaux et récompenses clients', pro: false },
   { type: 'menu',        name: 'Menu Restaurant',          emoji: '🍽️', desc: 'QR menu interactif multilingue', pro: false },
   { type: 'review',      name: 'Tap to Review',            emoji: '⭐', desc: 'Générez des avis Google en un tap', pro: false },
   { type: 'event',       name: 'Pass Événement',           emoji: '🎟️', desc: 'Billetterie NFC et check-in', pro: true },

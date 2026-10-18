@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
+import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { getOwnedProfileId } from '@/lib/profiles';
 import type { ProfileDoc, LinkDoc } from '@/lib/types';
@@ -42,6 +43,13 @@ export async function PATCH(req: NextRequest) {
   delete body.uid;
   delete body.cardId;
 
+  // Switcher name: trimmed, capped; empty → back to the default label
+  const updates: Record<string, unknown> = { ...body };
+  if ('label' in body) {
+    const label = typeof body.label === 'string' ? body.label.trim().slice(0, 40) : '';
+    updates.label = label || FieldValue.delete();
+  }
+
   if (body.username) {
     body.username = toSlug(body.username);
   }
@@ -70,7 +78,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   await adminDb.collection('profiles').doc(profileId).set(
-    { ...body, updatedAt: new Date().toISOString() },
+    { ...updates, updatedAt: new Date().toISOString() },
     { merge: true },
   );
 

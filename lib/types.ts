@@ -27,6 +27,7 @@ export interface ProfileDoc {
   sector?:          string;
   isPublic:         boolean;
   cardId?:          string; // set on a card-specific profile
+  label?:           string; // owner-chosen name shown in the dashboard profile switcher
   updatedAt:        string;
 }
 

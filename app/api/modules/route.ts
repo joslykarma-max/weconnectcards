@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
-import type { UserDoc } from '@/lib/types';
+import { PROFILE_MODULE } from '@/lib/modules';
+import type { ModuleDoc, UserDoc } from '@/lib/types';
 
 // Max active modules per account plan / card type
 const MODULE_LIMIT: Record<string, number> = {
@@ -18,36 +19,60 @@ export async function POST(req: NextRequest) {
     config?:  Record<string, unknown>;
   };
 
+  const [userSnap, modulesSnap] = await Promise.all([
+    adminDb.collection('users').doc(user.uid).get(),
+    adminDb.collection('modules').where('profileId', '==', user.uid).where('isActive', '==', true).get(),
+  ]);
+
+  const plan  = (userSnap.data() as UserDoc | undefined)?.plan ?? 'essentiel';
+  const limit = MODULE_LIMIT[plan] ?? 1;
+
+  // Active modules besides the toggled one — the digital profile never counts toward the cap
+  const otherActive = modulesSnap.docs
+    .map((d) => (d.data() as ModuleDoc).type)
+    .filter((t) => t !== type && t !== PROFILE_MODULE);
+
   // Enforce module cap when activating
-  if (isActive) {
-    const [userSnap, modulesSnap] = await Promise.all([
-      adminDb.collection('users').doc(user.uid).get(),
-      adminDb.collection('modules').where('profileId', '==', user.uid).where('isActive', '==', true).get(),
-    ]);
+  if (isActive && type !== PROFILE_MODULE && otherActive.length >= limit) {
+    return NextResponse.json({
+      error: `Limite atteinte (${limit} module${limit > 1 ? 's' : ''} max pour le plan ${plan}). Désactivez un module ou passez au plan supérieur.`,
+    }, { status: 403 });
+  }
 
-    const plan  = (userSnap.data() as UserDoc | undefined)?.plan ?? 'essentiel';
-    const limit = MODULE_LIMIT[plan] ?? 1;
+  const now   = new Date().toISOString();
+  const batch = adminDb.batch();
+  // Other modules switched as a side effect, returned so the client can mirror them
+  const changes: Record<string, boolean> = {};
+  const setActive = (t: string, on: boolean) => {
+    batch.set(adminDb.collection('modules').doc(`${user.uid}_${t}`), {
+      profileId: user.uid, type: t, isActive: on, updatedAt: now,
+    }, { merge: true });
+    changes[t] = on;
+  };
 
-    // Don't count the current module (toggling it on is the action)
-    const currentActive = modulesSnap.docs.filter(d => d.id !== `${user.uid}_${type}`).length;
-
-    if (currentActive >= limit) {
-      return NextResponse.json({
-        error: `Limite atteinte (${limit} module${limit > 1 ? 's' : ''} max pour le plan ${plan}). Désactivez un module ou passez au plan supérieur.`,
-      }, { status: 403 });
+  // Single-module plan: the digital profile shares the one slot with the other modules.
+  // Activating one switches the other off; the profile comes back once the slot is empty.
+  if (limit === 1) {
+    if (type === PROFILE_MODULE) {
+      if (isActive) otherActive.forEach((t) => setActive(t, false));
+    } else if (isActive) {
+      setActive(PROFILE_MODULE, false);
+    } else if (otherActive.length === 0) {
+      setActive(PROFILE_MODULE, true);
     }
   }
 
   const docId = `${user.uid}_${type}`;
-  await adminDb.collection('modules').doc(docId).set({
+  batch.set(adminDb.collection('modules').doc(docId), {
     profileId: user.uid,
     type,
     isActive,
     ...(config !== undefined && { config }),
-    updatedAt: new Date().toISOString(),
+    updatedAt: now,
   }, { merge: true });
+  await batch.commit();
 
-  return NextResponse.json({ ok: true, type, isActive });
+  return NextResponse.json({ ok: true, type, isActive, changes });
 }
 
 export async function PATCH(req: NextRequest) {

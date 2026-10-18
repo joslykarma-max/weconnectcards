@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Badge from '@/components/ui/Badge';
+import { PROFILE_MODULE } from '@/lib/modules';
 
 interface Module {
   type: string;
@@ -31,6 +32,7 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
   const [states, setStates] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
     activeModules.forEach((m) => { init[m.type] = m.isActive; });
+    init[PROFILE_MODULE] ??= true; // on until explicitly switched off
     return init;
   });
   const [loading, setLoading] = useState<string | null>(null);
@@ -47,7 +49,9 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
     });
 
     if (res.ok) {
-      setStates((prev) => ({ ...prev, [type]: !current }));
+      // Single-module plans swap the digital profile with the toggled module
+      const { changes = {} } = await res.json() as { changes?: Record<string, boolean> };
+      setStates((prev) => ({ ...prev, ...changes, [type]: !current }));
     }
     setLoading(null);
   }
@@ -56,7 +60,9 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
     <div>
       <div style={{ marginBottom: 28 }}>
         <p style={{ color: '#9CA3AF', fontSize: 14 }}>
-          {isPro ? 'Tous les modules sont disponibles.' : 'Certains modules nécessitent le plan Pro.'}
+          {isPro
+            ? 'Tous les modules sont disponibles.'
+            : 'Plan Essentiel : 1 module actif. Activer un module remplace le profil digital. Certains modules nécessitent le plan Pro.'}
         </p>
       </div>
 
@@ -130,7 +136,7 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
 
               {isActive && !isLocked && (
                 <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <Link href={`/dashboard/modules/${mod.type}`} style={{
+                  <Link href={mod.type === PROFILE_MODULE ? '/dashboard/profile' : `/dashboard/modules/${mod.type}`} style={{
                     color: '#818CF8', fontFamily: 'Space Mono, monospace',
                     fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
                     textDecoration: 'none',

@@ -12,11 +12,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const profileId = await getOwnedProfileId(user.uid, requested);
   if (!profileId) redirect('/dashboard/profile');
 
-  const [profileSnap, linksSnap, cardsSnap, cardProfilesSnap] = await Promise.all([
+  const [profileSnap, linksSnap, cardsSnap, cardProfilesSnap, mainSnap] = await Promise.all([
     adminDb.collection('profiles').doc(profileId).get(),
     adminDb.collection('profiles').doc(profileId).collection('links').orderBy('order', 'asc').get(),
     adminDb.collection('cards').where('userId', '==', user.uid).get(),
     adminDb.collection('profiles').where('uid', '==', user.uid).get(),
+    adminDb.collection('profiles').doc(user.uid).get(),
   ]);
 
   const profileData = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
@@ -43,14 +44,14 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     const c = cards.find((x) => x.id === cardId);
     return c?.nfcId ? `Carte ${c.nfcId}` : 'Carte en attente';
   };
-  const mainSnap = cardProfilesSnap.docs.find((d) => d.id === user.uid);
+  const mainData = mainSnap.data() as ProfileDoc | undefined;
   const profiles = [
-    { id: user.uid, label: 'Profil principal', username: (mainSnap?.data() as ProfileDoc | undefined)?.username ?? '' },
+    { id: user.uid, label: mainData?.label || 'Profil principal', username: mainData?.username ?? '' },
     ...cardProfilesSnap.docs
       .filter((d) => d.id !== user.uid)
       .map((d) => {
         const p = d.data() as ProfileDoc;
-        return { id: d.id, label: cardLabel(p.cardId), username: p.username };
+        return { id: d.id, label: p.label || cardLabel(p.cardId), username: p.username };
       }),
   ];
 

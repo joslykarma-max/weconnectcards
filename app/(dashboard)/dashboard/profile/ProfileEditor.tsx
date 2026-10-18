@@ -427,6 +427,39 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
     setSavingEdit(false);
   }
 
+  // Renaming entries of the profile switcher (one per card)
+  const [renamingId, setRenamingId]   = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState('');
+  const [savingRename, setSavingRename] = useState(false);
+  const [labels, setLabels]           = useState<Record<string, string>>({});
+
+  function startRename(p: ProfileOption) {
+    setRenamingId(p.id);
+    setRenameValue(labels[p.id] ?? p.label);
+  }
+
+  async function saveRename(id: string) {
+    setSavingRename(true);
+    const res = await fetch(`/api/profile?profileId=${encodeURIComponent(id)}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label: renameValue }),
+    });
+    setSavingRename(false);
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({})) as { error?: string };
+      alert(d.error ?? 'Erreur lors du renommage.');
+      return;
+    }
+    const name = renameValue.trim().slice(0, 40);
+    setLabels((prev) => {
+      const next = { ...prev };
+      if (name) next[id] = name; else delete next[id];
+      return next;
+    });
+    setRenamingId(null);
+    router.refresh();
+  }
+
   const { pct, width, containerRef, onSplitDown, onWidthDown } = useResizableLayout(50, 1100);
   const isMobile = useIsMobile();
 
@@ -446,22 +479,71 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {profiles.map((p) => {
                 const current = p.id === profileId;
+                const label   = labels[p.id] ?? p.label;
+                const chip: React.CSSProperties = {
+                  display: 'flex', alignItems: 'center', gap: 4, borderRadius: 8,
+                  flex: isMobile ? '1 1 140px' : undefined, minWidth: 0,
+                  background: current ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
+                  border: `1px solid ${current ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
+                  color: current ? '#818CF8' : '#9CA3AF',
+                  fontFamily: 'DM Sans, sans-serif', fontSize: 13,
+                };
+                const iconBtn: React.CSSProperties = {
+                  background: 'none', border: 'none', cursor: 'pointer', color: 'inherit',
+                  padding: '4px 6px', fontSize: 13, lineHeight: 1, flexShrink: 0,
+                };
+
+                if (renamingId === p.id) {
+                  return (
+                    <div key={p.id} style={{ ...chip, padding: '4px 4px 4px 8px' }}>
+                      <input
+                        autoFocus
+                        value={renameValue}
+                        maxLength={40}
+                        placeholder="Nom de la carte"
+                        aria-label="Nouveau nom de la carte"
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveRename(p.id);
+                          if (e.key === 'Escape') setRenamingId(null);
+                        }}
+                        style={{
+                          flex: 1, minWidth: 0, width: 140, background: 'rgba(0,0,0,0.25)', color: '#F8F9FC',
+                          border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '6px 8px',
+                          fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none',
+                        }}
+                      />
+                      <button onClick={() => saveRename(p.id)} disabled={savingRename} aria-label="Enregistrer le nom" style={{ ...iconBtn, color: '#10B981', opacity: savingRename ? 0.5 : 1 }}>✓</button>
+                      <button onClick={() => setRenamingId(null)} disabled={savingRename} aria-label="Annuler" style={iconBtn}>✕</button>
+                    </div>
+                  );
+                }
+
                 return (
-                  <button
-                    key={p.id}
-                    onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}
-                    style={{
-                      padding: '8px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
-                      flex: isMobile ? '1 1 140px' : undefined, minWidth: 0, overflowWrap: 'anywhere',
-                      background: current ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${current ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
-                      color: current ? '#818CF8' : '#9CA3AF',
-                      fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: current ? 600 : 400,
-                    }}
-                  >
-                    {p.label}
-                    <span style={{ display: 'block', fontSize: 11, opacity: 0.7 }}>/{p.username}</span>
-                  </button>
+                  <div key={p.id} style={chip}>
+                    <button
+                      onClick={() => startRename(p)}
+                      title="Renommer"
+                      aria-label={`Renommer ${label}`}
+                      style={{ ...iconBtn, padding: '10px 4px 10px 12px', display: 'flex' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}
+                      style={{
+                        flex: 1, minWidth: 0, overflowWrap: 'anywhere', textAlign: 'left',
+                        padding: '8px 12px 8px 6px', background: 'none', border: 'none', cursor: 'pointer',
+                        color: 'inherit', fontFamily: 'inherit', fontSize: 13, fontWeight: current ? 600 : 400,
+                      }}
+                    >
+                      {label}
+                      <span style={{ display: 'block', fontSize: 11, opacity: 0.7 }}>/{p.username}</span>
+                    </button>
+                  </div>
                 );
               })}
             </div>
