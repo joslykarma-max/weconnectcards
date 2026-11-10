@@ -22,10 +22,11 @@ type Profile = {
   title?: string | null;
   company?: string | null;
   bio?: string | null;
+  tagline?: string | null;
   avatar?: string | null;
   backgroundImage?: string | null;
   theme: string;
-  displayMode?: 'classic' | 'grid' | 'card';
+  displayMode?: 'classic' | 'grid' | 'card' | 'light';
   hiddenFields?: string[];
   links: Link[];
   modules: ActiveModule[];
@@ -424,6 +425,331 @@ function LayoutCard({ profile, theme, saveContactProps }: {
   );
 }
 
+// ── Layout: Light (soft pastel panels on a bright page) ─────────────────────
+
+const LIGHT_PAGE_BG  = '#FFFFFF';
+const LIGHT_FIELD_BG = '#F4F7FB';
+
+// Pastel panel, ink color and bubble tints per profile theme
+type LightPalette = { panel: string; ink: string; pill: string; bubbles: [string, string] };
+const LIGHT_PALETTES: Record<string, LightPalette> = {
+  midnight: { panel: '#BFE0F8', ink: '#0F2A44', pill: 'rgba(15,42,68,0.14)', bubbles: ['#6DB8F0', '#9FA8F7'] },
+  electric: { panel: '#DCD7FD', ink: '#211A5C', pill: 'rgba(33,26,92,0.13)', bubbles: ['#8B7CF6', '#C4B5FD'] },
+  glass:    { panel: '#C2EEF1', ink: '#083B44', pill: 'rgba(8,59,68,0.13)',  bubbles: ['#37C3D3', '#7DD3FC'] },
+  metal:    { panel: '#E2E5EA', ink: '#1F2937', pill: 'rgba(31,41,55,0.11)', bubbles: ['#9CA3AF', '#CBD5E1'] },
+};
+const lightPalette = (theme: string) => LIGHT_PALETTES[theme] ?? LIGHT_PALETTES.midnight;
+
+// Floating bubbles behind the light page — fixed values so server and client render alike
+const BUBBLES = [
+  { left: 4,  size: 120, dur: 26, delay: -4,  sway: 30,  rest: -22 },
+  { left: 20, size: 44,  dur: 18, delay: -11, sway: -24, rest: -62 },
+  { left: 36, size: 84,  dur: 30, delay: -19, sway: 40,  rest: -86 },
+  { left: 54, size: 28,  dur: 16, delay: -2,  sway: -18, rest: -40 },
+  { left: 68, size: 150, dur: 34, delay: -9,  sway: -36, rest: -70 },
+  { left: 84, size: 56,  dur: 21, delay: -15, sway: 22,  rest: -30 },
+  { left: 92, size: 24,  dur: 14, delay: -6,  sway: -14, rest: -96 },
+  { left: 11, size: 34,  dur: 19, delay: -13, sway: 18,  rest: -50 },
+  { left: 46, size: 64,  dur: 24, delay: -21, sway: -30, rest: -14 },
+  { left: 76, size: 38,  dur: 17, delay: -1,  sway: 26,  rest: -58 },
+  { left: 28, size: 100, dur: 28, delay: -25, sway: -40, rest: -100 },
+  { left: 61, size: 20,  dur: 13, delay: -8,  sway: 12,  rest: -78 },
+];
+
+const BUBBLE_CSS = `
+@keyframes wc-bubble-rise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%   { opacity: 1; }
+  50%  { transform: translate3d(var(--wc-sway), -62vh, 0); }
+  92%  { opacity: 1; }
+  100% { transform: translate3d(0, -125vh, 0); opacity: 0; }
+}
+.wc-bubble {
+  position: absolute; bottom: -170px; border-radius: 50%;
+  will-change: transform, opacity;
+  animation: wc-bubble-rise var(--wc-dur) linear var(--wc-delay) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-bubble { animation: none; opacity: 0.6; transform: translate3d(0, var(--wc-rest), 0); }
+}
+html, body { background: ${LIGHT_PAGE_BG}; }
+`;
+
+function BubblesBackground({ palette }: { palette: LightPalette }) {
+  return (
+    <div aria-hidden style={{ position: 'fixed', inset: 0, overflow: 'hidden', pointerEvents: 'none', zIndex: 0 }}>
+      <style>{BUBBLE_CSS}</style>
+      {BUBBLES.map((b, i) => {
+        const tint = palette.bubbles[i % 2];
+        return (
+          <span key={i} className="wc-bubble" style={{
+            left: `${b.left}%`, width: b.size, height: b.size,
+            background: `radial-gradient(circle at 32% 28%, rgba(255,255,255,0.95) 0 7%, ${tint}55 9%, ${tint}2E 58%, ${tint}14 100%)`,
+            border: `1px solid ${tint}4D`,
+            '--wc-sway': `${b.sway}px`, '--wc-dur': `${b.dur}s`, '--wc-delay': `${b.delay}s`, '--wc-rest': `${b.rest}vh`,
+          } as React.CSSProperties} />
+        );
+      })}
+    </div>
+  );
+}
+
+const LIGHT_SHADOW = '0 6px 28px rgba(15,42,68,0.07)';
+
+const QUICK_ACTIONS: Record<string, { label: string; icon: React.ReactNode }> = {
+  phone: {
+    label: 'Appeler',
+    icon: (
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+        <rect x="6" y="2" width="12" height="20" rx="2.5"/>
+        <line x1="10.5" y1="18.5" x2="13.5" y2="18.5"/>
+      </svg>
+    ),
+  },
+  whatsapp: {
+    label: 'WhatsApp',
+    icon: (
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.15" strokeLinejoin="round">
+        <path d="M12 3a8.6 8.6 0 0 0-7.4 13l-1.1 4 4.1-1.1A8.6 8.6 0 1 0 12 3z"/>
+        <path d="M9.2 8.3c.3-.4.8-.4 1 0l.7 1.3c.2.3.1.7-.2.9l-.5.4c.5 1.1 1.4 2 2.5 2.5l.4-.5c.2-.3.6-.4.9-.2l1.3.7c.4.2.4.7 0 1-.6.7-1.5 1-2.4.7-2.1-.7-3.8-2.4-4.5-4.5-.3-.9 0-1.8.8-2.3z"/>
+      </svg>
+    ),
+  },
+  email: {
+    label: 'Email',
+    icon: (
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+        <circle cx="12" cy="12" r="4"/>
+        <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
+      </svg>
+    ),
+  },
+};
+
+const saveContactIcon = (
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <line x1="19" y1="8" x2="19" y2="14"/>
+    <line x1="22" y1="11" x2="16" y2="11"/>
+  </svg>
+);
+
+const shareIcon = (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+    <circle cx="18" cy="5" r="3"/>
+    <circle cx="6" cy="12" r="3"/>
+    <circle cx="18" cy="19" r="3"/>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+  </svg>
+);
+
+const documentIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <polyline points="14 2 14 8 20 8"/>
+    <line x1="8" y1="13" x2="16" y2="13"/>
+    <line x1="8" y1="17" x2="13" y2="17"/>
+  </svg>
+);
+
+const isDocumentUrl = (url: string) => /\.pdf($|\?)/i.test(url);
+
+const chevron = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, opacity: 0.4 }}>
+    <path d="M9 18l6-6-6-6"/>
+  </svg>
+);
+
+function LayoutLight({ profile, saveContactProps }: {
+  profile: Profile;
+  saveContactProps: React.ComponentProps<typeof SaveContactBlock>;
+}) {
+  const [copied, setCopied]   = useState(false);
+  const [bioOpen, setBioOpen] = useState(false);
+  const pal = lightPalette(profile.theme);
+  const { saving, showForm, submitted, contactForm, setContactForm, onSave, onLeaveInfo } = saveContactProps;
+
+  const showAvatar  = isVisible(profile, 'avatar');
+  const showTitle   = isVisible(profile, 'title') && !!profile.title;
+  const showCompany = isVisible(profile, 'company') && !!profile.company;
+  const showBio     = isVisible(profile, 'bio') && !!profile.bio;
+
+  // First phone / WhatsApp / email become the icon shortcuts; the rest are listed below
+  const quick = (['phone', 'whatsapp', 'email'] as const)
+    .map((t) => profile.links.find((l) => l.type === t))
+    .filter((l): l is Link => !!l);
+  const quickIds = new Set(quick.map((l) => l.id));
+  const others   = profile.links.filter((l) => !quickIds.has(l.id));
+
+  async function share() {
+    const url = `${window.location.origin}/${profile.username}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: profile.displayName, url }); } catch { /* dismissed */ }
+      return;
+    }
+    await navigator.clipboard?.writeText(url).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  }
+
+  const shareButton = (style: React.CSSProperties) => (
+    <button onClick={share} aria-label="Partager le profil" title="Partager"
+      style={{ width: 40, height: 40, borderRadius: '50%', background: '#fff', border: 'none', boxShadow: '0 4px 14px rgba(15,42,68,0.15)', color: pal.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', ...style }}>
+      {shareIcon}
+    </button>
+  );
+
+  const card: React.CSSProperties = { marginTop: 14, background: '#fff', border: '1px solid #EDF1F6', borderRadius: 24, boxShadow: LIGHT_SHADOW };
+  const font = 'DM Sans, sans-serif';
+  const inputStyle: React.CSSProperties = {
+    width: '100%', boxSizing: 'border-box', padding: '12px 14px', background: LIGHT_FIELD_BG,
+    border: '1px solid #E3E8EF', borderRadius: 12, color: pal.ink, fontFamily: font, fontSize: 15, outline: 'none',
+  };
+  const rowStyle: React.CSSProperties = {
+    display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px', textDecoration: 'none', color: pal.ink,
+  };
+  const rowIcon: React.CSSProperties = {
+    width: 42, height: 42, borderRadius: '50%', background: pal.panel, color: pal.ink, flexShrink: 0,
+    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 19,
+  };
+
+  return (
+    <div style={{ fontFamily: font, color: pal.ink }}>
+      {/* Hero */}
+      <div style={{ position: 'relative', paddingTop: showAvatar ? 80 : 0 }}>
+        {showAvatar && (
+          <div style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', zIndex: 2 }}>
+            <div style={{ width: 160, height: 160, borderRadius: '50%', padding: 6, background: '#fff', boxShadow: '0 12px 32px rgba(15,42,68,0.14)', boxSizing: 'border-box' }}>
+              <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: pal.panel, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {profile.avatar ? (
+                  <Image src={profile.avatar} alt={profile.displayName} width={148} height={148} priority
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 22%' }} />
+                ) : (
+                  <span style={{ fontWeight: 800, fontSize: 56, color: pal.ink }}>{profile.displayName.charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+            </div>
+            {shareButton({ position: 'absolute', right: 2, bottom: 8 })}
+          </div>
+        )}
+
+        <div style={{ position: 'relative', background: pal.panel, borderRadius: 28, padding: showAvatar ? '98px 22px 22px' : '34px 22px 22px', textAlign: 'center' }}>
+          {!showAvatar && shareButton({ position: 'absolute', right: 14, top: 14 })}
+          <h1 style={{ fontWeight: 800, fontSize: 30, lineHeight: 1.15, letterSpacing: '-0.6px', margin: 0, color: pal.ink }}>
+            {profile.displayName}
+          </h1>
+          {(showTitle || showCompany) && (
+            <div style={{ marginTop: 10, fontSize: 15, lineHeight: 1.5, opacity: 0.78 }}>
+              {showTitle && <p style={{ margin: 0 }}>{profile.title}</p>}
+              {showCompany && <p style={{ margin: 0 }}>{profile.company}</p>}
+            </div>
+          )}
+          {profile.tagline && (
+            <div style={{ marginTop: 18, background: pal.pill, borderRadius: 14, padding: '11px 16px', fontSize: 14, lineHeight: 1.45 }}>
+              {profile.tagline}
+            </div>
+          )}
+        </div>
+
+        {copied && (
+          <div role="status" style={{ position: 'absolute', left: '50%', top: showAvatar ? 170 : 12, transform: 'translateX(-50%)', background: pal.ink, color: '#fff', fontSize: 13, padding: '6px 12px', borderRadius: 999, zIndex: 3 }}>
+            Lien copié
+          </div>
+        )}
+      </div>
+
+      {/* Quick actions */}
+      <div style={{ ...card, padding: '18px 8px', display: 'grid', gridTemplateColumns: `repeat(${quick.length + 1}, 1fr)` }}>
+        {quick.map((link) => (
+          <a key={link.id} href={ensureScheme(link.url, link.type)} target="_blank" rel="noopener noreferrer"
+            onClick={() => logLinkClick(link.id, profile.id)}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, textDecoration: 'none', color: pal.ink, padding: '4px 0' }}>
+            <span style={{ height: 32, display: 'flex', alignItems: 'center' }}>{QUICK_ACTIONS[link.type].icon}</span>
+            <span style={{ fontSize: 13 }}>{QUICK_ACTIONS[link.type].label}</span>
+          </a>
+        ))}
+        <button onClick={onSave} disabled={saving}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, background: 'none', border: 'none', color: pal.ink, cursor: 'pointer', fontFamily: font, padding: '4px 0' }}>
+          <span style={{ height: 32, display: 'flex', alignItems: 'center' }}>{saveContactIcon}</span>
+          <span style={{ fontSize: 13 }}>Enregistrer</span>
+        </button>
+      </div>
+
+      {/* Leave your details (after saving the contact) */}
+      {showForm && !submitted && (
+        <div style={{ ...card, padding: 20 }}>
+          <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 4px' }}>Laissez vos coordonnées</p>
+          <p style={{ fontSize: 13, opacity: 0.7, margin: '0 0 14px' }}>Partagez vos infos pour rester en contact.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {(['name', 'email', 'phone'] as const).map((field) => (
+              <input key={field}
+                type={field === 'email' ? 'email' : field === 'phone' ? 'tel' : 'text'}
+                placeholder={field === 'name' ? 'Votre nom' : field === 'email' ? 'Votre e-mail' : 'Votre téléphone'}
+                value={contactForm[field]}
+                onChange={(e) => setContactForm((prev) => ({ ...prev, [field]: e.target.value }))}
+                style={inputStyle}
+              />
+            ))}
+            <button onClick={onLeaveInfo} disabled={!contactForm.name && !contactForm.email}
+              style={{ marginTop: 4, padding: 13, background: pal.ink, border: 'none', borderRadius: 12, color: '#fff', fontFamily: font, fontWeight: 700, fontSize: 15, cursor: (!contactForm.name && !contactForm.email) ? 'not-allowed' : 'pointer', opacity: (!contactForm.name && !contactForm.email) ? 0.45 : 1 }}>
+              Envoyer
+            </button>
+          </div>
+        </div>
+      )}
+      {submitted && (
+        <div style={{ ...card, padding: 20, textAlign: 'center' }}>
+          <p style={{ fontWeight: 700, fontSize: 16, margin: '0 0 4px' }}>Merci !</p>
+          <p style={{ fontSize: 13, opacity: 0.7, margin: 0 }}>Vos coordonnées ont été transmises.</p>
+        </div>
+      )}
+
+      {/* About — folded by default, opens on tap */}
+      {showBio && (
+        <div style={{ marginTop: 14, background: pal.panel, borderRadius: 24 }}>
+          <button onClick={() => setBioOpen((o) => !o)} aria-expanded={bioOpen} aria-controls="wc-bio"
+            style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '20px 22px', background: 'none', border: 'none', cursor: 'pointer', color: pal.ink, fontFamily: font, textAlign: 'left' }}>
+            <span style={{ fontWeight: 800, fontSize: 21, letterSpacing: '-0.3px' }}>À propos</span>
+            <span style={{ width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'transform 0.3s cubic-bezier(0.23,1,0.32,1)', transform: bioOpen ? 'rotate(180deg)' : 'none' }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 9l6 6 6-6"/></svg>
+            </span>
+          </button>
+          <div id="wc-bio" style={{ display: 'grid', gridTemplateRows: bioOpen ? '1fr' : '0fr', transition: 'grid-template-rows 0.35s cubic-bezier(0.23,1,0.32,1)' }}>
+            <div style={{ overflow: 'hidden' }}>
+              <p style={{ fontSize: 15, lineHeight: 1.7, margin: 0, padding: '0 22px 24px', opacity: 0.88, whiteSpace: 'pre-line' }}>{profile.bio}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Other links + modules */}
+      {(others.length > 0 || profile.modules.length > 0) && (
+        <div style={{ ...card, padding: 6 }}>
+          {others.map((link, i) => (
+            <a key={link.id} href={ensureScheme(link.url, link.type)} target="_blank" rel="noopener noreferrer"
+              onClick={() => logLinkClick(link.id, profile.id)}
+              style={{ ...rowStyle, borderTop: i === 0 ? 'none' : '1px solid #EEF1F5' }}>
+              <span style={rowIcon}>{LINK_ICONS[link.type] ?? (isDocumentUrl(link.url) ? documentIcon : defaultIcon)}</span>
+              <span style={{ flex: 1, fontSize: 15, fontWeight: 600, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{link.label}</span>
+              {chevron}
+            </a>
+          ))}
+          {profile.modules.map((mod, i) => (
+            <a key={mod.type} href={`/m/${profile.username}/${mod.type}`}
+              style={{ ...rowStyle, borderTop: i === 0 && others.length === 0 ? 'none' : '1px solid #EEF1F5' }}>
+              <span style={rowIcon}>{mod.emoji}</span>
+              <span style={{ flex: 1, fontSize: 15, fontWeight: 600 }}>{mod.name}</span>
+              {chevron}
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProfilePublic({ profile }: { profile: Profile }) {
@@ -465,6 +791,24 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
   const saveContactProps = { profile, saving, showForm, submitted, contactForm, setContactForm, onSave: handleSaveContact, onLeaveInfo: handleLeaveInfo, theme };
 
   const layoutProps = { profile, theme, saveContactProps };
+
+  // Light mode brings its own bright page (no dark theme background)
+  if (displayMode === 'light') {
+    return (
+      <div style={{ minHeight: '100vh', background: LIGHT_PAGE_BG, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '28px 16px 64px', position: 'relative' }}>
+        <BubblesBackground palette={lightPalette(profile.theme)} />
+        <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }}>
+          <LayoutLight profile={profile} saveContactProps={saveContactProps} />
+          <div style={{ textAlign: 'center', marginTop: 32 }}>
+            <LogoStacked symbolSize="sm" className="mx-auto" />
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#94A3B8', marginTop: 4, textTransform: 'uppercase' }}>
+              Powered by We Connect · NFC Platform
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', ...bgStyle, display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '48px 16px 100px', position: 'relative' }}>

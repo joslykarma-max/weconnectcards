@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params, searchParams }: Props) {
   const { username } = await params;
   const { mode } = await searchParams;
-  const previewMode = (mode === 'classic' || mode === 'grid' || mode === 'card') ? mode : null;
+  const previewMode = (mode === 'classic' || mode === 'grid' || mode === 'card' || mode === 'light') ? mode : null;
 
   const resolved = await resolveUsername(username);
   if (!resolved) notFound();
@@ -106,6 +106,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     title:           profileData.title           ?? null,
     company:         profileData.company         ?? null,
     bio:             profileData.bio             ?? null,
+    tagline:         profileData.tagline         ?? null,
     avatar:          profileData.avatar          ?? null,
     backgroundImage: profileData.backgroundImage ?? null,
     theme:           profileData.theme,

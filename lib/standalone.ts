@@ -13,6 +13,18 @@ export function isStandaloneEdition(v: unknown): v is StandaloneEdition {
   return typeof v === 'string' && (STANDALONE_EDITIONS as readonly string[]).includes(v);
 }
 
+export const DISPLAY_MODES = [
+  { value: 'light',   label: 'Clair' },
+  { value: 'classic', label: 'Classique' },
+  { value: 'grid',    label: 'Grille' },
+  { value: 'card',    label: 'Carte Pro' },
+] as const;
+export type DisplayMode = typeof DISPLAY_MODES[number]['value'];
+
+export function isDisplayMode(v: unknown): v is DisplayMode {
+  return DISPLAY_MODES.some((m) => m.value === v);
+}
+
 export interface StandaloneLinkInput {
   type:  string;
   label: string;
@@ -24,8 +36,10 @@ export interface StandaloneProfileInput {
   title:       string;
   company:     string;
   bio:         string;
+  tagline:     string;
   avatar:      string;
   username:    string; // empty → generated from the name
+  displayMode: DisplayMode;
 }
 
 /** Admin form payload, sent in full on create (POST) and on save (PATCH). */
@@ -58,7 +72,9 @@ export interface StandaloneCardView {
     title:       string;
     company:     string;
     bio:         string;
+    tagline:     string;
     avatar:      string;
+    displayMode: DisplayMode;
     links:       StandaloneLinkInput[];
   } | null;
 }

@@ -1,6 +1,6 @@
 import type { DocumentSnapshot } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { isStandaloneEdition, linkValueFromUrl, standaloneUid, type StandaloneCardView } from '@/lib/standalone';
+import { isDisplayMode, isStandaloneEdition, linkValueFromUrl, standaloneUid, type StandaloneCardView } from '@/lib/standalone';
 import type { CardDoc, LinkDoc, ProfileDoc } from '@/lib/types';
 
 async function toView(doc: DocumentSnapshot): Promise<StandaloneCardView> {
@@ -31,7 +31,9 @@ async function toView(doc: DocumentSnapshot): Promise<StandaloneCardView> {
       title:       profile.title   ?? '',
       company:     profile.company ?? '',
       bio:         profile.bio     ?? '',
+      tagline:     profile.tagline ?? '',
       avatar:      profile.avatar  ?? '',
+      displayMode: isDisplayMode(profile.displayMode) ? profile.displayMode : 'classic',
       links: (linksSnap?.docs ?? []).map((d) => {
         const l = d.data() as LinkDoc;
         return { type: l.type, label: l.label, value: linkValueFromUrl(l.type, l.url) };

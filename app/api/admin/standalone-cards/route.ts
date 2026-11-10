@@ -5,7 +5,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import type { UsernameDoc } from '@/lib/profiles';
 import { getStandaloneCard } from '@/lib/standalone-server';
 import {
-  RESERVED_USERNAMES, defaultLinkLabel, isSafeUrl, isStandaloneEdition, isStandaloneLinkType,
+  RESERVED_USERNAMES, defaultLinkLabel, isDisplayMode, isSafeUrl, isStandaloneEdition, isStandaloneLinkType,
   linkUrlFromValue, normalizeRedirectUrl, slugify, standaloneUid,
   type StandaloneEdition, type StandalonePayload,
 } from '@/lib/standalone';
@@ -138,13 +138,15 @@ async function upsertProfile(
     title:       optional(text(p.title, 100)),
     company:     optional(text(p.company, 100)),
     bio:         optional(text(p.bio, 500)),
+    tagline:     optional(text(p.tagline, 120)),
     avatar:      optional(avatar),
     theme:       edition,
+    displayMode: isDisplayMode(p.displayMode) ? p.displayMode : (existing?.data.displayMode ?? 'light'),
     isPublic:    true,
     standalone:  true,
     cardId,
     updatedAt:   now,
-    ...(existing ? {} : { displayMode: 'classic', inDirectory: false }),
+    ...(existing ? {} : { inDirectory: false }),
   };
   Object.keys(fields).forEach((k) => fields[k] === undefined && delete fields[k]);
   batch.set(profileRef, fields, { merge: true });

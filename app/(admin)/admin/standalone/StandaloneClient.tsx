@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import {
-  STANDALONE_EDITIONS, STANDALONE_LINK_TYPES, defaultLinkLabel,
+  DISPLAY_MODES, STANDALONE_EDITIONS, STANDALONE_LINK_TYPES, defaultLinkLabel,
   type StandaloneCardView, type StandaloneEdition, type StandaloneLinkInput,
   type StandalonePayload, type StandaloneProfileInput,
 } from '@/lib/standalone';
@@ -31,7 +31,7 @@ type FormState = {
 
 const emptyForm = (): FormState => ({
   nfcId: '', label: '', edition: 'midnight', mode: 'profile', redirectUrl: '', active: true,
-  profile: { displayName: '', title: '', company: '', bio: '', avatar: '', username: '' },
+  profile: { displayName: '', title: '', company: '', bio: '', tagline: '', avatar: '', username: '', displayMode: 'light' },
   links: [
     { type: 'phone', label: '', value: '' },
     { type: 'email', label: '', value: '' },
@@ -49,13 +49,17 @@ function formFromCard(c: StandaloneCardView): FormState {
     active:      c.active,
     profile:     c.profile
       ? { displayName: c.profile.displayName, title: c.profile.title, company: c.profile.company,
-          bio: c.profile.bio, avatar: c.profile.avatar, username: c.profile.username }
+          bio: c.profile.bio, tagline: c.profile.tagline, avatar: c.profile.avatar,
+          username: c.profile.username, displayMode: c.profile.displayMode }
       : base.profile,
     links: c.profile ? c.profile.links : base.links,
   };
 }
 
 const nfcUrl = (code: string) => `${APP_URL}/nfc/${code}`;
+
+// Preview link that doesn't count as a visit (?mode= skips scan logging)
+const previewHref = (p: { username: string; displayMode: string }) => `/${p.username}?mode=${p.displayMode}`;
 
 function cardTitle(c: StandaloneCardView) {
   return c.profile?.displayName || c.label || 'Carte sans nom';
@@ -261,7 +265,7 @@ export default function StandaloneClient({
               {copied === nfcUrl(saved.nfcId) ? 'Copié ✓' : 'Copier'}
             </button>
             {saved.profile && !saved.redirectUrl && (
-              <a href={`/${saved.profile.username}?mode=classic`} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none' }}>
+              <a href={previewHref(saved.profile)} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none' }}>
                 Voir le profil ↗
               </a>
             )}
@@ -426,6 +430,33 @@ export default function StandaloneClient({
                 </Field>
               </div>
 
+              <Field label="Affichage du profil">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+                  {DISPLAY_MODES.map((m) => {
+                    const on = form.profile.displayMode === m.value;
+                    return (
+                      <button key={m.value} onClick={() => setProfile({ displayMode: m.value })} style={{
+                        padding: '8px 0', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 500,
+                        fontFamily: 'DM Sans, sans-serif',
+                        background: on ? 'rgba(99,102,241,0.12)' : 'var(--t-row)',
+                        border: `1px solid ${on ? 'rgba(99,102,241,0.45)' : 'var(--t-border)'}`,
+                        color: on ? '#818CF8' : 'var(--t-text-muted)',
+                      }}>
+                        {m.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
+
+              {form.profile.displayMode === 'light' && (
+                <Field label="Accroche" hint="Phrase courte affichée dans une bulle sous le nom.">
+                  <input style={input} value={form.profile.tagline} maxLength={120}
+                    placeholder="Ex : Innover. Inspirer. Réaliser."
+                    onChange={(e) => setProfile({ tagline: e.target.value })} />
+                </Field>
+              )}
+
               <Field label="Bio">
                 <textarea style={{ ...input, minHeight: 80, resize: 'vertical' }} value={form.profile.bio} maxLength={500}
                   onChange={(e) => setProfile({ bio: e.target.value })} />
@@ -510,7 +541,7 @@ export default function StandaloneClient({
             {cards.map((c) => {
               const ed       = EDITION_META[c.edition];
               const target   = c.redirectUrl ?? (c.profile ? `${APP_HOST}/${c.profile.username}` : '—');
-              const openHref = c.redirectUrl ?? (c.profile ? `/${c.profile.username}?mode=classic` : null);
+              const openHref = c.redirectUrl ?? (c.profile ? previewHref(c.profile) : null);
               return (
                 <div key={c.id} style={{ ...panel, padding: 18, display: 'flex', flexDirection: 'column', gap: 12, opacity: c.active ? 1 : 0.65 }}>
                   <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>

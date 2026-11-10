@@ -101,7 +101,7 @@ function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
 }
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
-type DisplayMode = 'classic' | 'grid' | 'card';
+type DisplayMode = 'classic' | 'grid' | 'card' | 'light';
 type Profile = {
   id: string;
   username: string;
@@ -109,6 +109,7 @@ type Profile = {
   title?: string | null;
   company?: string | null;
   bio?: string | null;
+  tagline?: string | null;
   avatar?: string | null;
   theme: string;
   displayMode?: DisplayMode;
@@ -158,6 +159,22 @@ const DISPLAY_MODES: { value: DisplayMode; label: string; desc: string; preview:
         <rect x="4"  y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
         <rect x="19" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
         <rect x="34" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
+      </svg>
+    ),
+  },
+  {
+    value: 'light',
+    label: 'Clair',
+    desc: 'Fond clair, grande photo',
+    preview: (
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <rect x="6" y="10" width="48" height="20" rx="5" fill="currentColor" opacity=".3"/>
+        <circle cx="30" cy="11" r="8" fill="currentColor" opacity=".7"/>
+        <rect x="18" y="22" width="24" height="4" rx="2" fill="currentColor" opacity=".55"/>
+        <rect x="6" y="34" width="48" height="10" rx="4" fill="currentColor" opacity=".18"/>
+        <circle cx="18" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
+        <circle cx="30" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
+        <circle cx="42" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
       </svg>
     ),
   },
@@ -278,6 +295,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
     title:       profile?.title ?? '',
     company:     profile?.company ?? '',
     bio:         profile?.bio ?? '',
+    tagline:     profile?.tagline ?? '',
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
@@ -590,6 +608,9 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
             <Input label="Titre / Poste" value={form.title} onChange={set('title')} placeholder="CEO & Founder" />
             <Input label="Entreprise" value={form.company} onChange={set('company')} placeholder="Acme Corp" />
             <Textarea label="Bio" value={form.bio} onChange={set('bio')} placeholder="Une courte présentation..." style={{ minHeight: 80 }} />
+            {displayMode === 'light' && (
+              <Input label="Accroche" value={form.tagline} onChange={set('tagline')} placeholder="Innover. Inspirer. Réaliser." hint="Phrase courte affichée sous ton nom (mode Clair)." />
+            )}
             <Input label="Nom d'utilisateur" value={form.username} onChange={set('username')} hint={`weconnect.cards/${form.username || '…'}`} />
           </div>
 
@@ -665,7 +686,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
               Mode d'affichage
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))', gap: 8 }}>
               {DISPLAY_MODES.map((m) => (
                 <button
                   key={m.value}
@@ -1081,7 +1102,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
           <Card padding="sm">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
-                Aperçu — {displayMode === 'classic' ? 'Classique' : displayMode === 'grid' ? 'Grille sociale' : 'Carte Pro'}
+                Aperçu — {DISPLAY_MODES.find((m) => m.value === displayMode)?.label}
               </p>
               <a
                 href={`/${profile.username}`}

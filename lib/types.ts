@@ -21,7 +21,8 @@ export interface ProfileDoc {
   avatar?:          string;
   backgroundImage?: string;
   theme:            'midnight' | 'electric' | 'glass' | 'metal';
-  displayMode?:     'classic' | 'grid' | 'card';
+  displayMode?:     'classic' | 'grid' | 'card' | 'light';
+  tagline?:         string; // short catchphrase shown in a pill (light display mode)
   hiddenFields?:    string[]; // 'avatar' | 'title' | 'company' | 'bio'
   inDirectory?:     boolean;
   sector?:          string;
