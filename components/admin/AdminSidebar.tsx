@@ -41,6 +41,17 @@ const navItems = [
     exact: false,
   },
   {
+    href: '/admin/standalone',
+    label: 'Cartes sans compte',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <rect x="1" y="4" width="22" height="16" rx="2"/>
+        <path d="M6 15h4M15 9a3 3 0 0 1 0 6M18 7a6 6 0 0 1 0 10"/>
+      </svg>
+    ),
+    exact: false,
+  },
+  {
     href: '/admin/clients',
     label: 'Clients',
     icon: (

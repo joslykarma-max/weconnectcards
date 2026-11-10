@@ -54,6 +54,10 @@ export async function POST(req: NextRequest) {
   let target: QueryDocumentSnapshot;
 
   if (codeDoc && codeData) {
+    // Cards without account are managed by We Connect and can't be claimed
+    if (codeData.standalone) {
+      return NextResponse.json({ error: 'Cette carte est gérée par We Connect et ne peut pas être liée à un compte.' }, { status: 409 });
+    }
     if (codeData.userId && codeData.userId !== user.uid) {
       return NextResponse.json({ error: 'Cette carte est déjà liée à un autre compte.' }, { status: 409 });
     }

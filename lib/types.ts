@@ -28,6 +28,7 @@ export interface ProfileDoc {
   isPublic:         boolean;
   cardId?:          string; // set on a card-specific profile
   label?:           string; // owner-chosen name shown in the dashboard profile switcher
+  standalone?:      boolean; // profile of a card without account (uid = standaloneUid(cardId))
   updatedAt:        string;
 }
 
@@ -111,6 +112,11 @@ export interface CardDoc {
   deactivationNote?:   string;
   replacedBy?:         string; // id of the card that took over this one
   replaces?:           string; // id of the card this one took over
+  // "Carte sans compte": created and managed from the admin panel, never linked to a user
+  standalone?:  boolean;
+  label?:       string; // admin-chosen name (client, event…)
+  redirectUrl?: string; // set → a tap opens this link instead of the profile
+  createdAt?:   string;
 }
 
 export type DeactivationReason = 'lost' | 'stolen' | 'damaged' | 'other';

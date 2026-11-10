@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { PROFILE_MODULE, TAP_MODULES, isProfileModuleActive } from '@/lib/modules';
+import { standaloneUid } from '@/lib/standalone';
 import type { CardDoc, ProfileDoc, AccessCardDoc, MemberCardDoc, ModuleDoc, UserDoc } from '@/lib/types';
 
 export async function GET(
@@ -17,6 +18,35 @@ export async function GET(
   }
 
   const card = snap.docs[0].data() as CardDoc;
+
+  // Card without account — managed from the admin panel
+  if (card.standalone) {
+    if (card.status !== 'active') {
+      return NextResponse.redirect(`${base}/carte-perdue`);
+    }
+
+    // Direct link: the tap opens it straight away
+    if (card.redirectUrl) {
+      adminDb.collection('scans').add({
+        userId:    standaloneUid(snap.docs[0].id),
+        nfcId:     id,
+        device:    'nfc',
+        userAgent: req.headers.get('user-agent')?.slice(0, 512) ?? '',
+        scannedAt: new Date().toISOString(),
+      }).catch(() => {});
+      return NextResponse.redirect(card.redirectUrl);
+    }
+
+    // Profile: the visit is counted by the profile page itself
+    const standaloneProfile = card.profileId
+      ? await adminDb.collection('profiles').doc(card.profileId).get()
+      : null;
+    const sp = standaloneProfile?.exists ? (standaloneProfile.data() as ProfileDoc) : null;
+    if (sp?.username && sp.isPublic) {
+      return NextResponse.redirect(`${base}/${sp.username}`);
+    }
+    return NextResponse.redirect(base);
+  }
 
   // Switched off by its owner (lost, stolen…) — never reveal the profile
   if (card.status === 'deactivated') {
