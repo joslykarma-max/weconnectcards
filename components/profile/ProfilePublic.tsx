@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import LogoStacked from '@/components/logo/LogoStacked';
 import { generateVCard } from '@/lib/utils';
+import { resolveDisplayMode } from '@/lib/display-mode';
 
 type Link = {
   id: string;
@@ -759,7 +760,7 @@ export default function ProfilePublic({ profile }: { profile: Profile }) {
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone: '' });
 
   const theme       = THEME_COLORS[profile.theme] ?? THEME_COLORS.midnight;
-  const displayMode = profile.displayMode ?? 'classic';
+  const displayMode = resolveDisplayMode(profile.displayMode);
 
   const downloadVCard = () => {
     const vcard = generateVCard({ displayName: profile.displayName, title: profile.title, company: profile.company, avatar: profile.avatar, username: profile.username, links: profile.links });

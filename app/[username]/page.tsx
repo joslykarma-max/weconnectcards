@@ -6,6 +6,7 @@ import ProfilePublic from '@/components/profile/ProfilePublic';
 import { getDeviceFromUA } from '@/lib/utils';
 import { headers } from 'next/headers';
 import type { ProfileDoc, LinkDoc, ModuleDoc } from '@/lib/types';
+import { isDisplayMode, resolveDisplayMode } from '@/lib/display-mode';
 
 const MODULE_META: Record<string, { emoji: string; name: string }> = {
   loyalty:     { emoji: '🎯', name: 'Carte de fidélité'       },
@@ -49,7 +50,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ProfilePage({ params, searchParams }: Props) {
   const { username } = await params;
   const { mode } = await searchParams;
-  const previewMode = (mode === 'classic' || mode === 'grid' || mode === 'card' || mode === 'light') ? mode : null;
+  const previewMode = isDisplayMode(mode) ? mode : null;
 
   const resolved = await resolveUsername(username);
   if (!resolved) notFound();
@@ -110,7 +111,7 @@ export default async function ProfilePage({ params, searchParams }: Props) {
     avatar:          profileData.avatar          ?? null,
     backgroundImage: profileData.backgroundImage ?? null,
     theme:           profileData.theme,
-    displayMode:     previewMode ?? profileData.displayMode  ?? 'classic',
+    displayMode:     previewMode ?? resolveDisplayMode(profileData.displayMode),
     hiddenFields:    profileData.hiddenFields ?? [],
     links,
     modules,

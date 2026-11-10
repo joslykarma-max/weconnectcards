@@ -13,17 +13,8 @@ export function isStandaloneEdition(v: unknown): v is StandaloneEdition {
   return typeof v === 'string' && (STANDALONE_EDITIONS as readonly string[]).includes(v);
 }
 
-export const DISPLAY_MODES = [
-  { value: 'light',   label: 'Clair' },
-  { value: 'classic', label: 'Classique' },
-  { value: 'grid',    label: 'Grille' },
-  { value: 'card',    label: 'Carte Pro' },
-] as const;
-export type DisplayMode = typeof DISPLAY_MODES[number]['value'];
-
-export function isDisplayMode(v: unknown): v is DisplayMode {
-  return DISPLAY_MODES.some((m) => m.value === v);
-}
+import type { DisplayMode } from './display-mode';
+export { DISPLAY_MODES, DEFAULT_DISPLAY_MODE, isDisplayMode, type DisplayMode } from './display-mode';
 
 export interface StandaloneLinkInput {
   type:  string;

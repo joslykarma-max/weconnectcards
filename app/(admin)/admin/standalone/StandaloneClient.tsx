@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import {
-  DISPLAY_MODES, STANDALONE_EDITIONS, STANDALONE_LINK_TYPES, defaultLinkLabel,
+  DEFAULT_DISPLAY_MODE, DISPLAY_MODES, STANDALONE_EDITIONS, STANDALONE_LINK_TYPES, defaultLinkLabel,
   type StandaloneCardView, type StandaloneEdition, type StandaloneLinkInput,
   type StandalonePayload, type StandaloneProfileInput,
 } from '@/lib/standalone';
@@ -31,7 +31,7 @@ type FormState = {
 
 const emptyForm = (): FormState => ({
   nfcId: '', label: '', edition: 'midnight', mode: 'profile', redirectUrl: '', active: true,
-  profile: { displayName: '', title: '', company: '', bio: '', tagline: '', avatar: '', username: '', displayMode: 'light' },
+  profile: { displayName: '', title: '', company: '', bio: '', tagline: '', avatar: '', username: '', displayMode: DEFAULT_DISPLAY_MODE },
   links: [
     { type: 'phone', label: '', value: '' },
     { type: 'email', label: '', value: '' },

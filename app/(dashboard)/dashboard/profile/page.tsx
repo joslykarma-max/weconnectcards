@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { getOwnedProfileId } from '@/lib/profiles';
 import ProfileEditor from './ProfileEditor';
 import type { ProfileDoc, LinkDoc, CardDoc } from '@/lib/types';
+import { resolveDisplayMode } from '@/lib/display-mode';
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ profile?: string }> }) {
   const user = await requireAuth();
@@ -32,7 +33,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
     bio:         profileData.bio         ?? null,
     avatar:      profileData.avatar      ?? null,
     theme:       profileData.theme,
-    displayMode: profileData.displayMode ?? 'classic',
+    displayMode: resolveDisplayMode(profileData.displayMode),
     hiddenFields: profileData.hiddenFields ?? [],
     isPublic:    profileData.isPublic,
     links,

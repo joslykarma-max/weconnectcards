@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import Badge from '@/components/ui/Badge';
 import { SECTORS } from '@/lib/sectors';
+import { DEFAULT_DISPLAY_MODE, type DisplayMode } from '@/lib/display-mode';
 
 const LS_SPLIT  = 'profile-split-pct';
 const LS_WIDTH  = 'profile-total-width';
@@ -101,7 +102,6 @@ function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
 }
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
-type DisplayMode = 'classic' | 'grid' | 'card' | 'light';
 type Profile = {
   id: string;
   username: string;
@@ -119,6 +119,22 @@ type Profile = {
 } | null;
 
 const DISPLAY_MODES: { value: DisplayMode; label: string; desc: string; preview: React.ReactNode }[] = [
+  {
+    value: 'light',
+    label: 'Clair',
+    desc: 'Par défaut · fond clair, bulles',
+    preview: (
+      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
+        <rect x="6" y="10" width="48" height="20" rx="5" fill="currentColor" opacity=".3"/>
+        <circle cx="30" cy="11" r="8" fill="currentColor" opacity=".7"/>
+        <rect x="18" y="22" width="24" height="4" rx="2" fill="currentColor" opacity=".55"/>
+        <rect x="6" y="34" width="48" height="10" rx="4" fill="currentColor" opacity=".18"/>
+        <circle cx="18" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
+        <circle cx="30" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
+        <circle cx="42" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
+      </svg>
+    ),
+  },
   {
     value: 'classic',
     label: 'Classique',
@@ -159,22 +175,6 @@ const DISPLAY_MODES: { value: DisplayMode; label: string; desc: string; preview:
         <rect x="4"  y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
         <rect x="19" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
         <rect x="34" y="32" width="12" height="12" rx="3" fill="currentColor" opacity=".4"/>
-      </svg>
-    ),
-  },
-  {
-    value: 'light',
-    label: 'Clair',
-    desc: 'Fond clair, grande photo',
-    preview: (
-      <svg viewBox="0 0 60 48" width="60" height="48" fill="none">
-        <rect x="6" y="10" width="48" height="20" rx="5" fill="currentColor" opacity=".3"/>
-        <circle cx="30" cy="11" r="8" fill="currentColor" opacity=".7"/>
-        <rect x="18" y="22" width="24" height="4" rx="2" fill="currentColor" opacity=".55"/>
-        <rect x="6" y="34" width="48" height="10" rx="4" fill="currentColor" opacity=".18"/>
-        <circle cx="18" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
-        <circle cx="30" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
-        <circle cx="42" cy="39" r="2.5" fill="currentColor" opacity=".55"/>
       </svg>
     ),
   },
@@ -299,7 +299,7 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
     username:    profile?.username ?? '',
     theme:       profile?.theme ?? 'midnight',
   });
-  const [displayMode, setDisplayMode]   = useState<DisplayMode>(profile?.displayMode ?? 'classic');
+  const [displayMode, setDisplayMode]   = useState<DisplayMode>(profile?.displayMode ?? DEFAULT_DISPLAY_MODE);
   const [hiddenFields, setHiddenFields] = useState<string[]>((profile as Record<string, unknown> & { hiddenFields?: string[] })?.hiddenFields ?? []);
   const [inDirectory, setInDirectory]   = useState<boolean>((profile as Record<string, unknown> & { inDirectory?: boolean })?.inDirectory ?? false);
   const [sector, setSector]             = useState<string>((profile as Record<string, unknown> & { sector?: string })?.sector ?? '');

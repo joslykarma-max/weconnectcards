@@ -4,6 +4,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { adminDb } from '@/lib/firebase-admin';
 import type { UsernameDoc } from '@/lib/profiles';
 import { getStandaloneCard } from '@/lib/standalone-server';
+import { resolveDisplayMode } from '@/lib/display-mode';
 import {
   RESERVED_USERNAMES, defaultLinkLabel, isDisplayMode, isSafeUrl, isStandaloneEdition, isStandaloneLinkType,
   linkUrlFromValue, normalizeRedirectUrl, slugify, standaloneUid,
@@ -141,7 +142,7 @@ async function upsertProfile(
     tagline:     optional(text(p.tagline, 120)),
     avatar:      optional(avatar),
     theme:       edition,
-    displayMode: isDisplayMode(p.displayMode) ? p.displayMode : (existing?.data.displayMode ?? 'light'),
+    displayMode: isDisplayMode(p.displayMode) ? p.displayMode : resolveDisplayMode(existing?.data.displayMode),
     isPublic:    true,
     standalone:  true,
     cardId,
