@@ -14,7 +14,7 @@
 .locked { opacity: 0.72; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .emoji { width: 38px; height: 38px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 21px; box-shadow: 0 2px 0 #E2E8F0; flex-shrink: 0; }
-.name { margin: 4px 0 0; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.2; color: #0F172A; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.name { margin: 4px 0 0; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.2; color: #0F172A; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 .desc { display: none; margin: 0; font-size: 12.5px; line-height: 1.4; color: #64748B; }
 .configure, .state { margin-top: auto; padding-top: 4px; font-size: 12px; font-weight: 700; text-decoration: none; }
 .configure { color: #4F46E5; min-height: 28px; display: inline-flex; align-items: center; }
@@ -36,7 +36,7 @@
 }
 .customIcon { width: 38px; height: 38px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #6366F1; font-size: 18px; flex-shrink: 0; }
 .customText { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; font-size: 12.5px; color: #64748B; line-height: 1.35; }
-.customText strong { font-family: 'Syne', sans-serif; font-size: 14px; color: #0F172A; }
+.customText strong { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; color: #0F172A; }
 .customBtn { min-height: 44px; padding: 0 16px; border-radius: 999px; border: none; cursor: pointer; background: #0F172A; color: #FFFFFF; font-weight: 700; font-size: 13.5px; white-space: nowrap; box-shadow: 0 3px 0 #000; }
 
 .switchBtn:focus-visible, .configure:focus-visible, .customBtn:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; border-radius: 10px; }

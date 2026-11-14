@@ -43,7 +43,7 @@ export default function ActivateClient({
     return (
       <div style={{ textAlign: 'center', padding: '40px 0' }}>
         <span style={{ fontSize: 56, display: 'block', marginBottom: 16 }}>🎉</span>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', marginBottom: 8 }}>
           Carte activée !
         </p>
         <p style={{ color: '#6B7280', fontSize: 14 }}>
@@ -57,7 +57,7 @@ export default function ActivateClient({
     return (
       <div style={{ textAlign: 'center' }}>
         <span style={{ fontSize: 48, display: 'block', marginBottom: 20 }}>🔐</span>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 10 }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 10 }}>
           Connecte-toi pour activer ta carte
         </p>
         <p style={{ color: '#6B7280', fontSize: 14, marginBottom: 32 }}>

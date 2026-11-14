@@ -88,9 +88,9 @@ export default function TablesClient({ username, initialTableCount }: Props) {
     <div style={{ maxWidth: 900 }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 28 }}>
-        <Link href="/dashboard/modules/menu" style={{ color: '#6B7280', fontSize: 20, textDecoration: 'none', display: 'flex', alignItems: 'center' }}>←</Link>
+        <Link href="/dashboard/modules/menu" style={{ color: '#64748B', fontSize: 20, textDecoration: 'none', display: 'flex', alignItems: 'center' }}>←</Link>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--t-text)', marginBottom: 2 }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--t-text)', marginBottom: 2 }}>
             ⬛ QR Codes Tables
           </h2>
           <p style={{ color: 'var(--t-text-muted)', fontSize: 13 }}>Un QR par table — le client scanne, voit le menu et passe commande.</p>
@@ -100,32 +100,32 @@ export default function TablesClient({ username, initialTableCount }: Props) {
       {/* Config panel */}
       <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 10, padding: 24, marginBottom: 28, display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: '0 0 180px' }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Nombre de tables</p>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 }}>Nombre de tables</p>
           <input
             type="number" min={0} max={99}
             value={draft === 0 ? '' : draft}
             onChange={e => setDraft(Math.min(99, Math.max(0, Number(e.target.value) || 0)))}
             placeholder="Ex : 12"
-            style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '11px 14px', color: 'var(--t-text)', fontFamily: 'Space Mono, monospace', fontSize: 16, outline: 'none', boxSizing: 'border-box' }}
+            style={{ width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.12)', borderRadius: 8, padding: '11px 14px', color: 'var(--t-text)', fontFamily: 'Space Mono, monospace', fontSize: 16, outline: 'none', boxSizing: 'border-box' }}
           />
         </div>
         <button
           onClick={save}
           disabled={saving}
-          style={{ padding: '11px 28px', background: saved ? 'rgba(16,185,129,0.15)' : 'linear-gradient(135deg, #4338CA, #6366F1)', border: saved ? '1px solid rgba(16,185,129,0.3)' : 'none', borderRadius: 8, color: saved ? '#10B981' : '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}
+          style={{ padding: '11px 28px', background: saved ? 'rgba(16,185,129,0.15)' : 'linear-gradient(135deg, #4338CA, #6366F1)', border: saved ? '1px solid rgba(16,185,129,0.3)' : 'none', borderRadius: 8, color: saved ? '#10B981' : '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1 }}
         >
           {saved ? '✓ Sauvegardé' : saving ? 'Sauvegarde...' : 'Appliquer'}
         </button>
         {tableCount > 0 && qrUrls.length === tableCount && (
           <button
             onClick={printAll}
-            style={{ padding: '11px 24px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+            style={{ padding: '11px 24px', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 8, color: 'var(--t-text-muted)', fontFamily: 'DM Sans, sans-serif', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
           >
             🖨️ Imprimer tout
           </button>
         )}
-        <p style={{ flex: '1 1 100%', color: '#6B7280', fontSize: 12, margin: 0 }}>
-          Chaque QR redirige vers <code style={{ color: '#818CF8', fontFamily: 'Space Mono, monospace' }}>/m/{username}/menu?table=N</code>. Imprimez-les et posez-les sur chaque table.
+        <p style={{ flex: '1 1 100%', color: '#64748B', fontSize: 12, margin: 0 }}>
+          Chaque QR redirige vers <code style={{ color: '#4F46E5', fontFamily: 'Space Mono, monospace' }}>/m/{username}/menu?table=N</code>. Imprimez-les et posez-les sur chaque table.
         </p>
       </div>
 
@@ -150,15 +150,15 @@ export default function TablesClient({ username, initialTableCount }: Props) {
                     style={{ width: 120, height: 120, borderRadius: 8, display: 'block' }}
                   />
                 ) : (
-                  <div style={{ width: 120, height: 120, borderRadius: 8, background: 'rgba(255,255,255,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <div style={{ width: 120, height: 120, borderRadius: 8, background: 'rgba(15,23,42,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ color: '#374151', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>...</span>
                   </div>
                 )}
 
                 {/* Label */}
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15, color: 'var(--t-text)' }}>Table {n}</p>
-                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#6B7280', letterSpacing: 1, marginTop: 2 }}>
+                  <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: 'var(--t-text)' }}>Table {n}</p>
+                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, color: '#64748B', letterSpacing: 1, marginTop: 2 }}>
                     ?table={n}
                   </p>
                 </div>
@@ -169,7 +169,7 @@ export default function TablesClient({ username, initialTableCount }: Props) {
                     <a
                       href={url}
                       download={`table-${n}.png`}
-                      style={{ flex: 1, textAlign: 'center', padding: '7px 0', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 7, textDecoration: 'none', color: '#818CF8', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' }}
+                      style={{ flex: 1, textAlign: 'center', padding: '7px 0', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 7, textDecoration: 'none', color: '#4F46E5', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' }}
                     >
                       ↓ PNG
                     </a>
@@ -178,7 +178,7 @@ export default function TablesClient({ username, initialTableCount }: Props) {
                     href={`${APP_URL}/m/${username}/menu?table=${n}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ flex: 1, textAlign: 'center', padding: '7px 0', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 7, textDecoration: 'none', color: '#6B7280', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' }}
+                    style={{ flex: 1, textAlign: 'center', padding: '7px 0', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 7, textDecoration: 'none', color: '#64748B', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, textTransform: 'uppercase' }}
                   >
                     ↗ Test
                   </a>

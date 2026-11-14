@@ -148,7 +148,7 @@ function Avatar({ src, name, size = 96 }: { src?: string | null; name: string; s
           <Image src={src} alt={name} width={size} height={size} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.2))' }}>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: size * 0.38, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: size * 0.38, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               {name.charAt(0).toUpperCase()}
             </span>
           </div>
@@ -192,7 +192,7 @@ function SaveContactBlock({
   return (
     <>
       <button onClick={onSave} disabled={saving}
-        style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1, #818CF8)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)', opacity: saving ? 0.7 : 1 }}
+        style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1, #818CF8)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)', opacity: saving ? 0.7 : 1 }}
         onMouseEnter={(e) => { if (!saving) e.currentTarget.style.transform = 'translateY(-2px)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
       >
@@ -206,7 +206,7 @@ function SaveContactBlock({
 
       {showForm && !submitted && (
         <div style={{ marginTop: 16, padding: 20, background: 'rgba(99,102,241,0.06)', border: `1px solid ${theme.border}`, borderRadius: 8 }}>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 4 }}>Laissez vos coordonnées</p>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 4 }}>Laissez vos coordonnées</p>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF', marginBottom: 16 }}>Partagez vos infos pour rester en contact.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {(['name', 'email', 'phone'] as const).map((field) => (
@@ -219,7 +219,7 @@ function SaveContactBlock({
               />
             ))}
             <button onClick={onLeaveInfo} disabled={!contactForm.name && !contactForm.email}
-              style={{ marginTop: 4, padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: (!contactForm.name && !contactForm.email) ? 'not-allowed' : 'pointer', opacity: (!contactForm.name && !contactForm.email) ? 0.5 : 1 }}>
+              style={{ marginTop: 4, padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, cursor: (!contactForm.name && !contactForm.email) ? 'not-allowed' : 'pointer', opacity: (!contactForm.name && !contactForm.email) ? 0.5 : 1 }}>
               Envoyer
             </button>
           </div>
@@ -229,7 +229,7 @@ function SaveContactBlock({
       {submitted && (
         <div style={{ marginTop: 16, padding: 20, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 8, textAlign: 'center' }}>
           <span style={{ fontSize: 28, display: 'block', marginBottom: 8 }}>✅</span>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#34D399', marginBottom: 4 }}>Merci !</p>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#34D399', marginBottom: 4 }}>Merci !</p>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF' }}>Vos coordonnées ont été transmises.</p>
         </div>
       )}
@@ -253,7 +253,7 @@ function LayoutClassic({ profile, theme, saveContactProps }: {
             <Avatar src={profile.avatar} name={profile.displayName} size={96} />
           </div>
         )}
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6, letterSpacing: '-0.5px' }}>
           {profile.displayName}
         </h1>
         {(isVisible(profile, 'title') || isVisible(profile, 'company')) && (profile.title || profile.company) && (
@@ -310,7 +310,7 @@ function LayoutGrid({ profile, theme, saveContactProps }: {
             <Avatar src={profile.avatar} name={profile.displayName} size={88} />
           </div>
         )}
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4, letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4, letterSpacing: '-0.5px' }}>
           {profile.displayName}
         </h1>
         {(isVisible(profile, 'title') || isVisible(profile, 'company')) && (profile.title || profile.company) && (
@@ -368,7 +368,7 @@ function LayoutCard({ profile, theme, saveContactProps }: {
       <div style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${theme.border}`, borderRadius: 16, padding: '24px 20px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 20 }}>
         {isVisible(profile, 'avatar') && <Avatar src={profile.avatar} name={profile.displayName} size={76} />}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', letterSpacing: '-0.3px', margin: 0 }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', letterSpacing: '-0.3px', margin: 0 }}>
             {profile.displayName}
           </h1>
           {profile.title && isVisible(profile, 'title') && (

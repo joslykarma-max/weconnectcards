@@ -11,6 +11,14 @@
   --t-text:        #0F172A;
   --t-text-sub:    #334155;
   --t-text-muted:  #64748B;
+  /* shared UI components (Card, Modal, Input) */
+  --ui-card-bg:     #FFFFFF;
+  --ui-card-border: 1px solid #EDF1F6;
+  --ui-card-radius: 20px;
+  --ui-card-shadow: 0 6px 22px rgba(15, 42, 68, 0.06);
+  --ui-modal-bg:    #FFFFFF;
+  --ui-modal-text:  #0F172A;
+  --ui-input-text:  #0F172A;
   color: #0F172A;
 }
 /* Fields written with translucent-white backgrounds/borders for the dark theme */

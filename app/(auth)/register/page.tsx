@@ -63,7 +63,7 @@ function RegisterForm() {
         <Badge variant="gradient" className="mb-4">
           Plan {plan.charAt(0).toUpperCase() + plan.slice(1)}
         </Badge>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10, marginTop: 12 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10, marginTop: 12 }}>
           Créer mon compte.
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 15 }}>

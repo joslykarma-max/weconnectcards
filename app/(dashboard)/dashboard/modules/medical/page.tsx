@@ -7,7 +7,7 @@ import Button from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 
 const label = (text: string) => (
-  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>{text}</p>
+  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 }}>{text}</p>
 );
 
 const textarea = (value: string, onChange: React.ChangeEventHandler<HTMLTextAreaElement>, placeholder: string) => (
@@ -17,8 +17,8 @@ const textarea = (value: string, onChange: React.ChangeEventHandler<HTMLTextArea
     placeholder={placeholder}
     rows={2}
     style={{
-      width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-      borderRadius: 6, padding: '10px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif',
+      width: '100%', background: 'rgba(15,23,42,0.03)', border: '1px solid rgba(15,23,42,0.1)',
+      borderRadius: 6, padding: '10px 14px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif',
       fontSize: 14, outline: 'none', resize: 'vertical', boxSizing: 'border-box',
     }}
   />
@@ -26,9 +26,9 @@ const textarea = (value: string, onChange: React.ChangeEventHandler<HTMLTextArea
 
 const select = (value: string, onChange: React.ChangeEventHandler<HTMLSelectElement>, options: string[], placeholder = 'Sélectionner...') => (
   <select value={value} onChange={onChange}
-    style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 14px', color: value ? '#F8F9FC' : '#6B7280', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}>
-    <option value="" style={{ background: '#181B26' }}>{placeholder}</option>
-    {options.map(o => <option key={o} value={o} style={{ background: '#181B26' }}>{o}</option>)}
+    style={{ width: '100%', background: 'rgba(15,23,42,0.03)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 14px', color: value ? '#0F172A' : '#64748B', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}>
+    <option value="" style={{ background: '#FFFFFF' }}>{placeholder}</option>
+    {options.map(o => <option key={o} value={o} style={{ background: '#FFFFFF' }}>{o}</option>)}
   </select>
 );
 
@@ -85,10 +85,10 @@ export default function MedicalPage() {
   return (
     <div style={{ maxWidth: 860, display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 4 }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>←</button>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC' }}>🩺 Carte Médicale</h2>
-          <p style={{ color: '#6B7280', fontSize: 13 }}>Informations d&apos;urgence accessibles en un scan</p>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A' }}>🩺 Carte Médicale</h2>
+          <p style={{ color: '#64748B', fontSize: 13 }}>Informations d&apos;urgence accessibles en un scan</p>
         </div>
       </div>
 
@@ -96,9 +96,9 @@ export default function MedicalPage() {
       <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '14px 18px', display: 'flex', gap: 14 }}>
         <span style={{ fontSize: 20, flexShrink: 0 }}>🔐</span>
         <div>
-          <p style={{ color: '#818CF8', fontSize: 13, fontWeight: 600, marginBottom: 4, fontFamily: 'Syne, sans-serif' }}>Comment fonctionne la protection ?</p>
-          <p style={{ color: '#9CA3AF', fontSize: 13, lineHeight: 1.7 }}>
-            Les <strong style={{ color: '#F8F9FC' }}>infos critiques</strong> (groupe sanguin, allergies, contact d&apos;urgence) sont <strong style={{ color: '#10B981' }}>toujours visibles</strong> — les secours y accèdent immédiatement. Les <strong style={{ color: '#F8F9FC' }}>infos complémentaires</strong> (médecin, dossier détaillé) peuvent être protégées par un PIN que vous partagez avec vos proches.
+          <p style={{ color: '#4F46E5', fontSize: 13, fontWeight: 600, marginBottom: 4, fontFamily: 'Plus Jakarta Sans, sans-serif' }}>Comment fonctionne la protection ?</p>
+          <p style={{ color: '#64748B', fontSize: 13, lineHeight: 1.7 }}>
+            Les <strong style={{ color: '#0F172A' }}>infos critiques</strong> (groupe sanguin, allergies, contact d&apos;urgence) sont <strong style={{ color: '#10B981' }}>toujours visibles</strong> — les secours y accèdent immédiatement. Les <strong style={{ color: '#0F172A' }}>infos complémentaires</strong> (médecin, dossier détaillé) peuvent être protégées par un PIN que vous partagez avec vos proches.
           </p>
         </div>
       </div>
@@ -111,7 +111,7 @@ export default function MedicalPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
               <span style={{ fontSize: 16 }}>🚨</span>
               <div>
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>Infos critiques</h3>
+                <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A' }}>Infos critiques</h3>
                 <p style={{ color: '#10B981', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 1 }}>TOUJOURS VISIBLES · Sans code</p>
               </div>
             </div>
@@ -127,8 +127,8 @@ export default function MedicalPage() {
                 {textarea(form.allergies, set('allergies') as React.ChangeEventHandler<HTMLTextAreaElement>, 'Pénicilline, arachides, latex...')}
               </div>
 
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 4 }}>
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, color: '#F8F9FC', marginBottom: 12 }}>Contact d&apos;urgence principal</p>
+              <div style={{ borderTop: '1px solid rgba(15,23,42,0.07)', paddingTop: 14, marginTop: 4 }}>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 13, color: '#0F172A', marginBottom: 12 }}>Contact d&apos;urgence principal</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <Input label="Nom" placeholder="Carine Hounkpatin" value={form.emergencyName} onChange={set('emergencyName')} />
                   <Input label="Relation" placeholder="Épouse, parent, ami..." value={form.emergencyRel} onChange={set('emergencyRel')} />
@@ -143,8 +143,8 @@ export default function MedicalPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
               <span style={{ fontSize: 16 }}>🔒</span>
               <div>
-                <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>Infos complémentaires</h3>
-                <p style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 1 }}>Protégées par PIN si défini</p>
+                <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A' }}>Infos complémentaires</h3>
+                <p style={{ color: '#64748B', fontSize: 11, fontFamily: 'Space Mono, monospace', letterSpacing: 1 }}>Protégées par PIN si défini</p>
               </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -165,8 +165,8 @@ export default function MedicalPage() {
               <Input label="Hôpital de référence" placeholder="CNHU-HKM de Cotonou" value={form.hospital} onChange={set('hospital')} />
               <Input label="N° assuré / Assurance" placeholder="123456789 — RAMU" value={form.insuranceNumber} onChange={set('insuranceNumber')} />
 
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 14, marginTop: 4 }}>
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, color: '#F8F9FC', marginBottom: 12 }}>2ème contact d&apos;urgence</p>
+              <div style={{ borderTop: '1px solid rgba(15,23,42,0.07)', paddingTop: 14, marginTop: 4 }}>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 13, color: '#0F172A', marginBottom: 12 }}>2ème contact d&apos;urgence</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <Input label="Nom" placeholder="Didier Adjovi" value={form.emergency2Name} onChange={set('emergency2Name')} />
                   <Input label="Relation" placeholder="Frère, collègue..." value={form.emergency2Rel} onChange={set('emergency2Rel')} />
@@ -182,7 +182,7 @@ export default function MedicalPage() {
 
           {/* Section 3 : Paramètres */}
           <Card padding="md">
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>⚙️ Paramètres</h3>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 18 }}>⚙️ Paramètres</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <Input label="Poids (kg)" placeholder="75" value={form.weight} onChange={set('weight')} />
@@ -208,9 +208,9 @@ export default function MedicalPage() {
                     placeholder="Laissez vide = tout visible"
                     maxLength={8}
                     style={{
-                      width: '100%', background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                      padding: '10px 44px 10px 14px', color: '#F8F9FC',
+                      width: '100%', background: 'rgba(15,23,42,0.03)',
+                      border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6,
+                      padding: '10px 44px 10px 14px', color: '#0F172A',
                       fontFamily: 'Space Mono, monospace', fontSize: 16,
                       letterSpacing: 4, outline: 'none', boxSizing: 'border-box',
                     }}
@@ -220,7 +220,7 @@ export default function MedicalPage() {
                     onClick={() => setShowPin(v => !v)}
                     style={{
                       position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                      background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', padding: 4,
+                      background: 'none', border: 'none', cursor: 'pointer', color: '#64748B', padding: 4,
                     }}
                   >
                     {showPin ? (
@@ -237,7 +237,7 @@ export default function MedicalPage() {
                     )}
                   </button>
                 </div>
-                <p style={{ color: '#6B7280', fontSize: 11, marginTop: 6, fontFamily: 'DM Sans, sans-serif' }}>
+                <p style={{ color: '#64748B', fontSize: 11, marginTop: 6, fontFamily: 'DM Sans, sans-serif' }}>
                   Si défini, les infos complémentaires sont cachées derrière ce code. Partagez-le avec vos proches uniquement.
                 </p>
               </div>
@@ -252,16 +252,16 @@ export default function MedicalPage() {
         {/* Aperçu */}
         <div style={{ position: 'sticky', top: 24 }}>
           <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu</p>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#64748B', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu</p>
 
             {/* Toujours visible */}
             <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, padding: 16, marginBottom: 12 }}>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 12 }}>🚨 Urgence — Toujours visible</p>
-              {form.fullName && <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', marginBottom: 8 }}>{form.fullName}</p>}
-              {form.birthDate && <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 8 }}>Né(e) le {new Date(form.birthDate).toLocaleDateString('fr-FR')}</p>}
+              {form.fullName && <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#0F172A', marginBottom: 8 }}>{form.fullName}</p>}
+              {form.birthDate && <p style={{ color: '#64748B', fontSize: 12, marginBottom: 8 }}>Né(e) le {new Date(form.birthDate).toLocaleDateString('fr-FR')}</p>}
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 8 }}>
                 {form.bloodType && (
-                  <span style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '4px 10px', color: '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>
+                  <span style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '4px 10px', color: '#EF4444', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14 }}>
                     🩸 {form.bloodType}
                   </span>
                 )}
@@ -274,28 +274,28 @@ export default function MedicalPage() {
               {form.allergies && (
                 <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 6, padding: '8px 10px', marginBottom: 8 }}>
                   <p style={{ color: '#F59E0B', fontSize: 10, fontFamily: 'Space Mono, monospace', marginBottom: 2 }}>ALLERGIES</p>
-                  <p style={{ color: '#F8F9FC', fontSize: 12 }}>{form.allergies}</p>
+                  <p style={{ color: '#0F172A', fontSize: 12 }}>{form.allergies}</p>
                 </div>
               )}
               {form.emergencyName && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10, marginTop: 4 }}>
-                  <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', marginBottom: 4 }}>URGENCE</p>
-                  <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600 }}>{form.emergencyName} {form.emergencyRel && `(${form.emergencyRel})`}</p>
-                  {form.emergencyPhone && <p style={{ color: '#818CF8', fontSize: 13 }}>{form.emergencyPhone}</p>}
+                <div style={{ borderTop: '1px solid rgba(15,23,42,0.06)', paddingTop: 10, marginTop: 4 }}>
+                  <p style={{ color: '#64748B', fontSize: 10, fontFamily: 'Space Mono, monospace', marginBottom: 4 }}>URGENCE</p>
+                  <p style={{ color: '#0F172A', fontSize: 13, fontWeight: 600 }}>{form.emergencyName} {form.emergencyRel && `(${form.emergencyRel})`}</p>
+                  {form.emergencyPhone && <p style={{ color: '#4F46E5', fontSize: 13 }}>{form.emergencyPhone}</p>}
                 </div>
               )}
             </div>
 
             {/* PIN section */}
-            <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 16 }}>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#818CF8', textTransform: 'uppercase', marginBottom: 8 }}>
+            <div style={{ background: '#FFFFFF', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 10, padding: 16 }}>
+              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#4F46E5', textTransform: 'uppercase', marginBottom: 8 }}>
                 🔒 {form.pin ? `Protégé par PIN · ${form.pin.length} chiffre${form.pin.length > 1 ? 's' : ''}` : 'Infos complémentaires — Visible (pas de PIN)'}
               </p>
-              {form.conditions && <p style={{ color: '#9CA3AF', fontSize: 12 }}>🏥 {form.conditions}</p>}
-              {form.medications && <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>💊 {form.medications}</p>}
-              {form.doctorName && <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 4 }}>👨‍⚕️ {form.doctorName}</p>}
+              {form.conditions && <p style={{ color: '#64748B', fontSize: 12 }}>🏥 {form.conditions}</p>}
+              {form.medications && <p style={{ color: '#64748B', fontSize: 12, marginTop: 4 }}>💊 {form.medications}</p>}
+              {form.doctorName && <p style={{ color: '#64748B', fontSize: 12, marginTop: 4 }}>👨‍⚕️ {form.doctorName}</p>}
               {!form.conditions && !form.medications && !form.doctorName && (
-                <p style={{ color: '#4B5563', fontSize: 12, fontStyle: 'italic' }}>Renseignez les infos complémentaires</p>
+                <p style={{ color: '#94A3B8', fontSize: 12, fontStyle: 'italic' }}>Renseignez les infos complémentaires</p>
               )}
             </div>
           </Card>

@@ -6,5 +6,5 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const Section = SectionPage as unknown as React.ComponentType<{ searchParams: SearchParams }>;
 
 export default function ActivitePanel({ searchParams }: { searchParams: SearchParams }) {
-  return <PanelFrame title="Activité" legacy><Section searchParams={searchParams} /></PanelFrame>;
+  return <PanelFrame title="Activité"><Section searchParams={searchParams} /></PanelFrame>;
 }

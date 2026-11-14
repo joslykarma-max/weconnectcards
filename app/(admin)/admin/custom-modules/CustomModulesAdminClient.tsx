@@ -38,7 +38,7 @@ export default function CustomModulesAdminClient({ requests: initial }: { reques
       {/* Header */}
       <div>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>Admin</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: 'var(--t-text)', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: 'var(--t-text)', marginBottom: 4 }}>
           ✦ Modules sur mesure
         </h1>
         <div style={{ display: 'flex', gap: 20, marginTop: 12 }}>
@@ -81,7 +81,7 @@ export default function CustomModulesAdminClient({ requests: initial }: { reques
                   }}
                 >
                   <div>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 2 }}>
+                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 2 }}>
                       {r.moduleName}
                     </p>
                     <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: 'var(--t-text-muted)' }}>

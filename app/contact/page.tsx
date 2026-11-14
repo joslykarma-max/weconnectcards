@@ -44,7 +44,7 @@ export default function ContactPage() {
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>
             Contact
           </p>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC', letterSpacing: '-1px', marginBottom: 12 }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC', letterSpacing: '-1px', marginBottom: 12 }}>
             Parlons de votre équipe.
           </h1>
           <p style={{ color: '#9CA3AF', fontSize: 16, lineHeight: 1.6 }}>
@@ -55,7 +55,7 @@ export default function ContactPage() {
         {sent ? (
           <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: 40, textAlign: 'center' }}>
             <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>✅</span>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 22, color: '#10B981', marginBottom: 8 }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 22, color: '#10B981', marginBottom: 8 }}>
               Message envoyé !
             </h2>
             <p style={{ color: '#9CA3AF', fontSize: 15 }}>
@@ -126,7 +126,7 @@ export default function ContactPage() {
                   border: 'none',
                   borderRadius: 8,
                   color: '#fff',
-                  fontFamily: 'Syne, sans-serif',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
                   fontWeight: 700,
                   fontSize: 16,
                   cursor: sending ? 'not-allowed' : 'pointer',

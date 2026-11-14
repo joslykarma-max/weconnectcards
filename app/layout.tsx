@@ -29,8 +29,8 @@ try {
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // Brand fonts (declared in globals.css): titles in Syne, text in DM Sans
-  preload('/fonts/syne-latin.woff2',    { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
+  // Brand fonts (declared in globals.css): titles in Plus Jakarta Sans, text in DM Sans
+  preload('/fonts/plus-jakarta-sans-latin.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   preload('/fonts/dm-sans-latin.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   return (
     <html lang="fr" className="h-full">

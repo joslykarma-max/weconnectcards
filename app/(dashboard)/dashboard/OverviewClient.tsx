@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import cx from '@/components/dashboard/shell/compact.module.css';
 import Link from 'next/link';
-import KPICard from '@/components/dashboard/KPICard';
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 type Scan          = { device: string; scannedAt: string };
@@ -43,7 +43,7 @@ function Section({ title, action, children }: { title: string; action?: React.Re
   return (
     <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 10, padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t-text)' }}>{title}</h3>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t-text)' }}>{title}</h3>
         {action}
       </div>
       {children}
@@ -54,7 +54,7 @@ function Section({ title, action, children }: { title: string; action?: React.Re
 function StatPill({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <div style={{ flex: 1, minWidth: 100, padding: '14px 16px', background: 'var(--t-row)', borderRadius: 8, textAlign: 'center' }}>
-      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: accent ?? 'var(--t-text)' }}>{value}</p>
+      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: accent ?? 'var(--t-text)' }}>{value}</p>
       <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginTop: 4 }}>{label}</p>
     </div>
   );
@@ -62,7 +62,7 @@ function StatPill({ label, value, accent }: { label: string; value: string | num
 
 function SeeLink({ href, label = 'Gérer →' }: { href: string; label?: string }) {
   return (
-    <Link href={href} style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase' }}>
+    <Link href={href} style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4F46E5', textDecoration: 'none', letterSpacing: 2, textTransform: 'uppercase' }}>
       {label}
     </Link>
   );
@@ -140,7 +140,7 @@ function MenuDashboard({ stats, username }: { stats: NonNullable<OverviewProps['
             </Link>
           {publicUrl && (
             <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 7, textDecoration: 'none', color: '#9CA3AF', fontFamily: 'DM Sans, sans-serif', fontSize: 12 }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: 7, textDecoration: 'none', color: '#64748B', fontFamily: 'DM Sans, sans-serif', fontSize: 12 }}>
               🔗 Menu public ↗
             </a>
           )}
@@ -278,7 +278,7 @@ function AccessDashboard({ stats }: { stats: NonNullable<OverviewProps['accessSt
         </div>
         <div style={{ background: 'var(--t-row)', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text)' }}>Taux d'accès accordé</p>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: rate >= 80 ? '#10B981' : '#EF4444' }}>{rate}%</p>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: rate >= 80 ? '#10B981' : '#EF4444' }}>{rate}%</p>
         </div>
       </Section>
 
@@ -311,7 +311,7 @@ function AccessDashboard({ stats }: { stats: NonNullable<OverviewProps['accessSt
 }
 
 /* ─── Member dashboard ───────────────────────────────────────────────────── */
-const LEVEL_COLOR: Record<string, string> = { silver: '#9CA3AF', gold: '#F59E0B', platinum: '#06B6D4', vip: '#8B5CF6' };
+const LEVEL_COLOR: Record<string, string> = { silver: '#64748B', gold: '#F59E0B', platinum: '#06B6D4', vip: '#8B5CF6' };
 
 function MemberDashboard({ stats }: { stats: NonNullable<OverviewProps['memberStats']> }) {
   return (
@@ -343,7 +343,7 @@ function MemberDashboard({ stats }: { stats: NonNullable<OverviewProps['memberSt
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: `${LEVEL_COLOR[m.level] ?? '#6366F1'}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🎫</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ color: 'var(--t-text)', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.memberName}</p>
-                  <p style={{ color: LEVEL_COLOR[m.level] ?? '#818CF8', fontSize: 11, textTransform: 'capitalize' }}>{m.level}</p>
+                  <p style={{ color: LEVEL_COLOR[m.level] ?? '#4F46E5', fontSize: 11, textTransform: 'capitalize' }}>{m.level}</p>
                 </div>
                 <span style={{ width: 8, height: 8, borderRadius: '50%', background: m.isActive ? '#10B981' : '#EF4444', flexShrink: 0 }} />
               </div>
@@ -419,57 +419,36 @@ export default function OverviewClient({
   const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? 'nfc');
 
   const kpis = [
-    { label: 'Scans totaux',          value: totalScans,        description: '30 derniers jours' },
-    { label: 'Liens cliqués',         value: totalClicks,       description: '30 derniers jours' },
-    { label: 'Contacts sauvegardés',  value: totalContacts,     description: 'Total' },
-    { label: 'Taux engagement',       value: `${engagement}%`,  description: 'Clics / Scans' },
+    { label: 'Scans · 30 j',          value: totalScans,        description: '30 derniers jours' },
+    { label: 'Clics · 30 j',          value: totalClicks,       description: 'Liens cliqués, 30 derniers jours' },
+    { label: 'Contacts',              value: totalContacts,     description: 'Contacts sauvegardés' },
+    { label: 'Engagement',            value: `${engagement}%`,  description: 'Clics / Scans' },
   ];
 
   return (
-    <div>
-      {/* Greeting */}
-      <div style={{ marginBottom: 28 }}>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 6 }}>
-          Bonjour, {profile?.displayName?.split(' ')[0] ?? 'là'} 👋
-        </h2>
-        <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
-          Voici ce qui se passe avec votre profil{profile?.username ? ` weconnect.cards/${profile.username}` : ''}.
-        </p>
+    <div className={cx.fill}>
+      {/* Indicators (the home already greets the user) */}
+      <div className={cx.kpis}>
+        {kpis.map((kpi) => (
+          <div key={kpi.label} className={cx.kpi} title={kpi.description}>
+            <span className={cx.kpiValue}>{kpi.value}</span>
+            <span className={cx.kpiLabel}>{kpi.label}</span>
+          </div>
+        ))}
       </div>
 
-      {/* KPI cards */}
-      <div className="dash-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 32 }}>
-        {kpis.map(kpi => <KPICard key={kpi.label} {...kpi} />)}
-      </div>
-
-      {/* Tab bar — only shown if at least 1 module active */}
       {tabs.length > 1 && (
-        <div style={{ display: 'flex', gap: 8, marginBottom: 24, overflowX: 'auto', paddingBottom: 4 }}>
-          {tabs.map(tab => {
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '8px 16px', borderRadius: 20, cursor: 'pointer',
-                  border: `1px solid ${active ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
-                  background: active ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
-                  color: active ? '#818CF8' : '#6B7280',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: active ? 600 : 400,
-                  whiteSpace: 'nowrap', flexShrink: 0, transition: 'all 0.15s',
-                }}
-              >
-                <span style={{ fontSize: 14 }}>{tab.icon}</span>
-                {tab.label}
-              </button>
-            );
-          })}
+        <div className={cx.tabs} role="tablist" aria-label="Activité par module">
+          {tabs.map((tab) => (
+            <button key={tab.id} type="button" role="tab" aria-selected={activeTab === tab.id}
+              className={`${cx.tab} ${activeTab === tab.id ? cx.tabOn : ''}`} onClick={() => setActiveTab(tab.id)}>
+              <span aria-hidden>{tab.icon}</span>{tab.label}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Dashboard content */}
+      <div className={cx.content} role="tabpanel">
       {activeTab === 'nfc'         && <NfcDashboard recentScans={recentScans} profile={profile} />}
       {activeTab === 'menu'        && menuStats    && <MenuDashboard    stats={menuStats}    username={profile?.username} />}
       {activeTab === 'loyalty'     && loyaltyStats && <LoyaltyDashboard stats={loyaltyStats} username={profile?.username} />}
@@ -480,6 +459,7 @@ export default function OverviewClient({
       {activeTab === 'portfolio'   && <SimpleDashboard type="portfolio" />}
       {activeTab === 'medical'     && <SimpleDashboard type="medical" />}
       {activeTab === 'certificate' && <SimpleDashboard type="certificate" />}
+      </div>
     </div>
   );
 }

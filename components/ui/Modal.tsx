@@ -67,7 +67,7 @@ export default function Modal({
           position: 'relative',
           width: '100%',
           maxWidth: sizeWidths[size],
-          background: '#12141C',
+          background: 'var(--ui-modal-bg, #12141C)',
           border: '1px solid rgba(255,255,255,0.07)',
           borderRadius: '8px',
           animation: 'fadeInUp 0.3s cubic-bezier(0.23,1,0.32,1) both',
@@ -89,10 +89,10 @@ export default function Modal({
             {title && (
               <h3
                 style={{
-                  fontFamily: 'Syne, sans-serif',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
                   fontWeight: 700,
                   fontSize: 18,
-                  color: '#F8F9FC',
+                  color: 'var(--ui-modal-text, #F8F9FC)',
                 }}
               >
                 {title}

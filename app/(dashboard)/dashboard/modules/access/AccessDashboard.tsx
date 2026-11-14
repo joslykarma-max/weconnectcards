@@ -19,7 +19,7 @@ async function hashPin(pin: string): Promise<string> {
 
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
-    <button onClick={onToggle} style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', background: on ? '#6366F1' : 'rgba(255,255,255,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+    <button onClick={onToggle} style={{ width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', background: on ? '#6366F1' : 'rgba(15,23,42,0.1)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
       <div style={{ position: 'absolute', top: 2, left: on ? 22 : 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.2s' }} />
     </button>
   );
@@ -40,7 +40,7 @@ function CardEditor({
   const [uploading, setUploading] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
 
-  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '9px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '9px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
 
   async function uploadPhoto(file: File) {
     setUploading(true);
@@ -58,7 +58,7 @@ function CardEditor({
     setSaving(false);
   }
 
-  const label: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 };
+  const label: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 6 };
 
   return (
     <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -71,12 +71,12 @@ function CardEditor({
           {draft.holderPhoto
             // eslint-disable-next-line @next/next/no-img-element
             ? <Image src={draft.holderPhoto} alt="" fill style={{ objectFit: 'cover' }} />
-            : <span style={{ fontSize: uploading ? 12 : 22, color: '#818CF8' }}>{uploading ? '⏳' : '+'}</span>
+            : <span style={{ fontSize: uploading ? 12 : 22, color: '#4F46E5' }}>{uploading ? '⏳' : '+'}</span>
           }
         </button>
         <div style={{ flex: 1 }}>
           <p style={label}>Photo</p>
-          <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>JPG / PNG · optionnel</p>
+          <p style={{ color: '#64748B', fontSize: 11, margin: 0 }}>JPG / PNG · optionnel</p>
         </div>
       </div>
 
@@ -98,11 +98,11 @@ function CardEditor({
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={handleSave} disabled={saving}
-          style={{ flex: 1, padding: '9px 0', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontSize: 13, fontFamily: 'Syne, sans-serif', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
+          style={{ flex: 1, padding: '9px 0', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontSize: 13, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
           {saving ? 'Enregistrement…' : '✓ Enregistrer'}
         </button>
         <button onClick={onCancel}
-          style={{ padding: '9px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>
+          style={{ padding: '9px 16px', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, color: '#64748B', fontSize: 13, cursor: 'pointer' }}>
           Annuler
         </button>
       </div>
@@ -286,17 +286,17 @@ export default function AccessDashboard({
     URL.revokeObjectURL(url);
   }
 
-  const label: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 };
-  const sHead: React.CSSProperties = { fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', margin: 0 };
-  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '9px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+  const label: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 };
+  const sHead: React.CSSProperties = { fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: '#0F172A', margin: 0 };
+  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '9px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
+      <div className="dash-page-header" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20, lineHeight: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>🔑 Clé d&apos;accès</h2>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Badge NFC multi-porteurs — zones partagées</p>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A', margin: 0 }}>🔑 Clé d&apos;accès</h2>
+          <p style={{ color: '#64748B', fontSize: 13, margin: 0 }}>Badge NFC multi-porteurs — zones partagées</p>
         </div>
       </div>
 
@@ -308,11 +308,11 @@ export default function AccessDashboard({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h3 style={sHead}>Porteurs</h3>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>{cards.length} badge{cards.length !== 1 ? 's' : ''} · 1 carte NFC chacun</p>
+                <p style={{ color: '#64748B', fontSize: 11, margin: '2px 0 0' }}>{cards.length} badge{cards.length !== 1 ? 's' : ''} · 1 carte NFC chacun</p>
               </div>
               {!addingCard && (
                 <button onClick={() => { setAddingCard(true); setEditingCard(null); }}
-                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 12px', color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 12px', color: '#4F46E5', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   + Nouveau
                 </button>
               )}
@@ -333,9 +333,9 @@ export default function AccessDashboard({
             {cards.length === 0 && !addingCard ? (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
                 <p style={{ fontSize: 32, marginBottom: 8 }}>🪪</p>
-                <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 16 }}>Aucun porteur encore</p>
+                <p style={{ color: '#64748B', fontSize: 13, marginBottom: 16 }}>Aucun porteur encore</p>
                 <button onClick={() => setAddingCard(true)}
-                  style={{ padding: '9px 18px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
+                  style={{ padding: '9px 18px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#4F46E5', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
                   + Créer le premier badge
                 </button>
               </div>
@@ -344,7 +344,7 @@ export default function AccessDashboard({
                 {cards.map(card => (
                   <div key={card.id}>
                     {/* Card row */}
-                    <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '12px 14px' }}>
+                    <div style={{ background: '#FFFFFF', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 10, padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                         {/* Avatar */}
                         <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -356,21 +356,21 @@ export default function AccessDashboard({
                         </div>
                         {/* Name / role */}
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ color: '#0F172A', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {card.holderName || 'Sans nom'}
                           </p>
-                          <p style={{ color: '#6B7280', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <p style={{ color: '#64748B', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {card.holderRole || card.holderTitle}
                           </p>
                         </div>
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                           <button onClick={() => copyLink(card.id)} title="Copier le lien NFC"
-                            style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)', background: copied === card.id ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)', color: copied === card.id ? '#10B981' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(15,23,42,0.1)', background: copied === card.id ? 'rgba(16,185,129,0.15)' : 'rgba(15,23,42,0.04)', color: copied === card.id ? '#10B981' : '#64748B', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {copied === card.id ? '✓' : '🔗'}
                           </button>
                           <button onClick={() => setEditingCard(editingCard === card.id ? null : card.id)} title="Modifier"
-                            style={{ width: 28, height: 28, borderRadius: 5, border: `1px solid ${editingCard === card.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`, background: editingCard === card.id ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)', color: editingCard === card.id ? '#818CF8' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            style={{ width: 28, height: 28, borderRadius: 5, border: `1px solid ${editingCard === card.id ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.1)'}`, background: editingCard === card.id ? 'rgba(99,102,241,0.15)' : 'rgba(15,23,42,0.04)', color: editingCard === card.id ? '#4F46E5' : '#64748B', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             ✎
                           </button>
                           <button onClick={() => deleteCard(card.id)} title="Supprimer"
@@ -381,7 +381,7 @@ export default function AccessDashboard({
                       </div>
 
                       {/* Link hint */}
-                      <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <p style={{ color: '#94A3B8', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         /m/{username}/access?card={card.id}
                       </p>
 
@@ -408,7 +408,7 @@ export default function AccessDashboard({
                     {assigningCard === card.id && (
                       <div style={{ marginTop: 8, background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.2)', borderRadius: 10, padding: 14 }}>
                         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#06B6D4', textTransform: 'uppercase', marginBottom: 10 }}>Lier une carte NFC</p>
-                        <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>
+                        <p style={{ color: '#64748B', fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>
                           Entre le code NFC de la carte physique (imprimé au dos), ou scanne-la directement depuis un téléphone Android avec Chrome.
                         </p>
                         <div style={{ display: 'flex', gap: 8, marginBottom: nfcError ? 8 : 0 }}>
@@ -416,14 +416,14 @@ export default function AccessDashboard({
                             value={nfcInput}
                             onChange={e => { setNfcInput(e.target.value.toUpperCase()); setNfcError(''); }}
                             placeholder="Ex: A1B2C3D4E5"
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '8px 12px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 12, outline: 'none', letterSpacing: 2 }}
+                            style={{ flex: 1, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.12)', borderRadius: 6, padding: '8px 12px', color: '#0F172A', fontFamily: 'Space Mono, monospace', fontSize: 12, outline: 'none', letterSpacing: 2 }}
                           />
                           <button onClick={() => scanNfc(card.id)} disabled={nfcScanning}
                             style={{ padding: '8px 12px', background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.3)', borderRadius: 6, color: '#06B6D4', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                             {nfcScanning ? '📡…' : '📡 Scanner'}
                           </button>
                           <button onClick={() => assignNfc(card.id)} disabled={nfcSaving || !nfcInput}
-                            style={{ padding: '8px 14px', background: nfcInput ? 'linear-gradient(135deg, #4338CA, #6366F1)' : 'rgba(255,255,255,0.04)', border: 'none', borderRadius: 6, color: nfcInput ? '#fff' : '#4B5563', fontSize: 12, cursor: nfcInput ? 'pointer' : 'not-allowed', fontFamily: 'Space Mono, monospace' }}>
+                            style={{ padding: '8px 14px', background: nfcInput ? 'linear-gradient(135deg, #4338CA, #6366F1)' : 'rgba(15,23,42,0.04)', border: 'none', borderRadius: 6, color: nfcInput ? '#fff' : '#94A3B8', fontSize: 12, cursor: nfcInput ? 'pointer' : 'not-allowed', fontFamily: 'Space Mono, monospace' }}>
                             {nfcSaving ? '…' : '✓'}
                           </button>
                         </div>
@@ -450,7 +450,7 @@ export default function AccessDashboard({
           {/* How to use hint */}
           <div style={{ background: 'rgba(6,182,212,0.05)', border: '1px solid rgba(6,182,212,0.15)', borderRadius: 10, padding: 14 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#06B6D4', textTransform: 'uppercase', marginBottom: 8 }}>Comment ça marche</p>
-            <p style={{ color: '#6B7280', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
+            <p style={{ color: '#64748B', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
               Chaque porteur a son propre lien NFC. Copiez le lien 🔗 et configurez-le sur sa carte physique. Les zones d&apos;accès sont partagées par tous.
             </p>
           </div>
@@ -462,18 +462,18 @@ export default function AccessDashboard({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h3 style={sHead}>Zones d&apos;accès</h3>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>Partagées par tous les porteurs · max 5</p>
+                <p style={{ color: '#64748B', fontSize: 11, margin: '2px 0 0' }}>Partagées par tous les porteurs · max 5</p>
               </div>
               {zones.length < 5 && (
                 <button onClick={addZone}
-                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 14px', color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
+                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 14px', color: '#4F46E5', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
                   + Ajouter
                 </button>
               )}
             </div>
 
             {zones.length === 0 && (
-              <p style={{ color: '#6B7280', fontSize: 13, textAlign: 'center', padding: '32px 0' }}>
+              <p style={{ color: '#64748B', fontSize: 13, textAlign: 'center', padding: '32px 0' }}>
                 Aucune zone — cliquez sur + Ajouter
               </p>
             )}
@@ -481,22 +481,22 @@ export default function AccessDashboard({
             {zones.map((zone, idx) => {
               const isExpanded = expandedId === zone.id;
               return (
-                <div key={zone.id} style={{ borderBottom: idx < zones.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none', paddingBottom: 12, marginBottom: 12 }}>
+                <div key={zone.id} style={{ borderBottom: idx < zones.length - 1 ? '1px solid rgba(15,23,42,0.05)' : 'none', paddingBottom: 12, marginBottom: 12 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
                     onClick={() => setExpandedId(isExpanded ? null : zone.id)}>
                     <span style={{ fontSize: 20 }}>{zone.emoji}</span>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif' }}>{zone.name}</p>
-                      <p style={{ color: '#6B7280', fontSize: 11, margin: 0, fontFamily: 'Space Mono, monospace' }}>
+                      <p style={{ color: '#0F172A', fontSize: 14, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif' }}>{zone.name}</p>
+                      <p style={{ color: '#64748B', fontSize: 11, margin: 0, fontFamily: 'Space Mono, monospace' }}>
                         {TYPE_LABELS[zone.accessType]} · {zone.schedule.allDay ? 'Toute la journée' : `${zone.schedule.startTime}–${zone.schedule.endTime}`}
                       </p>
                     </div>
-                    <span style={{ fontSize: 12, background: zone.accessType === 'pin' ? 'rgba(245,158,11,0.15)' : zone.accessType === 'whatsapp' ? 'rgba(16,185,129,0.15)' : 'rgba(99,102,241,0.15)', color: zone.accessType === 'pin' ? '#F59E0B' : zone.accessType === 'whatsapp' ? '#10B981' : '#818CF8', borderRadius: 4, padding: '2px 8px', fontFamily: 'Space Mono, monospace' }}>
+                    <span style={{ fontSize: 12, background: zone.accessType === 'pin' ? 'rgba(245,158,11,0.15)' : zone.accessType === 'whatsapp' ? 'rgba(16,185,129,0.15)' : 'rgba(99,102,241,0.15)', color: zone.accessType === 'pin' ? '#F59E0B' : zone.accessType === 'whatsapp' ? '#10B981' : '#4F46E5', borderRadius: 4, padding: '2px 8px', fontFamily: 'Space Mono, monospace' }}>
                       {TYPE_LABELS[zone.accessType]}
                     </span>
                     <button onClick={e => { e.stopPropagation(); setZones(p => p.filter(z => z.id !== zone.id)); if (expandedId === zone.id) setExpandedId(null); }}
                       style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 0, flexShrink: 0 }}>×</button>
-                    <span style={{ color: '#6B7280', fontSize: 12 }}>{isExpanded ? '▲' : '▼'}</span>
+                    <span style={{ color: '#64748B', fontSize: 12 }}>{isExpanded ? '▲' : '▼'}</span>
                   </div>
 
                   {isExpanded && (
@@ -505,15 +505,15 @@ export default function AccessDashboard({
                       <div style={{ display: 'flex', gap: 10 }}>
                         <div style={{ position: 'relative' }}>
                           <button onClick={() => setShowEmojiFor(showEmojiFor === zone.id ? null : zone.id)}
-                            style={{ width: 44, height: 44, fontSize: 22, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, cursor: 'pointer' }}>
+                            style={{ width: 44, height: 44, fontSize: 22, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 8, cursor: 'pointer' }}>
                             {zone.emoji}
                           </button>
                           {showEmojiFor === zone.id && (
-                            <div style={{ position: 'absolute', top: 48, left: 0, zIndex: 50, background: '#181B26', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: 8, display: 'flex', flexWrap: 'wrap', gap: 4, width: 220, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                            <div style={{ position: 'absolute', top: 48, left: 0, zIndex: 50, background: '#FFFFFF', border: '1px solid rgba(15,23,42,0.12)', borderRadius: 10, padding: 8, display: 'flex', flexWrap: 'wrap', gap: 4, width: 220, boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
                               {EMOJIS.map(e => (
                                 <button key={e} onClick={() => { updateZone(zone.id, { emoji: e }); setShowEmojiFor(null); }}
                                   style={{ width: 32, height: 32, fontSize: 18, background: 'none', border: 'none', borderRadius: 4, cursor: 'pointer' }}
-                                  onMouseOver={ev => (ev.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
+                                  onMouseOver={ev => (ev.currentTarget.style.background = 'rgba(15,23,42,0.08)')}
                                   onMouseOut={ev => (ev.currentTarget.style.background = 'none')}>{e}</button>
                               ))}
                             </div>
@@ -529,12 +529,12 @@ export default function AccessDashboard({
                         <div style={{ display: 'flex', gap: 8 }}>
                           {(['libre','pin','whatsapp'] as const).map(t => (
                             <button key={t} onClick={() => updateZone(zone.id, { accessType: t })}
-                              style={{ flex: 1, padding: '8px 0', borderRadius: 6, border: `1px solid ${zone.accessType === t ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`, background: zone.accessType === t ? 'rgba(99,102,241,0.2)' : 'transparent', color: zone.accessType === t ? '#818CF8' : '#6B7280', fontFamily: 'Space Mono, monospace', fontSize: 10, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 1 }}>
+                              style={{ flex: 1, padding: '8px 0', borderRadius: 6, border: `1px solid ${zone.accessType === t ? 'rgba(99,102,241,0.5)' : 'rgba(15,23,42,0.1)'}`, background: zone.accessType === t ? 'rgba(99,102,241,0.2)' : 'transparent', color: zone.accessType === t ? '#4F46E5' : '#64748B', fontFamily: 'Space Mono, monospace', fontSize: 10, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: 1 }}>
                               {TYPE_LABELS[t]}
                             </button>
                           ))}
                         </div>
-                        <p style={{ color: '#6B7280', fontSize: 11, marginTop: 6 }}>
+                        <p style={{ color: '#64748B', fontSize: 11, marginTop: 6 }}>
                           {zone.accessType === 'libre' && 'Badge NFC suffit — accès accordé sans code'}
                           {zone.accessType === 'pin'   && 'Code PIN chiffré requis pour ouvrir'}
                           {zone.accessType === 'whatsapp' && 'Envoie un message WhatsApp au responsable'}
@@ -553,15 +553,15 @@ export default function AccessDashboard({
                               <button onClick={() => confirmPin(zone.id)}
                                 style={{ padding: '0 14px', background: '#6366F1', border: 'none', borderRadius: 6, color: '#fff', cursor: 'pointer', fontSize: 13, fontFamily: 'Space Mono, monospace' }}>✓</button>
                               <button onClick={() => { setEditingPinFor(null); setNewPinValue(''); }}
-                                style={{ padding: '0 10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#6B7280', cursor: 'pointer', fontSize: 16 }}>×</button>
+                                style={{ padding: '0 10px', background: 'rgba(15,23,42,0.05)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, color: '#64748B', cursor: 'pointer', fontSize: 16 }}>×</button>
                             </div>
                           ) : (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, padding: '10px 14px' }}>
-                              <span style={{ color: zone.pinHash ? '#10B981' : '#6B7280', fontSize: 13 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(15,23,42,0.03)', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 6, padding: '10px 14px' }}>
+                              <span style={{ color: zone.pinHash ? '#10B981' : '#64748B', fontSize: 13 }}>
                                 {zone.pinHash ? '● PIN configuré' : '⚠ Aucun PIN défini'}
                               </span>
                               <button onClick={() => setEditingPinFor(zone.id)}
-                                style={{ background: 'none', border: 'none', color: '#818CF8', cursor: 'pointer', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>
+                                style={{ background: 'none', border: 'none', color: '#4F46E5', cursor: 'pointer', fontSize: 12, fontFamily: 'Space Mono, monospace' }}>
                                 {zone.pinHash ? 'Modifier' : 'Définir'}
                               </button>
                             </div>
@@ -580,7 +580,7 @@ export default function AccessDashboard({
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                           <p style={{ ...label, margin: 0 }}>Horaires</p>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span style={{ color: '#6B7280', fontSize: 11 }}>Toute la journée</span>
+                            <span style={{ color: '#64748B', fontSize: 11 }}>Toute la journée</span>
                             <Toggle on={zone.schedule.allDay} onToggle={() => updateSchedule(zone.id, { allDay: !zone.schedule.allDay })} />
                           </div>
                         </div>
@@ -595,7 +595,7 @@ export default function AccessDashboard({
                             const active = zone.schedule.days.includes(d);
                             return (
                               <button key={d} onClick={() => updateSchedule(zone.id, { days: active ? zone.schedule.days.filter(x => x !== d) : [...zone.schedule.days, d] })}
-                                style={{ padding: '5px 10px', borderRadius: 5, border: `1px solid ${active ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.1)'}`, background: active ? 'rgba(99,102,241,0.2)' : 'transparent', color: active ? '#818CF8' : '#6B7280', fontFamily: 'Space Mono, monospace', fontSize: 9, cursor: 'pointer', letterSpacing: 1, textTransform: 'uppercase' }}>
+                                style={{ padding: '5px 10px', borderRadius: 5, border: `1px solid ${active ? 'rgba(99,102,241,0.5)' : 'rgba(15,23,42,0.1)'}`, background: active ? 'rgba(99,102,241,0.2)' : 'transparent', color: active ? '#4F46E5' : '#64748B', fontFamily: 'Space Mono, monospace', fontSize: 9, cursor: 'pointer', letterSpacing: 1, textTransform: 'uppercase' }}>
                                 {d}
                               </button>
                             );
@@ -634,31 +634,31 @@ export default function AccessDashboard({
             <h3 style={{ ...sHead, marginBottom: 16 }}>Journal d&apos;accès</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
               <div style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(16,185,129,0.08)', borderRadius: 8, border: '1px solid rgba(16,185,129,0.15)' }}>
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#10B981', margin: 0 }}>{grantedToday}</p>
-                <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>accordés auj.</p>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: '#10B981', margin: 0 }}>{grantedToday}</p>
+                <p style={{ color: '#64748B', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>accordés auj.</p>
               </div>
               <div style={{ textAlign: 'center', padding: '14px 8px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.15)' }}>
-                <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#EF4444', margin: 0 }}>{deniedToday}</p>
-                <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>refusés auj.</p>
+                <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: '#EF4444', margin: 0 }}>{deniedToday}</p>
+                <p style={{ color: '#64748B', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 4 }}>refusés auj.</p>
               </div>
             </div>
             <button onClick={exportCSV}
-              style={{ width: '100%', padding: '9px 0', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#9CA3AF', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', marginBottom: 16 }}>
+              style={{ width: '100%', padding: '9px 0', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, color: '#64748B', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', marginBottom: 16 }}>
               📥 Exporter CSV
             </button>
             <div style={{ maxHeight: 460, overflowY: 'auto' }}>
               {logs.length === 0 ? (
-                <p style={{ color: '#6B7280', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>Aucun accès enregistré</p>
+                <p style={{ color: '#64748B', fontSize: 13, textAlign: 'center', padding: '24px 0' }}>Aucun accès enregistré</p>
               ) : (
                 logs.map((l, i) => {
                   const d = new Date(l.timestamp);
                   return (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid rgba(15,23,42,0.05)' }}>
                       <span style={{ fontSize: 16, flexShrink: 0 }}>{l.status === 'granted' ? '✅' : '❌'}</span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: '#F8F9FC', fontSize: 12, fontWeight: 500, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.zoneName}</p>
-                        <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', margin: 0 }}>
-                          {l.holderName && <span style={{ color: '#4B5563' }}>{l.holderName} · </span>}
+                        <p style={{ color: '#0F172A', fontSize: 12, fontWeight: 500, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{l.zoneName}</p>
+                        <p style={{ color: '#64748B', fontSize: 10, fontFamily: 'Space Mono, monospace', margin: 0 }}>
+                          {l.holderName && <span style={{ color: '#94A3B8' }}>{l.holderName} · </span>}
                           {d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })} · {d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>

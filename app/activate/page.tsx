@@ -50,7 +50,7 @@ export default async function ActivatePage({ searchParams }: Props) {
           }}>
             💳
           </div>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 8 }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 8 }}>
             Activer ma carte NFC
           </h1>
           <p style={{ color: '#6B7280', fontSize: 14 }}>

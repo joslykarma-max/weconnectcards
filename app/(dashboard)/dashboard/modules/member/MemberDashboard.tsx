@@ -16,7 +16,7 @@ interface ClubConfig {
 }
 
 const LEVELS = [
-  { key: 'silver',   label: 'Silver',   emoji: '🥈', color: '#9CA3AF', bg: 'rgba(156,163,175,0.15)', border: 'rgba(156,163,175,0.3)' },
+  { key: 'silver',   label: 'Silver',   emoji: '🥈', color: '#64748B', bg: 'rgba(156,163,175,0.15)', border: 'rgba(156,163,175,0.3)' },
   { key: 'gold',     label: 'Gold',     emoji: '🥇', color: '#F59E0B', bg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.3)'  },
   { key: 'platinum', label: 'Platinum', emoji: '💎', color: '#06B6D4', bg: 'rgba(6,182,212,0.15)',   border: 'rgba(6,182,212,0.3)'   },
   { key: 'vip',      label: 'VIP',      emoji: '👑', color: '#6366F1', bg: 'rgba(99,102,241,0.15)',  border: 'rgba(99,102,241,0.3)'  },
@@ -40,8 +40,8 @@ function MemberEditor({
   const [uploading, setUploading] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
 
-  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '9px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
-  const lbl: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 };
+  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '9px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+  const lbl: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 6 };
 
   async function uploadPhoto(file: File) {
     setUploading(true);
@@ -77,7 +77,7 @@ function MemberEditor({
         </button>
         <div style={{ flex: 1 }}>
           <p style={lbl}>Photo du membre (optionnel)</p>
-          <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>JPG / PNG</p>
+          <p style={{ color: '#64748B', fontSize: 11, margin: 0 }}>JPG / PNG</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ function MemberEditor({
         <div style={{ display: 'flex', gap: 6 }}>
           {LEVELS.map(l => (
             <button key={l.key} onClick={() => setDraft(p => ({ ...p, level: l.key }))}
-              style={{ flex: 1, padding: '7px 4px', borderRadius: 6, border: `1px solid ${draft.level === l.key ? l.border : 'rgba(255,255,255,0.08)'}`, background: draft.level === l.key ? l.bg : 'transparent', color: draft.level === l.key ? l.color : '#6B7280', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, cursor: 'pointer', textTransform: 'uppercase' }}>
+              style={{ flex: 1, padding: '7px 4px', borderRadius: 6, border: `1px solid ${draft.level === l.key ? l.border : 'rgba(15,23,42,0.08)'}`, background: draft.level === l.key ? l.bg : 'transparent', color: draft.level === l.key ? l.color : '#64748B', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, cursor: 'pointer', textTransform: 'uppercase' }}>
               {l.emoji} {l.label}
             </button>
           ))}
@@ -113,11 +113,11 @@ function MemberEditor({
 
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={handleSave} disabled={saving}
-          style={{ flex: 1, padding: '9px 0', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontSize: 13, fontFamily: 'Syne, sans-serif', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
+          style={{ flex: 1, padding: '9px 0', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 6, color: '#fff', fontSize: 13, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, cursor: saving ? 'wait' : 'pointer' }}>
           {saving ? 'Enregistrement…' : '✓ Enregistrer'}
         </button>
         <button onClick={onCancel}
-          style={{ padding: '9px 16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, color: '#6B7280', fontSize: 13, cursor: 'pointer' }}>
+          style={{ padding: '9px 16px', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, color: '#64748B', fontSize: 13, cursor: 'pointer' }}>
           Annuler
         </button>
       </div>
@@ -131,16 +131,16 @@ function CardPreview({ card, clubName, benefits }: { card: Partial<MemberCardDoc
   const bens  = benefits.split('\n').filter(Boolean);
 
   return (
-    <div style={{ background: `linear-gradient(135deg, #0D0E14, #181B26)`, border: `1px solid ${level.border}`, borderRadius: 14, padding: 24 }}>
+    <div style={{ background: `linear-gradient(135deg, #F4F7FB, #FFFFFF)`, border: `1px solid ${level.border}`, borderRadius: 14, padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
         <div>
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: level.color, textTransform: 'uppercase', marginBottom: 6 }}>Carte Membre</p>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', margin: 0 }}>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#0F172A', margin: 0 }}>
             {clubName || 'Club / Organisation'}
           </p>
         </div>
         <div style={{ background: level.bg, border: `1px solid ${level.border}`, borderRadius: 6, padding: '5px 12px', flexShrink: 0 }}>
-          <span style={{ color: level.color, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 12 }}>{level.emoji} {level.label}</span>
+          <span style={{ color: level.color, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 12 }}>{level.emoji} {level.label}</span>
         </div>
       </div>
 
@@ -154,7 +154,7 @@ function CardPreview({ card, clubName, benefits }: { card: Partial<MemberCardDoc
           }
         </div>
         <div>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', margin: '0 0 2px' }}>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: '#0F172A', margin: '0 0 2px' }}>
             {card?.memberName || 'Nom du membre'}
           </p>
           {card?.memberId && (
@@ -164,7 +164,7 @@ function CardPreview({ card, clubName, benefits }: { card: Partial<MemberCardDoc
       </div>
 
       {card?.expiryDate && (
-        <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', marginBottom: 12 }}>
+        <p style={{ color: '#64748B', fontSize: 11, fontFamily: 'Space Mono, monospace', marginBottom: 12 }}>
           Valable jusqu&apos;au {new Date(card.expiryDate).toLocaleDateString('fr-FR')}
         </p>
       )}
@@ -174,7 +174,7 @@ function CardPreview({ card, clubName, benefits }: { card: Partial<MemberCardDoc
           {bens.slice(0, 4).map((b, i) => (
             <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
               <span style={{ color: level.color, flexShrink: 0, fontSize: 12 }}>✦</span>
-              <p style={{ color: '#9CA3AF', fontSize: 12, margin: 0 }}>{b}</p>
+              <p style={{ color: '#64748B', fontSize: 12, margin: 0 }}>{b}</p>
             </div>
           ))}
         </div>
@@ -326,17 +326,17 @@ export default function MemberDashboard({
     }
   }
 
-  const lbl: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 };
-  const sHead: React.CSSProperties = { fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', margin: 0 };
-  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '9px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
+  const lbl: React.CSSProperties = { fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 };
+  const sHead: React.CSSProperties = { fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: '#0F172A', margin: 0 };
+  const inputCss: React.CSSProperties = { width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '9px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box' };
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
+      <div className="dash-page-header" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20, lineHeight: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>🎫 Carte Membre</h2>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Adhésions multi-membres — 1 carte NFC par membre</p>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A', margin: 0 }}>🎫 Carte Membre</h2>
+          <p style={{ color: '#64748B', fontSize: 13, margin: 0 }}>Adhésions multi-membres — 1 carte NFC par membre</p>
         </div>
       </div>
 
@@ -356,12 +356,12 @@ export default function MemberDashboard({
                 {config.clubPhoto
                   // eslint-disable-next-line @next/next/no-img-element
                   ? <Image src={config.clubPhoto} alt="" fill style={{ objectFit: 'cover' }} />
-                  : <span style={{ fontSize: uploadingLogo ? 12 : 22, color: '#818CF8' }}>{uploadingLogo ? '⏳' : '🏛️'}</span>
+                  : <span style={{ fontSize: uploadingLogo ? 12 : 22, color: '#4F46E5' }}>{uploadingLogo ? '⏳' : '🏛️'}</span>
                 }
               </button>
               <div>
-                <p style={{ color: '#F8F9FC', fontSize: 13, margin: 0 }}>Logo (optionnel)</p>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>JPG / PNG</p>
+                <p style={{ color: '#0F172A', fontSize: 13, margin: 0 }}>Logo (optionnel)</p>
+                <p style={{ color: '#64748B', fontSize: 11, margin: 0 }}>JPG / PNG</p>
               </div>
             </div>
 
@@ -396,11 +396,11 @@ export default function MemberDashboard({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <h3 style={sHead}>Membres</h3>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: '2px 0 0' }}>{cards.length} membre{cards.length !== 1 ? 's' : ''} · 1 carte NFC chacun</p>
+                <p style={{ color: '#64748B', fontSize: 11, margin: '2px 0 0' }}>{cards.length} membre{cards.length !== 1 ? 's' : ''} · 1 carte NFC chacun</p>
               </div>
               {!addingCard && (
                 <button onClick={() => { setAddingCard(true); setEditingCard(null); }}
-                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 12px', color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, padding: '6px 12px', color: '#4F46E5', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   + Nouveau
                 </button>
               )}
@@ -419,9 +419,9 @@ export default function MemberDashboard({
             {cards.length === 0 && !addingCard ? (
               <div style={{ textAlign: 'center', padding: '32px 0' }}>
                 <p style={{ fontSize: 32, marginBottom: 8 }}>🎫</p>
-                <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 16 }}>Aucun membre encore</p>
+                <p style={{ color: '#64748B', fontSize: 13, marginBottom: 16 }}>Aucun membre encore</p>
                 <button onClick={() => setAddingCard(true)}
-                  style={{ padding: '9px 18px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#818CF8', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
+                  style={{ padding: '9px 18px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#4F46E5', fontSize: 12, fontFamily: 'Space Mono, monospace', cursor: 'pointer' }}>
                   + Ajouter le premier membre
                 </button>
               </div>
@@ -434,7 +434,7 @@ export default function MemberDashboard({
                       {/* Member row */}
                       <div
                         onClick={() => setPreview(card)}
-                        style={{ background: preview && (preview as MemberCardDoc).id === card.id ? 'rgba(99,102,241,0.07)' : '#181B26', border: `1px solid ${preview && (preview as MemberCardDoc).id === card.id ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, padding: '12px 14px', cursor: 'pointer' }}>
+                        style={{ background: preview && (preview as MemberCardDoc).id === card.id ? 'rgba(99,102,241,0.07)' : '#FFFFFF', border: `1px solid ${preview && (preview as MemberCardDoc).id === card.id ? 'rgba(99,102,241,0.3)' : 'rgba(15,23,42,0.07)'}`, borderRadius: 10, padding: '12px 14px', cursor: 'pointer' }}>
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           {/* Avatar */}
@@ -448,23 +448,23 @@ export default function MemberDashboard({
                           {/* Info */}
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                              <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              <p style={{ color: '#0F172A', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {card.memberName || 'Sans nom'}
                               </p>
                               <span style={{ fontSize: 11, background: lvl.bg, color: lvl.color, borderRadius: 4, padding: '1px 6px', fontFamily: 'Space Mono, monospace', flexShrink: 0 }}>{lvl.emoji} {lvl.label}</span>
                             </div>
                             {card.memberId && (
-                              <p style={{ color: '#4B5563', fontSize: 11, margin: 0, fontFamily: 'Space Mono, monospace' }}>#{card.memberId}</p>
+                              <p style={{ color: '#94A3B8', fontSize: 11, margin: 0, fontFamily: 'Space Mono, monospace' }}>#{card.memberId}</p>
                             )}
                           </div>
                           {/* Actions */}
                           <div style={{ display: 'flex', gap: 5, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
                             <button onClick={() => copyLink(card.id)} title="Copier le lien"
-                              style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(255,255,255,0.1)', background: copied === card.id ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)', color: copied === card.id ? '#10B981' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              style={{ width: 28, height: 28, borderRadius: 5, border: '1px solid rgba(15,23,42,0.1)', background: copied === card.id ? 'rgba(16,185,129,0.15)' : 'rgba(15,23,42,0.04)', color: copied === card.id ? '#10B981' : '#64748B', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               {copied === card.id ? '✓' : '🔗'}
                             </button>
                             <button onClick={() => setEditingCard(editingCard === card.id ? null : card.id)} title="Modifier"
-                              style={{ width: 28, height: 28, borderRadius: 5, border: `1px solid ${editingCard === card.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`, background: editingCard === card.id ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.04)', color: editingCard === card.id ? '#818CF8' : '#9CA3AF', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              style={{ width: 28, height: 28, borderRadius: 5, border: `1px solid ${editingCard === card.id ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.1)'}`, background: editingCard === card.id ? 'rgba(99,102,241,0.15)' : 'rgba(15,23,42,0.04)', color: editingCard === card.id ? '#4F46E5' : '#64748B', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               ✎
                             </button>
                             <button onClick={() => deleteCard(card.id)} title="Supprimer"
@@ -493,7 +493,7 @@ export default function MemberDashboard({
                             </div>
                           ) : (
                             <button onClick={() => { setAssigningCard(assigningCard === card.id ? null : card.id); setNfcInput(''); setNfcError(''); }}
-                              style={{ marginTop: 8, width: '100%', padding: '6px 0', background: 'rgba(99,102,241,0.06)', border: '1px dashed rgba(99,102,241,0.25)', borderRadius: 6, color: '#818CF8', fontSize: 11, fontFamily: 'Space Mono, monospace', cursor: 'pointer', letterSpacing: 1 }}>
+                              style={{ marginTop: 8, width: '100%', padding: '6px 0', background: 'rgba(99,102,241,0.06)', border: '1px dashed rgba(99,102,241,0.25)', borderRadius: 6, color: '#4F46E5', fontSize: 11, fontFamily: 'Space Mono, monospace', cursor: 'pointer', letterSpacing: 1 }}>
                               ⚡ LIER UNE CARTE NFC
                             </button>
                           )}
@@ -503,21 +503,21 @@ export default function MemberDashboard({
                       {/* NFC assignment panel */}
                       {assigningCard === card.id && (
                         <div style={{ marginTop: 8, background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: 14 }}>
-                          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 10 }}>Lier une carte NFC</p>
-                          <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 10, lineHeight: 1.6 }}>
+                          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#4F46E5', textTransform: 'uppercase', marginBottom: 10 }}>Lier une carte NFC</p>
+                          <p style={{ color: '#64748B', fontSize: 12, marginBottom: 10, lineHeight: 1.6 }}>
                             Entre le code NFC de la carte physique (imprimé au dos), ou scanne-la depuis Android Chrome.
                           </p>
                           <div style={{ display: 'flex', gap: 8, marginBottom: nfcError ? 8 : 0 }}>
                             <input value={nfcInput}
                               onChange={e => { setNfcInput(e.target.value.toUpperCase()); setNfcError(''); }}
                               placeholder="Ex: A1B2C3D4E5"
-                              style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 6, padding: '8px 10px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 11, outline: 'none', letterSpacing: 2 }} />
+                              style={{ flex: 1, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.12)', borderRadius: 6, padding: '8px 10px', color: '#0F172A', fontFamily: 'Space Mono, monospace', fontSize: 11, outline: 'none', letterSpacing: 2 }} />
                             <button onClick={() => scanNfc(card.id)} disabled={nfcScanning}
-                              style={{ padding: '8px 10px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#818CF8', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                              style={{ padding: '8px 10px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#4F46E5', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                               {nfcScanning ? '📡…' : '📡'}
                             </button>
                             <button onClick={() => assignNfc(card.id)} disabled={nfcSaving || !nfcInput}
-                              style={{ padding: '8px 14px', background: nfcInput ? 'linear-gradient(135deg, #4338CA, #6366F1)' : 'rgba(255,255,255,0.04)', border: 'none', borderRadius: 6, color: nfcInput ? '#fff' : '#4B5563', fontSize: 12, cursor: nfcInput ? 'pointer' : 'not-allowed', fontFamily: 'Space Mono, monospace' }}>
+                              style={{ padding: '8px 14px', background: nfcInput ? 'linear-gradient(135deg, #4338CA, #6366F1)' : 'rgba(15,23,42,0.04)', border: 'none', borderRadius: 6, color: nfcInput ? '#fff' : '#94A3B8', fontSize: 12, cursor: nfcInput ? 'pointer' : 'not-allowed', fontFamily: 'Space Mono, monospace' }}>
                               {nfcSaving ? '…' : '✓'}
                             </button>
                           </div>
@@ -549,15 +549,15 @@ export default function MemberDashboard({
             <p style={{ ...lbl, marginBottom: 16 }}>Aperçu carte</p>
             <CardPreview card={preview} clubName={config.clubName} benefits={config.benefits} />
             {!preview && (
-              <p style={{ color: '#6B7280', fontSize: 12, textAlign: 'center', marginTop: 12 }}>
+              <p style={{ color: '#64748B', fontSize: 12, textAlign: 'center', marginTop: 12 }}>
                 Cliquez sur un membre pour le prévisualiser
               </p>
             )}
           </Card>
 
           <div style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 10, padding: 14 }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 8 }}>Comment ça marche</p>
-            <p style={{ color: '#6B7280', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#4F46E5', textTransform: 'uppercase', marginBottom: 8 }}>Comment ça marche</p>
+            <p style={{ color: '#64748B', fontSize: 12, lineHeight: 1.7, margin: 0 }}>
               Chaque membre a son propre lien 🔗. Liez-le à sa carte NFC physique via le bouton ⚡. Quand il tape la carte, il voit sa carte membre personnalisée.
             </p>
           </div>

@@ -109,17 +109,17 @@ export default function SettingsClient({ user, subscription }: Props) {
   }
 
   return (
-    <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 24 }}>
+    <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Suspense>
         <PaymentBanner />
       </Suspense>
 
       {/* Account */}
       <Card padding="md">
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 20 }}>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 12 }}>
           Mon compte
         </h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Input
             label="Nom"
             value={name}
@@ -141,8 +141,8 @@ export default function SettingsClient({ user, subscription }: Props) {
 
       {/* Plan */}
       <Card padding="md">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)' }}>
             Mon abonnement
           </h3>
           <Badge variant={planColors[subscription?.plan ?? 'essentiel'] ?? 'neutral'}>
@@ -150,7 +150,7 @@ export default function SettingsClient({ user, subscription }: Props) {
           </Badge>
         </div>
 
-        <p style={{ color: 'var(--t-text-sub)', fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
+        <p style={{ color: 'var(--t-text-sub)', fontSize: 14, lineHeight: 1.6, marginBottom: 12 }}>
           {subscription?.plan === 'essentiel' && 'Passez au plan Pro pour accéder à tous les modules, analytics illimités et domaine personnalisé.'}
           {subscription?.plan === 'pro'       && 'Vous bénéficiez de toutes les fonctionnalités Pro. Merci de votre confiance !'}
           {subscription?.plan === 'equipe'    && 'Vous êtes sur le plan Équipe. Contactez-nous pour toute modification.'}
@@ -165,10 +165,10 @@ export default function SettingsClient({ user, subscription }: Props) {
 
       {/* Danger zone */}
       <Card padding="md">
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#EF4444', marginBottom: 16 }}>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: '#DC2626', marginBottom: 8 }}>
           Zone dangereuse
         </h3>
-        <p style={{ color: 'var(--t-text-muted)', fontSize: 14, marginBottom: 20 }}>
+        <p style={{ color: 'var(--t-text-muted)', fontSize: 13.5, marginBottom: 12 }}>
           La suppression de votre compte est irréversible. Toutes vos données seront effacées.
         </p>
         <Button variant="danger" size="sm" loading={deleting} onClick={deleteAccount}>

@@ -120,7 +120,7 @@ export default function StockClient({ stock: initialStock, totals: initialTotals
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>
           Admin · Stock NFC
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
           Stock cartes NFC
         </h1>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
@@ -140,7 +140,7 @@ export default function StockClient({ stock: initialStock, totals: initialTotals
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: s.color, textTransform: 'uppercase', marginBottom: 10 }}>
               {s.label}
             </p>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32, color: 'var(--t-text)', lineHeight: 1 }}>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 32, color: 'var(--t-text)', lineHeight: 1 }}>
               {s.value}
             </p>
           </div>

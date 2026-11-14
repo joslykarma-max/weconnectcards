@@ -30,9 +30,10 @@ export default function Card({
   return (
     <div
       style={{
-        background: '#181B26',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: '8px',
+        background: 'var(--ui-card-bg, #181B26)',
+        border: 'var(--ui-card-border, 1px solid rgba(255,255,255,0.07))',
+        borderRadius: 'var(--ui-card-radius, 8px)',
+        boxShadow: 'var(--ui-card-shadow, none)',
         transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
         ...style,
       }}

@@ -3,15 +3,14 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './shell.module.css';
+import clair from './clair.module.css';
 
 /**
  * Floating panel over the dashboard home (bottom sheet on phones, window on desktop).
  * Rendered by the intercepted routes in app/(dashboard)/dashboard/@panel, so the URL
  * follows the panel and the back button closes it.
  */
-export default function PanelFrame({ title, legacy = false, children }: {
-  title: string; legacy?: boolean; children?: React.ReactNode;
-}) {
+export default function PanelFrame({ title, children }: { title: string; children?: React.ReactNode }) {
   const router   = useRouter();
   const panelRef = useRef<HTMLElement>(null);
 
@@ -42,7 +41,7 @@ export default function PanelFrame({ title, legacy = false, children }: {
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
-        className={`${styles.panel} ${legacy ? styles.panelLegacy : ''}`}
+        className={styles.panel}
         onClick={(e) => e.stopPropagation()}
       >
         <header className={styles.panelHead}>
@@ -52,7 +51,7 @@ export default function PanelFrame({ title, legacy = false, children }: {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
         </header>
-        <div className={styles.panelBody}>{children}</div>
+        <div className={`${styles.panelBody} ${clair.scope} in-panel`}>{children}</div>
       </section>
     </div>
   );

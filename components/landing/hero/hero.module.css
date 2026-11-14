@@ -108,8 +108,8 @@
 
 .title {
   margin: 8px 0 0;
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(30px, 9.4vw, 48px); line-height: 1.04; letter-spacing: -0.03em;
+  font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800;
+  font-size: clamp(34px, 10.4vw, 54px); line-height: 1.04; letter-spacing: -0.035em;
   text-wrap: balance;
 }
 .titleAccent { display: block; color: var(--hx-accent); transition: color var(--text-ms) ease var(--hx-color-delay, 0ms); }
@@ -252,7 +252,7 @@
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%;
 }
 .nfcDot { width: 1.8cqw; height: 1.8cqw; }
-.person { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 5.9cqw; color: #F8F9FC; margin: 0 0 1.2cqw; line-height: 1.2; }
+.person { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 5.9cqw; color: #F8F9FC; margin: 0 0 1.2cqw; line-height: 1.2; }
 .role { font-family: 'Space Mono', monospace; font-size: 2.65cqw; letter-spacing: 0.6cqw; color: #9CA3AF; text-transform: uppercase; margin: 0; }
 .faceBottom { display: flex; justify-content: space-between; align-items: flex-end; }
 .brand { font-family: 'Space Mono', monospace; font-size: 2.35cqw; letter-spacing: 0.9cqw; color: #6B7280; text-transform: uppercase; margin: 0; }
@@ -295,7 +295,7 @@
 /* ── Product information ─────────────────────────────────────────────────── */
 .info { margin-top: 10px; max-width: 420px; }
 .infoKicker { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--hx-muted); margin: 0; transition: color var(--text-ms) ease var(--hx-color-delay, 0ms); }
-.infoName { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(26px, 7vw, 34px); letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.1; }
+.infoName { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(26px, 7vw, 34px); letter-spacing: -0.02em; margin: 2px 0 0; line-height: 1.1; }
 .infoDesc { font-size: 15px; line-height: 1.55; color: var(--hx-muted); margin: 8px 0 0; transition: color var(--text-ms) ease var(--hx-color-delay, 0ms); }
 .swapIn { animation: hx-swap 700ms var(--ease) both; }
 @keyframes hx-swap {
@@ -384,7 +384,7 @@
   }
   .colText { display: flex; flex-direction: column; align-items: flex-start; }
   .colStage { display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .title { font-size: clamp(40px, 3.9vw, 56px); letter-spacing: -0.03em; }   /* Syne 800 is wide: 3 lines max */
+  .title { font-size: clamp(46px, 4.6vw, 70px); letter-spacing: -0.035em; }
   .sub { margin-left: 0; max-width: 470px; }
   .ctas { justify-content: flex-start; }
   .stage { width: calc(100% + 80px); margin: 0 -40px; }

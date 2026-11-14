@@ -25,5 +25,5 @@ export default async function ModulePanel({ params, searchParams }: {
   const entry = PAGES[slug.join('/')];
   if (!entry) notFound();
   const Page = (await entry.load()).default;
-  return <PanelFrame title={entry.title} legacy><Page searchParams={searchParams} /></PanelFrame>;
+  return <PanelFrame title={entry.title}><Page searchParams={searchParams} /></PanelFrame>;
 }

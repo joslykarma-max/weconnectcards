@@ -39,15 +39,15 @@ type Request = {
 
 const input: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(15,23,42,0.03)',
+  border: '1px solid rgba(15,23,42,0.1)',
   borderRadius: 6, padding: '10px 14px',
-  color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
+  color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
   outline: 'none',
 };
 const lbl: React.CSSProperties = {
   fontFamily: 'Space Mono, monospace', fontSize: 9,
-  letterSpacing: 2, color: '#6B7280',
+  letterSpacing: 2, color: '#64748B',
   textTransform: 'uppercase', display: 'block', marginBottom: 6,
 };
 
@@ -107,12 +107,12 @@ export default function CustomModulePage() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         <button onClick={() => router.back()}
-          style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>←</button>
+          style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20, lineHeight: 1 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A', margin: 0 }}>
             ✦ Module sur mesure
           </h2>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>
+          <p style={{ color: '#64748B', fontSize: 13, margin: 0 }}>
             Décrivez votre besoin — notre équipe vous revient avec un devis sous 48h.
           </p>
         </div>
@@ -122,10 +122,10 @@ export default function CustomModulePage() {
         <Card padding="md">
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <p style={{ fontSize: 48, marginBottom: 12 }}>✅</p>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 8 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: '#0F172A', marginBottom: 8 }}>
               Demande envoyée !
             </h3>
-            <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
+            <p style={{ color: '#64748B', fontSize: 14, marginBottom: 24, maxWidth: 360, margin: '0 auto 24px' }}>
               Notre équipe analyse votre besoin et vous contacte sous 48h avec un devis personnalisé.
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -140,7 +140,7 @@ export default function CustomModulePage() {
         </Card>
       ) : (
         <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
+          <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: '#0F172A', marginBottom: 20 }}>
             Décrivez votre module
           </h3>
 
@@ -172,7 +172,7 @@ export default function CustomModulePage() {
                 <select style={{ ...input, cursor: 'pointer' }} value={form.budget} onChange={set('budget')}>
                   <option value="">Sélectionner…</option>
                   {BUDGET_OPTIONS.map((o) => (
-                    <option key={o} value={o} style={{ background: '#181B26' }}>{o}</option>
+                    <option key={o} value={o} style={{ background: '#FFFFFF' }}>{o}</option>
                   ))}
                 </select>
               </div>
@@ -181,7 +181,7 @@ export default function CustomModulePage() {
                 <select style={{ ...input, cursor: 'pointer' }} value={form.timeline} onChange={set('timeline')}>
                   <option value="">Sélectionner…</option>
                   {TIMELINE_OPTIONS.map((o) => (
-                    <option key={o} value={o} style={{ background: '#181B26' }}>{o}</option>
+                    <option key={o} value={o} style={{ background: '#FFFFFF' }}>{o}</option>
                   ))}
                 </select>
               </div>
@@ -202,7 +202,7 @@ export default function CustomModulePage() {
 
       {/* Info card */}
       <Card padding="md">
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 14 }}>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: '#0F172A', marginBottom: 14 }}>
           Comment ça marche ?
         </h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -221,8 +221,8 @@ export default function CustomModulePage() {
                 flexShrink: 0, marginTop: 1,
               }}>{s.step}</div>
               <div>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#F8F9FC', fontWeight: 600, marginBottom: 2 }}>{s.title}</p>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#6B7280' }}>{s.desc}</p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#0F172A', fontWeight: 600, marginBottom: 2 }}>{s.title}</p>
+                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#64748B' }}>{s.desc}</p>
               </div>
             </div>
           ))}
@@ -241,27 +241,27 @@ export default function CustomModulePage() {
         </button>
       ) : (
         <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 16 }}>
+          <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 16 }}>
             Mes demandes
           </h3>
           {requests.length === 0 ? (
-            <p style={{ color: '#6B7280', fontSize: 13 }}>Aucune demande pour l'instant.</p>
+            <p style={{ color: '#64748B', fontSize: 13 }}>Aucune demande pour l'instant.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {requests.map((r) => {
                 const st = STATUS_LABELS[r.status] ?? STATUS_LABELS['pending'];
                 return (
                   <div key={r.id} style={{
-                    background: 'rgba(255,255,255,0.02)',
-                    border: '1px solid rgba(255,255,255,0.07)',
+                    background: 'rgba(15,23,42,0.02)',
+                    border: '1px solid rgba(15,23,42,0.07)',
                     borderRadius: 8, padding: '14px 16px',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: r.adminNote ? 8 : 0 }}>
                       <div>
-                        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#F8F9FC', fontWeight: 600 }}>
+                        <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#0F172A', fontWeight: 600 }}>
                           {r.moduleName}
                         </p>
-                        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4B5563', marginTop: 2 }}>
+                        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#94A3B8', marginTop: 2 }}>
                           {new Date(r.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                       </div>
@@ -276,8 +276,8 @@ export default function CustomModulePage() {
                     </div>
                     {r.adminNote && (
                       <p style={{
-                        fontSize: 12, color: '#9CA3AF', fontFamily: 'DM Sans, sans-serif',
-                        background: 'rgba(255,255,255,0.03)', borderRadius: 4, padding: '8px 10px', marginTop: 8,
+                        fontSize: 12, color: '#64748B', fontFamily: 'DM Sans, sans-serif',
+                        background: 'rgba(15,23,42,0.03)', borderRadius: 4, padding: '8px 10px', marginTop: 8,
                       }}>
                         💬 {r.adminNote}
                       </p>

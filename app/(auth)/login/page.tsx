@@ -44,7 +44,7 @@ function LoginForm() {
   return (
     <div style={{ width: '100%', maxWidth: 420 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10 }}>
           Bon retour.
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 15 }}>

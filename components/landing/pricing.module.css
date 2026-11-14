@@ -5,7 +5,7 @@
 }
 .head { text-align: center; max-width: 640px; margin: 0 auto 18px; }
 .eyebrow { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 4px; color: #6366F1; text-transform: uppercase; margin: 0 0 10px; }
-.title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(24px, 6.4vw, 42px); line-height: 1.12; letter-spacing: -0.02em; color: #0F172A; margin: 0 0 8px; text-wrap: balance; }
+.title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(24px, 6.4vw, 42px); line-height: 1.12; letter-spacing: -0.02em; color: #0F172A; margin: 0 0 8px; text-wrap: balance; }
 .sub { color: #64748B; font-size: 15px; margin: 0; }
 
 /* Phone selector */
@@ -16,7 +16,7 @@
   transition: border-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
 }
 .selOn { box-shadow: 0 8px 20px -10px rgba(15, 42, 68, 0.3); }
-.selName { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+.selName { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14px; }
 .selPrice { font-size: 12px; opacity: 0.8; }
 .selBtn:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; }
 
@@ -35,7 +35,7 @@
 .planIcon { font-size: 22px; }
 .planName { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; margin: 0; }
 .tagline { color: #64748B; font-size: 13px; line-height: 1.5; margin: 4px 0 12px; }
-.price { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 38px; color: #0F172A; margin: 0 0 12px; line-height: 1; }
+.price { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 38px; color: #0F172A; margin: 0 0 12px; line-height: 1; }
 .price span { font-size: 15px; color: #94A3B8; margin-left: 6px; }
 .price small { display: block; font-family: 'Space Mono', monospace; font-weight: 400; font-size: 9px; letter-spacing: 2px; color: #94A3B8; margin-top: 6px; text-transform: uppercase; }
 .features { list-style: none; margin: 0 0 12px; padding: 12px 0 0; border-top: 1px solid #F1F5F9; display: grid; gap: 7px; }
@@ -54,8 +54,8 @@
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.07), rgba(6, 182, 212, 0.05)); border: 1px solid rgba(99, 102, 241, 0.18); border-radius: 18px; padding: 14px;
 }
 .upgradeText p { margin: 0; color: #64748B; font-size: 13px; line-height: 1.5; }
-.upgradeText .upgradeTitle { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: #0F172A; margin-bottom: 4px; }
-.upgradePrice { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 24px; color: #0F172A; margin: 0; text-align: right; line-height: 1; }
+.upgradeText .upgradeTitle { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; color: #0F172A; margin-bottom: 4px; }
+.upgradePrice { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 24px; color: #0F172A; margin: 0; text-align: right; line-height: 1; }
 .upgradePrice span { font-size: 12px; color: #94A3B8; margin-left: 4px; }
 .upgradePrice small { display: block; font-family: 'Space Mono', monospace; font-weight: 400; font-size: 9px; letter-spacing: 2px; color: #94A3B8; margin-top: 4px; }
 .upgradeLink { grid-column: 1 / -1; display: block; }

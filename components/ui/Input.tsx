@@ -21,7 +21,7 @@ const inputBaseStyle = {
   border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: '6px',
   padding: '10px 14px',
-  color: '#F8F9FC',
+  color: 'var(--ui-input-text, #F8F9FC)',
   fontFamily: 'DM Sans, sans-serif',
   fontSize: '14px',
   width: '100%',

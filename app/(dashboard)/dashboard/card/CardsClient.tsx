@@ -165,7 +165,7 @@ function CardVisual({ edition, profile }: { edition: string; profile: Profile })
         </div>
       </div>
       <div>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 13, color: style.textColor, marginBottom: 2 }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 13, color: style.textColor, marginBottom: 2 }}>
           {profile?.displayName ?? 'Votre nom'}
         </p>
         {profile?.title && (
@@ -358,7 +358,7 @@ function OrderModal({
 
         {step === 1 && (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
               Choisir une carte
             </h3>
             <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
@@ -379,10 +379,10 @@ function OrderModal({
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t-text)', textTransform: 'capitalize' }}>
+                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t-text)', textTransform: 'capitalize' }}>
                       Carte {info.label}
                     </p>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, color: info.color }}>
+                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 16, color: info.color }}>
                       {fmtFCFA(info.basePrice)}
                     </p>
                   </div>
@@ -432,7 +432,7 @@ function OrderModal({
 
         {step === 2 && (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
               Personnaliser ta carte
             </h3>
             <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
@@ -621,7 +621,7 @@ function OrderModal({
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
                 Total
               </p>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: planMeta.color }}>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: planMeta.color }}>
                 {fmtFCFA(finalPrice)}
               </p>
             </div>
@@ -637,7 +637,7 @@ function OrderModal({
 
         {step === 3 && (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 8 }}>
               Informations de livraison
             </h3>
             <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
@@ -799,7 +799,7 @@ function ModulePickerModal({
           ✕
         </button>
 
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
           Choisir mon module
         </h3>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20 }}>
@@ -905,7 +905,7 @@ function ActivateCardModal({
           ✕
         </button>
 
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
           Activer cette carte
         </h3>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 13, marginBottom: 20, fontFamily: 'DM Sans, sans-serif' }}>
@@ -1023,7 +1023,7 @@ function ReplaceCardModal({
 
         {done ? (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
               Nouvelle carte connectée ✅
             </h3>
             <p style={text}>
@@ -1035,7 +1035,7 @@ function ReplaceCardModal({
           </>
         ) : step === 'reason' ? (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
               Changer ma carte
             </h3>
             <p style={text}>Pourquoi changes-tu {oldLabel} ?</p>
@@ -1091,7 +1091,7 @@ function ReplaceCardModal({
           </>
         ) : (
           <>
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: 'var(--t-text)', marginBottom: 6 }}>
               Connecter ma nouvelle carte
             </h3>
             {justDeactivated && (

@@ -13,7 +13,7 @@ function Avatar({ src, name, size = 56 }: { src?: string | null; name: string; s
         {src ? (
           <Image src={src} alt={name} width={size} height={size} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: size * 0.38, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: size * 0.38, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             {name.charAt(0).toUpperCase()}
           </span>
         )}
@@ -48,7 +48,7 @@ export default function DirectoryClient({ initial }: { initial: DirectoryProfile
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>
           Réseau We Connect
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC', marginBottom: 12, letterSpacing: '-1px' }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 36, color: '#F8F9FC', marginBottom: 12, letterSpacing: '-1px' }}>
           Annuaire des membres
         </h1>
         <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 15, color: '#9CA3AF', maxWidth: 480, margin: '0 auto 32px' }}>
@@ -122,7 +122,7 @@ export default function DirectoryClient({ initial }: { initial: DirectoryProfile
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <p style={{ fontSize: 40, marginBottom: 16 }}>🔍</p>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 8 }}>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 8 }}>
               Aucun membre trouvé
             </p>
             <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#6B7280' }}>
@@ -151,7 +151,7 @@ export default function DirectoryClient({ initial }: { initial: DirectoryProfile
                 <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                   <Avatar src={profile.avatar} name={profile.displayName} size={56} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {profile.displayName}
                     </p>
                     {(profile.title || profile.company) && (

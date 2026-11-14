@@ -65,12 +65,12 @@ function OrderCard({ order, onAdvance }: { order: OrderDoc; onAdvance: (id: stri
             borderRadius: 8,
             padding: '4px 12px',
           }}>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15, color: STATUS_COLOR[order.status] }}>
+            <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: STATUS_COLOR[order.status] }}>
               Table {order.tableNumber}
             </span>
           </div>
         </div>
-        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', letterSpacing: 1 }}>
+        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#64748B', letterSpacing: 1 }}>
           {timeAgo(order.createdAt)}
         </span>
       </div>
@@ -85,7 +85,7 @@ function OrderCard({ order, onAdvance }: { order: OrderDoc; onAdvance: (id: stri
               </span>
               {item.emoji} {item.name}
             </span>
-            <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#6B7280' }}>
+            <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#64748B' }}>
               {(item.qty * item.price).toLocaleString('fr-FR')}
             </span>
           </div>
@@ -96,7 +96,7 @@ function OrderCard({ order, onAdvance }: { order: OrderDoc; onAdvance: (id: stri
       {order.note && (
         <div style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 6, padding: '8px 10px' }}>
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#F59E0B', marginBottom: 3, textTransform: 'uppercase' }}>Note</p>
-          <p style={{ color: '#F8F9FC', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{order.note}</p>
+          <p style={{ color: '#0F172A', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{order.note}</p>
         </div>
       )}
 
@@ -113,7 +113,7 @@ function OrderCard({ order, onAdvance }: { order: OrderDoc; onAdvance: (id: stri
               background: next === 'preparing' ? 'rgba(99,102,241,0.15)' : 'rgba(16,185,129,0.15)',
               border: `1px solid ${next === 'preparing' ? 'rgba(99,102,241,0.35)' : 'rgba(16,185,129,0.35)'}`,
               borderRadius: 7, cursor: 'pointer',
-              color: next === 'preparing' ? '#818CF8' : '#10B981',
+              color: next === 'preparing' ? '#4F46E5' : '#10B981',
               fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: 12,
             }}
           >
@@ -193,9 +193,9 @@ export default function RestaurantClient({ uid, restaurantName }: Props) {
     <div style={{ maxWidth: 900 }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <Link href="/dashboard/modules/menu" style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, textDecoration: 'none', display: 'flex', alignItems: 'center' }}>←</Link>
+        <Link href="/dashboard/modules/menu" style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20, textDecoration: 'none', display: 'flex', alignItems: 'center' }}>←</Link>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--t-text)', marginBottom: 2 }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--t-text)', marginBottom: 2 }}>
             📊 Dashboard Restaurant
           </h2>
           <p style={{ color: 'var(--t-text-muted)', fontSize: 13 }}>{restaurantName || 'Mon Restaurant'}</p>
@@ -211,12 +211,12 @@ export default function RestaurantClient({ uid, restaurantName }: Props) {
       {/* Today KPIs */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
         {[
-          { label: "Commandes auj.", value: todayCount,   color: '#818CF8' },
+          { label: "Commandes auj.", value: todayCount,   color: '#4F46E5' },
           { label: "En attente",     value: pending.length, color: '#F59E0B' },
           { label: `CA auj. ${todayCurrency}`, value: todayTotal.toLocaleString('fr-FR'), color: '#10B981' },
         ].map(stat => (
           <div key={stat.label} style={{ flex: 1, minWidth: 120, padding: '14px 16px', background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, textAlign: 'center' }}>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: stat.color }}>{stat.value}</p>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: stat.color }}>{stat.value}</p>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, color: 'var(--t-text-muted)', marginTop: 4, textTransform: 'uppercase' }}>{stat.label}</p>
           </div>
         ))}
@@ -234,7 +234,7 @@ export default function RestaurantClient({ uid, restaurantName }: Props) {
                 flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 padding: '10px 12px', borderRadius: 10, cursor: 'pointer',
                 background: active ? `${tab.color}18` : 'var(--t-surface)',
-                border: `1px solid ${active ? tab.color + '44' : 'var(--t-border-color, rgba(255,255,255,0.08))'}`,
+                border: `1px solid ${active ? tab.color + '44' : 'var(--t-border-color, rgba(15,23,42,0.08))'}`,
                 color: active ? tab.color : 'var(--t-text-muted)',
                 fontFamily: 'DM Sans, sans-serif', fontWeight: active ? 700 : 400, fontSize: 13,
                 transition: 'all 0.15s',

@@ -208,7 +208,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>
             Admin
           </p>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)' }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)' }}>
             Commandes &amp; Cartes
           </h1>
         </div>
@@ -388,7 +388,7 @@ export default function CardsAdminClient({ initialCards }: { initialCards: Admin
 
             {/* Client info */}
             <div style={{ background: 'rgba(255,255,255,0.03)', border: 'var(--t-border-full)', borderRadius: 6, padding: '12px 16px', marginBottom: 24 }}>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 2 }}>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: 'var(--t-text)', marginBottom: 2 }}>
                 {configCard.user?.displayName ?? 'Client inconnu'}
               </p>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: 'var(--t-text-muted)' }}>

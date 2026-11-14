@@ -92,7 +92,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
     <Shell backHref={`/${username}`}>
       <div style={{ textAlign: 'center', marginBottom: 28 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Carte de fidélité</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
           {String(config.businessName || 'Mon Commerce')}
         </h1>
         {card?.tiers && card.tiers.length === 1 && (
@@ -108,7 +108,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
       {/* Phase 1 — Saisie téléphone */}
       {phase === 'phone' && (
         <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 28 }}>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 6 }}>Accéder à ma carte</p>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 6 }}>Accéder à ma carte</p>
           <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 20 }}>Entrez votre numéro pour voir ou créer votre carte de fidélité.</p>
           <input
             type="tel"
@@ -121,7 +121,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
           <button
             onClick={loadCard}
             disabled={loading || !phone.trim()}
-            style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: (!phone.trim() || loading) ? 0.6 : 1 }}
+            style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: (!phone.trim() || loading) ? 0.6 : 1 }}
           >
             {loading ? 'Chargement...' : 'Voir ma carte →'}
           </button>
@@ -135,7 +135,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
           <div style={{ background: '#181B26', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 12, padding: 24, marginBottom: 12 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
               <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>Ma carte</p>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#818CF8' }}>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#818CF8' }}>
                 {emoji} {card.stamps}
               </p>
             </div>
@@ -179,7 +179,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
           {triggeredTier && (
             <div style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, padding: '14px 18px', marginBottom: 12, textAlign: 'center' }}>
               <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>🎁</span>
-              <p style={{ color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>Palier atteint !</p>
+              <p style={{ color: '#10B981', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14 }}>Palier atteint !</p>
               <p style={{ color: '#F8F9FC', fontSize: 13, marginTop: 4 }}>{triggeredTier.reward}</p>
               <p style={{ color: '#9CA3AF', fontSize: 12, marginTop: 6 }}>Montrez cet écran au gérant pour obtenir votre récompense.</p>
             </div>
@@ -194,7 +194,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
 
           {/* Saisie code tampon */}
           <div style={{ background: '#12141C', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 20 }}>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 4 }}>Ajouter un tampon</p>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, color: '#F8F9FC', marginBottom: 4 }}>Ajouter un tampon</p>
             <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 14 }}>Demandez le code du jour au gérant après votre achat.</p>
             <input
               type="text"
@@ -208,7 +208,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
             <button
               onClick={addStamp}
               disabled={stamping || !stampCode.trim()}
-              style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', opacity: (!stampCode.trim() || stamping) ? 0.6 : 1 }}
+              style={{ width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', opacity: (!stampCode.trim() || stamping) ? 0.6 : 1 }}
             >
               {stamping ? 'Validation...' : nextTier ? `Valider (encore ${nextTier.stamps - card.stamps} pour ${nextTier.reward || 'prochain palier'})` : 'Valider le tampon'}
             </button>
@@ -225,7 +225,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
       {phase === 'rewarded' && (
         <div style={{ textAlign: 'center', padding: '40px 24px', background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(6,182,212,0.1))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 12 }}>
           <span style={{ fontSize: 56, display: 'block', marginBottom: 16 }}>🎁</span>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>
             Félicitations !
           </h2>
           <p style={{ color: '#818CF8', fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
@@ -236,7 +236,7 @@ function LoyaltyModule({ config, username, profileId }: { config: Record<string,
           </p>
           <button
             onClick={() => { setPhase('card'); setRewardedTier(null); }}
-            style={{ padding: '12px 24px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            style={{ padding: '12px 24px', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
           >
             Continuer à collecter →
           </button>
@@ -329,7 +329,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
       <Shell backHref={`/${username}`}>
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.35)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>✅</div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Commande envoyée !</h2>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Commande envoyée !</h2>
           <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 28 }}>
             Votre commande pour la <strong style={{ color: '#F8F9FC' }}>Table {tableNumber}</strong> a bien été reçue. Le serveur vous apportera vos plats.
           </p>
@@ -347,7 +347,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
           </div>
           <button
             onClick={() => { setCart({}); setNote(''); setOrderPhase('browse'); setOrderId(''); }}
-            style={{ padding: '12px 28px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
+            style={{ padding: '12px 28px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, color: '#818CF8', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
           >
             Ajouter d&apos;autres plats →
           </button>
@@ -370,11 +370,11 @@ function MenuModule({ config, username, profileId, tableNumber }: {
           <span style={{ fontSize: 20 }}>🪑</span>
           <div>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase' }}>Votre table</p>
-            <p style={{ color: '#F8F9FC', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>Table {tableNumber}</p>
+            <p style={{ color: '#F8F9FC', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16 }}>Table {tableNumber}</p>
           </div>
         </div>
 
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 16 }}>Récapitulatif</h2>
+        <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 16 }}>Récapitulatif</h2>
         <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
           {cartItems.map(({ item, qty }, i) => (
             <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: i < cartItems.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
@@ -402,7 +402,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
         <button
           onClick={submitOrder}
           disabled={submitting}
-          style={{ width: '100%', padding: '15px', background: submitting ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: submitting ? '#6B7280' : '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: submitting ? 'not-allowed' : 'pointer' }}>
+          style={{ width: '100%', padding: '15px', background: submitting ? 'rgba(255,255,255,0.06)' : 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: submitting ? '#6B7280' : '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, cursor: submitting ? 'not-allowed' : 'pointer' }}>
           {submitting ? 'Envoi en cours...' : `🛎️ Commander à Table ${tableNumber}`}
         </button>
       </Shell>
@@ -415,7 +415,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: 24 }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>Menu</p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 6 }}>
           {String(config.restaurantName || 'Notre Restaurant')}
         </h1>
         {!!config.address   && <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 4 }}>📍 {String(config.address)}</p>}
@@ -427,7 +427,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
           <div style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 20, padding: '7px 18px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 16 }}>🪑</span>
-            <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#818CF8' }}>Table {tableNumber}</span>
+            <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#818CF8' }}>Table {tableNumber}</span>
           </div>
         </div>
       )}
@@ -436,14 +436,14 @@ function MenuModule({ config, username, profileId, tableNumber }: {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {!!config.menuUrl && (
             <a href={String(config.menuUrl)} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17 }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 17 }}>
               📋 Voir le menu
             </a>
           )}
           {!!config.whatsapp && (
             <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent('Bonjour, je souhaite passer une commande')}`}
               target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, textDecoration: 'none', color: '#10B981', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '16px 24px', background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 10, textDecoration: 'none', color: '#10B981', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16 }}>
               💬 Commander sur WhatsApp
             </a>
           )}
@@ -456,12 +456,12 @@ function MenuModule({ config, username, profileId, tableNumber }: {
           {/* Category tabs */}
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20, msOverflowStyle: 'none', scrollbarWidth: 'none' } as React.CSSProperties}>
             <button onClick={() => setSelectedCat('all')}
-              style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === 'all' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === 'all' ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === 'all' ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
+              style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === 'all' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === 'all' ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === 'all' ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
               Tout
             </button>
             {categories.map(cat => (
               <button key={cat.id} onClick={() => setSelectedCat(cat.id)}
-                style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === cat.id ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === cat.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === cat.id ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
+                style={{ flexShrink: 0, padding: '8px 16px', borderRadius: 20, background: selectedCat === cat.id ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === cat.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === cat.id ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap' }}>
                 {cat.emoji} {cat.name}
               </button>
             ))}
@@ -475,7 +475,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
                 <div key={cat.id}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                     <span style={{ fontSize: 20 }}>{cat.emoji}</span>
-                    <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC' }}>{cat.name}</h2>
+                    <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC' }}>{cat.name}</h2>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {cat.items.filter(i => i.available !== false).map(item => {
@@ -504,7 +504,7 @@ function MenuModule({ config, username, profileId, tableNumber }: {
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
                               <button onClick={() => sub(item.id)}
                                 style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>−</button>
-                              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 16, color: '#F8F9FC', minWidth: 18, textAlign: 'center' }}>{qty}</span>
+                              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 16, color: '#F8F9FC', minWidth: 18, textAlign: 'center' }}>{qty}</span>
                               <button onClick={() => add(item.id)}
                                 style={{ width: 30, height: 30, borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#818CF8', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>+</button>
                             </div>
@@ -531,12 +531,12 @@ function MenuModule({ config, username, profileId, tableNumber }: {
                 </div>
                 {tableNumber ? (
                   <button onClick={() => setOrderPhase('confirm')}
-                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                     🛎️ Commander — Table {tableNumber}
                   </button>
                 ) : whatsapp ? (
                   <button onClick={orderOnWhatsApp}
-                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                    style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
                     💬 Envoyer la commande
                   </button>
                 ) : (
@@ -563,7 +563,7 @@ function ReviewModule({ config, username }: { config: Record<string, unknown>; u
         <div style={{ fontSize: 64, marginBottom: 20 }}>
           {'⭐'.repeat(stars)}
         </div>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 12 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 12 }}>
           {String(config.businessName || 'Notre commerce')}
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 16, lineHeight: 1.6, marginBottom: 36, maxWidth: 320, margin: '0 auto 36px' }}>
@@ -571,7 +571,7 @@ function ReviewModule({ config, username }: { config: Record<string, unknown>; u
         </p>
         {config.googleUrl ? (
           <a href={String(config.googleUrl)} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 32px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17 }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '16px 32px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 10, textDecoration: 'none', color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 17 }}>
             ⭐ Laisser un avis Google
           </a>
         ) : (
@@ -598,7 +598,7 @@ function PortfolioModule({ config, username }: { config: Record<string, unknown>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 12 }}>
           {String(config.discipline || 'Portfolio')}
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 12 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: '#F8F9FC', marginBottom: 12 }}>
           {String(config.artistName || 'Mon Portfolio')}
         </h1>
         {!!config.bio && (
@@ -750,7 +750,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           {posters.length === 0 && <div style={{ fontSize: 56, marginBottom: 12 }}>{String(config.emoji || '🎟️')}</div>}
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8, margin: '0 0 8px' }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', marginBottom: 8, margin: '0 0 8px' }}>
             {String(config.eventName || 'Événement')}
           </h1>
           {!!config.organizer && (
@@ -767,7 +767,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
               {[{ v: countdown.d, l: 'jours' }, { v: countdown.h, l: 'heures' }, { v: countdown.m, l: 'min' }, { v: countdown.s, l: 'sec' }].map(({ v, l }) => (
                 <div key={l} style={{ textAlign: 'center' }}>
-                  <div style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', minWidth: 44, background: 'rgba(99,102,241,0.1)', borderRadius: 8, padding: '6px 10px' }}>
+                  <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 26, color: '#F8F9FC', minWidth: 44, background: 'rgba(99,102,241,0.1)', borderRadius: 8, padding: '6px 10px' }}>
                     {String(v).padStart(2, '0')}
                   </div>
                   <div style={{ color: '#6B7280', fontSize: 9, fontFamily: 'Space Mono, monospace', marginTop: 4, textTransform: 'uppercase' }}>{l}</div>
@@ -788,7 +788,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
             <div style={infoCardStyle}>
               <span style={{ fontSize: 18 }}>📅</span>
               <div>
-                <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, fontFamily: 'Syne, sans-serif', textTransform: 'capitalize', margin: 0 }}>{dateStr}</p>
+                <p style={{ color: '#F8F9FC', fontSize: 13, fontWeight: 600, fontFamily: 'Plus Jakarta Sans, sans-serif', textTransform: 'capitalize', margin: 0 }}>{dateStr}</p>
                 {!!config.time && <p style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'Space Mono, monospace', margin: '2px 0 0' }}>{String(config.time)}</p>}
               </div>
             </div>
@@ -819,7 +819,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
                   <div key={ticket.id} style={{ background: '#181B26', border: `1px solid ${isFull ? 'rgba(239,68,68,0.25)' : 'rgba(99,102,241,0.25)'}`, borderRadius: 10, padding: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                       <div>
-                        <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 15, fontFamily: 'Syne, sans-serif', margin: '0 0 2px' }}>{ticket.name}</p>
+                        <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 15, fontFamily: 'Plus Jakarta Sans, sans-serif', margin: '0 0 2px' }}>{ticket.name}</p>
                         {ticket.description && <p style={{ color: '#9CA3AF', fontSize: 12, margin: 0 }}>{ticket.description}</p>}
                       </div>
                       <p style={{ color: ticket.price === 0 ? '#10B981' : '#F8F9FC', fontWeight: 700, fontSize: 15, fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', marginLeft: 12, margin: '0 0 0 12px' }}>
@@ -890,14 +890,14 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
         <div style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(129,140,248,0.04))', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 10, padding: 16, marginBottom: 28 }}>
           <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textTransform: 'uppercase', marginBottom: 6 }}>Billet sélectionné</p>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p style={{ color: '#F8F9FC', fontWeight: 600, fontFamily: 'Syne, sans-serif', margin: 0 }}>{selectedTicket.name}</p>
+            <p style={{ color: '#F8F9FC', fontWeight: 600, fontFamily: 'Plus Jakarta Sans, sans-serif', margin: 0 }}>{selectedTicket.name}</p>
             <p style={{ color: '#F8F9FC', fontWeight: 700, fontFamily: 'Space Mono, monospace', margin: 0 }}>
               {selectedTicket.price === 0 ? 'Gratuit' : `${selectedTicket.price.toLocaleString('fr-FR')} ${currency}`}
             </p>
           </div>
         </div>
 
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 20 }}>Vos informations</h2>
+        <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: '#F8F9FC', marginBottom: 20 }}>Vos informations</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Nom complet *</p>
@@ -942,7 +942,7 @@ function EventModule({ config, username, profileId }: { config: Record<string, u
         <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, margin: '0 auto 20px' }}>
           ✅
         </div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Inscription confirmée !</h2>
+        <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 8 }}>Inscription confirmée !</h2>
         <p style={{ color: '#9CA3AF', fontSize: 14, marginBottom: 28 }}>Votre place est réservée</p>
 
         <div style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: 20, textAlign: 'left', marginBottom: 24 }}>
@@ -985,11 +985,11 @@ function CertificateModule({ config, username }: { config: Record<string, unknow
           <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>✅</div>
           <div>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#10B981', textTransform: 'uppercase' }}>Produit authentique</p>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>Certificat We Connect</p>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>Certificat We Connect</p>
           </div>
         </div>
 
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: '#F8F9FC', marginBottom: 4 }}>
           {String(config.productName || 'Produit')}
         </h1>
         {!!config.brand && <p style={{ color: '#818CF8', fontSize: 14, marginBottom: 20 }}>par {String(config.brand)}</p>}
@@ -1052,7 +1052,7 @@ function MemberModule({ config, username, memberCard }: { config: Record<string,
       <Shell backHref={`/${username}`}>
         <div style={{ textAlign: 'center', padding: '40px 0' }}>
           <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>🎫</span>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 20, color: '#F8F9FC', marginBottom: 8 }}>{clubName}</h2>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: '#F8F9FC', marginBottom: 8 }}>{clubName}</h2>
           <p style={{ color: '#6B7280', fontSize: 14 }}>Scannez votre carte membre NFC pour afficher vos informations.</p>
         </div>
       </Shell>
@@ -1066,10 +1066,10 @@ function MemberModule({ config, username, memberCard }: { config: Record<string,
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: level.color, textTransform: 'uppercase', marginBottom: 6 }}>Carte Membre</p>
-            <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>{clubName}</h1>
+            <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', margin: 0 }}>{clubName}</h1>
           </div>
           <div style={{ background: level.bg, border: `1px solid ${level.border}`, borderRadius: 8, padding: '6px 14px', flexShrink: 0 }}>
-            <p style={{ color: level.color, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, margin: 0 }}>{level.label}</p>
+            <p style={{ color: level.color, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 13, margin: 0 }}>{level.label}</p>
           </div>
         </div>
 
@@ -1085,7 +1085,7 @@ function MemberModule({ config, username, memberCard }: { config: Record<string,
             {memberName && (
               <>
                 <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 3 }}>MEMBRE</p>
-                <p style={{ color: '#F8F9FC', fontSize: 18, fontFamily: 'Syne, sans-serif', fontWeight: 700, margin: 0 }}>{memberName}</p>
+                <p style={{ color: '#F8F9FC', fontSize: 18, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, margin: 0 }}>{memberName}</p>
               </>
             )}
             {memberId && (
@@ -1242,7 +1242,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
               }
             </div>
             <div>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', margin: '0 0 3px' }}>{holderName || 'Porteur'}</p>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', margin: '0 0 3px' }}>{holderName || 'Porteur'}</p>
               {holderRole && <p style={{ color: '#818CF8', fontSize: 13, margin: 0 }}>{holderRole}</p>}
             </div>
           </div>
@@ -1261,7 +1261,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
                   <div key={zone.id} style={{ background: '#181B26', border: `1px solid ${open ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
                     <span style={{ fontSize: 22, flexShrink: 0 }}>{zone.emoji}</span>
                     <div style={{ flex: 1 }}>
-                      <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 14, fontFamily: 'Syne, sans-serif', margin: '0 0 3px' }}>{zone.name}</p>
+                      <p style={{ color: '#F8F9FC', fontWeight: 600, fontSize: 14, fontFamily: 'Plus Jakarta Sans, sans-serif', margin: '0 0 3px' }}>{zone.name}</p>
                       <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', margin: 0 }}>
                         {zone.schedule.allDay ? 'Toute la journée' : `${zone.schedule.startTime} – ${zone.schedule.endTime}`}
                       </p>
@@ -1296,7 +1296,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
 
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <span style={{ fontSize: 40 }}>{activeZone.emoji}</span>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 4px' }}>{activeZone.name}</h2>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 4px' }}>{activeZone.name}</h2>
           <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontFamily: 'Space Mono, monospace' }}>Entrez votre code PIN</p>
         </div>
 
@@ -1311,7 +1311,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
         {blocked ? (
           <div style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, padding: 24, textAlign: 'center' }}>
             <span style={{ fontSize: 40, display: 'block', marginBottom: 12 }}>🔒</span>
-            <p style={{ color: '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, margin: '0 0 8px' }}>Accès temporairement bloqué</p>
+            <p style={{ color: '#EF4444', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, margin: '0 0 8px' }}>Accès temporairement bloqué</p>
             <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0 }}>Réessayez à {blockedTime}</p>
             {activeZone.emergencyContact && (
               <p style={{ color: '#6B7280', fontSize: 12, marginTop: 16, fontFamily: 'Space Mono, monospace' }}>📞 {activeZone.emergencyContact}</p>
@@ -1323,7 +1323,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
               {['1','2','3','4','5','6','7','8','9','⌫','0','✓'].map(k => (
                 <button key={k} onClick={() => k === '⌫' ? setPinInput(p => p.slice(0, -1)) : k === '✓' ? submitPin() : addKey(k)}
                   disabled={checking || (k === '✓' && !pinInput)}
-                  style={{ height: 62, borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: k === '✓' ? (pinInput ? 'linear-gradient(135deg, #6366F1, #818CF8)' : 'rgba(255,255,255,0.04)') : k === '⌫' ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.04)', color: k === '✓' && pinInput ? '#fff' : '#F8F9FC', fontSize: k === '⌫' || k === '✓' ? 20 : 22, fontFamily: 'Syne, sans-serif', fontWeight: 600, cursor: (k === '✓' && !pinInput) ? 'not-allowed' : 'pointer', transition: 'background 0.15s' }}
+                  style={{ height: 62, borderRadius: 10, border: '1px solid rgba(255,255,255,0.1)', background: k === '✓' ? (pinInput ? 'linear-gradient(135deg, #6366F1, #818CF8)' : 'rgba(255,255,255,0.04)') : k === '⌫' ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.04)', color: k === '✓' && pinInput ? '#fff' : '#F8F9FC', fontSize: k === '⌫' || k === '✓' ? 20 : 22, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, cursor: (k === '✓' && !pinInput) ? 'not-allowed' : 'pointer', transition: 'background 0.15s' }}
                   onMouseOver={ev => { if (k !== '✓') ev.currentTarget.style.background = 'rgba(99,102,241,0.15)'; }}
                   onMouseOut={ev => { ev.currentTarget.style.background = k === '✓' ? (pinInput ? 'linear-gradient(135deg, #6366F1, #818CF8)' : 'rgba(255,255,255,0.04)') : 'rgba(255,255,255,0.04)'; }}>
                   {checking && k === '✓' ? '⏳' : k}
@@ -1354,11 +1354,11 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
         </button>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <span style={{ fontSize: 40 }}>{activeZone.emoji}</span>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 6px' }}>{activeZone.name}</h2>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC', margin: '10px 0 6px' }}>{activeZone.name}</h2>
           <p style={{ color: '#9CA3AF', fontSize: 14, margin: 0 }}>Contactez le responsable pour ouvrir</p>
         </div>
         <a href={`https://wa.me/${wa}?text=${msg}`} target="_blank" rel="noopener noreferrer"
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', padding: '16px 0', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 16 }}>
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, width: '100%', padding: '16px 0', background: 'linear-gradient(135deg, #059669, #10B981)', border: 'none', borderRadius: 10, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16, textDecoration: 'none', marginBottom: 16 }}>
           💬 Contacter le responsable
         </a>
         {activeZone.emergencyContact && (
@@ -1375,7 +1375,7 @@ function AccessModule({ config, username, profileId, holderCard }: { config: Rec
         <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, margin: '0 auto 20px' }}>
           🔓
         </div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: '#10B981', marginBottom: 6 }}>Accès accordé</h2>
+        <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: '#10B981', marginBottom: 6 }}>Accès accordé</h2>
         <p style={{ color: '#9CA3AF', fontSize: 15, marginBottom: 28 }}>{activeZone?.name}</p>
 
         {grantMsg && (
@@ -1451,13 +1451,13 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 14 }}>Infos critiques · Toujours visibles</p>
 
         {!!config.fullName && (
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 4 }}>{String(config.fullName)}</h1>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 4 }}>{String(config.fullName)}</h1>
         )}
         {!!birthDate && <p style={{ color: '#9CA3AF', fontSize: 13, marginBottom: 12 }}>Né(e) le {birthDate}</p>}
 
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
           {!!config.bloodType && (
-            <span style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '6px 12px', color: '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16 }}>
+            <span style={{ background: 'rgba(239,68,68,0.2)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, padding: '6px 12px', color: '#EF4444', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 16 }}>
               🩸 {String(config.bloodType)}
             </span>
           )}
@@ -1494,13 +1494,13 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
           <div style={{ borderTop: '1px solid rgba(239,68,68,0.15)', paddingTop: 14 }}>
             <p style={{ color: '#EF4444', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 8 }}>📞 CONTACT D&apos;URGENCE</p>
             {!!config.emergencyName && (
-              <p style={{ color: '#F8F9FC', fontSize: 15, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+              <p style={{ color: '#F8F9FC', fontSize: 15, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}>
                 {String(config.emergencyName)}{!!config.emergencyRel && <span style={{ color: '#9CA3AF', fontWeight: 400, fontSize: 13 }}> — {String(config.emergencyRel)}</span>}
               </p>
             )}
             {!!config.emergencyPhone && (
               <a href={`tel:${String(config.emergencyPhone)}`}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '10px 18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, textDecoration: 'none', color: '#FCA5A5', fontSize: 15, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 10, padding: '10px 18px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, textDecoration: 'none', color: '#FCA5A5', fontSize: 15, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}>
                 📞 {String(config.emergencyPhone)}
               </a>
             )}
@@ -1542,7 +1542,7 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
               </button>
             </div>
             {denied && <p role="alert" style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12 }}>{pinError || 'Code incorrect. Réessayez.'}</p>}
-            <button onClick={checkPin} disabled={checking} aria-busy={checking} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
+            <button onClick={checkPin} disabled={checking} aria-busy={checking} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
               Déverrouiller
             </button>
           </div>
@@ -1578,7 +1578,7 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
                 )}
                 {!!record.emergency2Phone && (
                   <a href={`tel:${String(record.emergency2Phone)}`}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 14px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, textDecoration: 'none', color: '#818CF8', fontSize: 14, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 14px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, textDecoration: 'none', color: '#818CF8', fontSize: 14, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700 }}>
                     📞 {String(record.emergency2Phone)}
                   </a>
                 )}
@@ -1669,12 +1669,12 @@ function AgencyModule({ config, username, profileId, agentData }: {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={agentData.photoUrl} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(99,102,241,0.4)', flexShrink: 0 }} />
             ) : (
-              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #4338CA, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#fff', flexShrink: 0 }}>
+              <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #4338CA, #6366F1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#fff', flexShrink: 0 }}>
                 {initials}
               </div>
             )}
             <div style={{ minWidth: 0 }}>
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 17, color: '#F8F9FC', lineHeight: 1.3, marginBottom: 4 }}>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 17, color: '#F8F9FC', lineHeight: 1.3, marginBottom: 4 }}>
                 {agentData.fullName}
               </p>
               <p style={{ color: '#818CF8', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>

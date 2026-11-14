@@ -30,10 +30,10 @@ export default function ContactsClient({ contacts }: { contacts: Contact[] }) {
     <div>
       <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 24, color: '#F8F9FC', marginBottom: 6 }}>
+          <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 24, color: '#0F172A', marginBottom: 6 }}>
             {contacts.length} contact{contacts.length !== 1 ? 's' : ''} sauvegardé{contacts.length !== 1 ? 's' : ''}
           </p>
-          <p style={{ color: '#6B7280', fontSize: 14 }}>
+          <p style={{ color: '#64748B', fontSize: 14 }}>
             Personnes qui ont enregistré votre contact depuis votre profil NFC.
           </p>
         </div>
@@ -45,8 +45,8 @@ export default function ContactsClient({ contacts }: { contacts: Contact[] }) {
               background: 'rgba(99,102,241,0.1)',
               border: '1px solid rgba(99,102,241,0.3)',
               borderRadius: 8,
-              color: '#818CF8',
-              fontFamily: 'Syne, sans-serif',
+              color: '#4F46E5',
+              fontFamily: 'Plus Jakarta Sans, sans-serif',
               fontWeight: 700,
               fontSize: 13,
               cursor: 'pointer',
@@ -68,15 +68,15 @@ export default function ContactsClient({ contacts }: { contacts: Contact[] }) {
 
       {contacts.length === 0 ? (
         <div style={{
-          background: '#12141C',
-          border: '1px solid rgba(255,255,255,0.07)',
+          background: '#FFFFFF',
+          border: '1px solid rgba(15,23,42,0.07)',
           borderRadius: 8,
           padding: '60px 40px',
           textAlign: 'center',
         }}>
           <span style={{ fontSize: 40, display: 'block', marginBottom: 16 }}>📇</span>
-          <p style={{ color: '#9CA3AF', fontSize: 15, marginBottom: 8 }}>Pas encore de contacts.</p>
-          <p style={{ color: '#6B7280', fontSize: 14 }}>
+          <p style={{ color: '#64748B', fontSize: 15, marginBottom: 8 }}>Pas encore de contacts.</p>
+          <p style={{ color: '#64748B', fontSize: 14 }}>
             Quand quelqu&apos;un enregistre votre vCard depuis votre profil, il apparaît ici.
           </p>
         </div>
@@ -90,8 +90,8 @@ export default function ContactsClient({ contacts }: { contacts: Contact[] }) {
 
             return (
               <div key={c.id} style={{
-                background: '#12141C',
-                border: '1px solid rgba(255,255,255,0.07)',
+                background: '#FFFFFF',
+                border: '1px solid rgba(15,23,42,0.07)',
                 borderRadius: 8,
                 padding: '16px 20px',
                 display: 'flex',
@@ -103,32 +103,32 @@ export default function ContactsClient({ contacts }: { contacts: Contact[] }) {
                   background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(6,182,212,0.2))',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: hasName ? 14 : 20,
-                  fontFamily: 'Syne, sans-serif',
+                  fontFamily: 'Plus Jakarta Sans, sans-serif',
                   fontWeight: 700,
-                  color: '#818CF8',
+                  color: '#4F46E5',
                 }}>
                   {initials}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: '#F8F9FC', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 2 }}>
-                    {c.name ?? <span style={{ color: '#6B7280' }}>Anonyme</span>}
+                  <p style={{ color: '#0F172A', fontSize: 14, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, marginBottom: 2 }}>
+                    {c.name ?? <span style={{ color: '#64748B' }}>Anonyme</span>}
                   </p>
                   {c.email && (
-                    <p style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                    <p style={{ color: '#64748B', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
                       {c.email}
                     </p>
                   )}
                   {c.phone && (
-                    <p style={{ color: '#9CA3AF', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                    <p style={{ color: '#64748B', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
                       {c.phone}
                     </p>
                   )}
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ color: '#6B7280', fontSize: 12, fontFamily: 'Space Mono, monospace', letterSpacing: 0.5 }}>
+                  <p style={{ color: '#64748B', fontSize: 12, fontFamily: 'Space Mono, monospace', letterSpacing: 0.5 }}>
                     {c.device}
                   </p>
-                  <p style={{ color: '#4B5563', fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 2 }}>
+                  <p style={{ color: '#94A3B8', fontSize: 11, fontFamily: 'Space Mono, monospace', marginTop: 2 }}>
                     {new Date(c.savedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </p>
                 </div>

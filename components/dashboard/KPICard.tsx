@@ -36,7 +36,7 @@ export default function KPICard({ label, value, trend, icon, description }: KPIC
         {icon && <div style={{ color: '#818CF8', opacity: 0.7 }}>{icon}</div>}
       </div>
 
-      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: 'var(--t-text)', lineHeight: 1, marginBottom: 10 }}>
+      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 36, color: 'var(--t-text)', lineHeight: 1, marginBottom: 10 }}>
         {value}
       </p>
 

@@ -85,7 +85,7 @@ export default function CardPreview({ card, profile }: { card: Card; profile: Pr
 
           {/* Info */}
           <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: edition.textColor, marginBottom: 3 }}>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: edition.textColor, marginBottom: 3 }}>
               {profile?.displayName ?? 'Votre nom'}
             </p>
             {profile?.title && (

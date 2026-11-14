@@ -42,38 +42,38 @@ export default function PortfolioPage() {
     { key: 'spotifyUrl',    icon: '🎵', label: 'Spotify',   color: '#1DB954' },
     { key: 'youtubeUrl',    icon: '▶️', label: 'YouTube',   color: '#FF0000' },
     { key: 'soundcloudUrl', icon: '☁️', label: 'SoundCloud',color: '#FF5500' },
-    { key: 'websiteUrl',    icon: '🌐', label: 'Site web',  color: '#818CF8' },
+    { key: 'websiteUrl',    icon: '🌐', label: 'Site web',  color: '#4F46E5' },
   ].filter(l => form[l.key as keyof typeof form]);
 
   return (
     <div style={{ maxWidth: 760, display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 8 }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>←</button>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC' }}>🎵 Portfolio Artiste</h2>
-          <p style={{ color: '#6B7280', fontSize: 13 }}>Galerie média, streaming et booking en un tap</p>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A' }}>🎵 Portfolio Artiste</h2>
+          <p style={{ color: '#64748B', fontSize: 13 }}>Galerie média, streaming et booking en un tap</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className="dash-overview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>Profil artiste</h3>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 18 }}>Profil artiste</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Input label="Nom d'artiste" placeholder="DJ Koffi / Ama Art" value={form.artistName} onChange={set('artistName')} />
               <Input label="Discipline" placeholder="Musique, Peinture, Photo..." value={form.discipline} onChange={set('discipline')} />
               <div>
-                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Bio / Présentation</p>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 }}>Bio / Présentation</p>
                 <textarea value={form.bio} onChange={set('bio')} rows={3}
                   placeholder="Artiste basé à Abidjan, spécialisé en..."
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 14px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, resize: 'vertical', outline: 'none', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', background: 'rgba(15,23,42,0.03)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 14px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 14, resize: 'vertical', outline: 'none', boxSizing: 'border-box' }} />
               </div>
               <Input label="Email booking" placeholder="booking@artiste.com" value={form.bookingEmail} onChange={set('bookingEmail')} />
             </div>
           </Card>
 
           <Card padding="md">
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>Liens & plateformes</h3>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 18 }}>Liens & plateformes</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <Input label="📸 Instagram" placeholder="https://instagram.com/..." value={form.instagramUrl} onChange={set('instagramUrl')} />
               <Input label="🎵 Spotify" placeholder="https://open.spotify.com/..." value={form.spotifyUrl} onChange={set('spotifyUrl')} />
@@ -89,29 +89,29 @@ export default function PortfolioPage() {
         </div>
 
         <Card padding="md">
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu page artiste</p>
-          <div style={{ background: 'linear-gradient(180deg, #0D0E14, #181B26)', borderRadius: 12, padding: 24, textAlign: 'center' }}>
+          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#64748B', textTransform: 'uppercase', marginBottom: 16 }}>Aperçu page artiste</p>
+          <div style={{ background: 'linear-gradient(180deg, #F4F7FB, #FFFFFF)', borderRadius: 12, padding: 24, textAlign: 'center' }}>
             <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #06B6D4)', margin: '0 auto 12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>
               🎵
             </div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', marginBottom: 4 }}>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#0F172A', marginBottom: 4 }}>
               {form.artistName || 'Nom d\'artiste'}
             </p>
-            {form.discipline && <p style={{ color: '#818CF8', fontSize: 13, marginBottom: 8 }}>{form.discipline}</p>}
-            {form.bio && <p style={{ color: '#6B7280', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>{form.bio.substring(0, 80)}{form.bio.length > 80 ? '...' : ''}</p>}
+            {form.discipline && <p style={{ color: '#4F46E5', fontSize: 13, marginBottom: 8 }}>{form.discipline}</p>}
+            {form.bio && <p style={{ color: '#64748B', fontSize: 12, lineHeight: 1.6, marginBottom: 16 }}>{form.bio.substring(0, 80)}{form.bio.length > 80 ? '...' : ''}</p>}
             {links.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {links.map(l => (
-                  <div key={l.key} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div key={l.key} style={{ background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 8, padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                     <span>{l.icon}</span>
-                    <span style={{ color: '#F8F9FC', fontSize: 13 }}>{l.label}</span>
+                    <span style={{ color: '#0F172A', fontSize: 13 }}>{l.label}</span>
                   </div>
                 ))}
               </div>
             )}
             {form.bookingEmail && (
               <div style={{ marginTop: 14, padding: '10px', background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8 }}>
-                <p style={{ color: '#818CF8', fontSize: 12 }}>📩 Booking : {form.bookingEmail}</p>
+                <p style={{ color: '#4F46E5', fontSize: 12 }}>📩 Booking : {form.bookingEmail}</p>
               </div>
             )}
           </div>

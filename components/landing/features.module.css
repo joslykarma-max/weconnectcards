@@ -9,7 +9,7 @@
 }
 .head { text-align: center; max-width: 640px; margin: 0 auto 20px; }
 .eyebrow { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 4px; color: #6366F1; text-transform: uppercase; margin: 0 0 10px; }
-.title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(24px, 6.4vw, 42px); line-height: 1.12; letter-spacing: -0.02em; color: #0F172A; margin: 0; text-wrap: balance; }
+.title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(24px, 6.4vw, 42px); line-height: 1.12; letter-spacing: -0.02em; color: #0F172A; margin: 0; text-wrap: balance; }
 
 .glass {
   list-style: none; margin: 0 auto; max-width: 1040px; padding: 10px;
@@ -26,7 +26,7 @@
   border-radius: 20px; background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(255, 255, 255, 0.9);
 }
 .icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
-.name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14.5px; line-height: 1.2; color: #0F172A; }
+.name { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 14.5px; line-height: 1.2; color: #0F172A; }
 .desc { font-size: 12.5px; line-height: 1.45; color: #64748B; }
 
 @media (min-width: 900px) {

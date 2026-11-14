@@ -78,7 +78,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
             </svg>
           </button>
         )}
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>
           {title}
         </h1>
       </div>
@@ -140,7 +140,7 @@ export default function Topbar({ userEmail }: { userEmail?: string }) {
               </svg>
             ) : (
               /* Initial / avatar */
-              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', fontFamily: 'Syne, sans-serif' }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
                 {userEmail?.charAt(0).toUpperCase() ?? 'U'}
               </span>
             )}

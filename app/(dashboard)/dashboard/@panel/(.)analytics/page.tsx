@@ -6,5 +6,5 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const Section = SectionPage as unknown as React.ComponentType<{ searchParams: SearchParams }>;
 
 export default function AnalyticsPanel({ searchParams }: { searchParams: SearchParams }) {
-  return <PanelFrame title="Statistiques" legacy><Section searchParams={searchParams} /></PanelFrame>;
+  return <PanelFrame title="Statistiques"><Section searchParams={searchParams} /></PanelFrame>;
 }

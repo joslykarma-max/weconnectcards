@@ -125,7 +125,7 @@ function Avatar({ src, name, size }: { src?: string; name: string; size: number 
     }}>
       {src
         ? <Image src={src} alt={name} width={size} height={size} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: size * 0.4, color: '#818CF8' }}>
+        : <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: size * 0.4, color: '#818CF8' }}>
             {(name.trim().charAt(0) || '?').toUpperCase()}
           </span>}
     </div>
@@ -236,7 +236,7 @@ export default function StandaloneClient({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
         <div>
           <p style={{ ...kicker, color: '#EF4444', marginBottom: 8 }}>Admin · Cartes sans compte</p>
-          <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
+          <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
             Cartes sans compte
           </h1>
           <p style={{ color: 'var(--t-text-muted)', fontSize: 14, maxWidth: 560, lineHeight: 1.6 }}>

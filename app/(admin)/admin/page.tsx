@@ -13,7 +13,7 @@ function StatCard({ label, value, sub, color }: { label: string; value: string |
       <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color, textTransform: 'uppercase', marginBottom: 10 }}>
         {label}
       </p>
-      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 36, color: 'var(--t-text)', lineHeight: 1 }}>
+      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 36, color: 'var(--t-text)', lineHeight: 1 }}>
         {value}
       </p>
       {sub && (
@@ -61,7 +61,7 @@ export default async function AdminOverviewPage() {
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#EF4444', textTransform: 'uppercase', marginBottom: 8 }}>
           Admin Panel
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 28, color: 'var(--t-text)', marginBottom: 4 }}>
           Vue d&apos;ensemble
         </h1>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
@@ -91,7 +91,7 @@ export default async function AdminOverviewPage() {
             <div key={p.label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
               <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: 'var(--t-text-sub)' }}>{p.label}</span>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>{p.count}</span>
+              <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)' }}>{p.count}</span>
               {users.length > 0 && (
                 <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4B5563' }}>
                   {Math.round(p.count / users.length * 100)}%

@@ -1,7 +1,8 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, Legend } from 'recharts';
-import KPICard from '@/components/dashboard/KPICard';
+import { useState } from 'react';
+import cx from '@/components/dashboard/shell/compact.module.css';
 
 interface AnalyticsData {
   scansByDay:  Record<string, number>;
@@ -14,7 +15,7 @@ interface AnalyticsData {
   clicksTrend?: number;
 }
 
-const CHART_COLORS = ['#6366F1', '#06B6D4', '#818CF8', '#0891B2', '#4338CA'];
+const CHART_COLORS = ['#6366F1', '#06B6D4', '#4F46E5', '#0891B2', '#4338CA'];
 
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
   if (!active || !payload?.length) return null;
@@ -25,8 +26,8 @@ const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?:
       borderRadius: 6,
       padding: '10px 14px',
     }}>
-      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#6B7280', marginBottom: 4 }}>{label}</p>
-      <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#F8F9FC' }}>{payload[0].value}</p>
+      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#64748B', marginBottom: 4 }}>{label}</p>
+      <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 20, color: '#0F172A' }}>{payload[0].value}</p>
     </div>
   );
 };
@@ -44,73 +45,79 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
     ? Math.round((data.totalClicks / data.totalScans) * 100)
     : 0;
 
+  const [tab, setTab] = useState<'scans' | 'liens' | 'appareils'>('scans');
+  const trend = (n?: number) => (typeof n === 'number' && n !== 0 ? <span className={cx.kpiTrend}>{n > 0 ? '+' : ''}{n}%</span> : null);
+
   return (
-    <div>
-      <div className="dash-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20, marginBottom: 36 }}>
-        <KPICard label="Scans (90j)" value={data.totalScans} trend={data.scansTrend} />
-        <KPICard label="Clics (90j)" value={data.totalClicks} trend={data.clicksTrend} />
-        <KPICard label="Engagement" value={`${engagement}%`} />
+    <div className={cx.fill}>
+      <div className={cx.kpis} style={{ '--cols': 3 } as React.CSSProperties}>
+        <div className={cx.kpi}><span className={cx.kpiValue}>{data.totalScans}{trend(data.scansTrend)}</span><span className={cx.kpiLabel}>Scans · 90 j</span></div>
+        <div className={cx.kpi}><span className={cx.kpiValue}>{data.totalClicks}{trend(data.clicksTrend)}</span><span className={cx.kpiLabel}>Clics · 90 j</span></div>
+        <div className={cx.kpi}><span className={cx.kpiValue}>{engagement}%</span><span className={cx.kpiLabel}>Engagement</span></div>
       </div>
 
-      {/* Scans chart */}
-      <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28, marginBottom: 24 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)' }}>Scans — 30 derniers jours</h3>
-        </div>
-        {lineData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={240}>
-            <LineChart data={lineData}>
-              <XAxis dataKey="date" stroke="#6B7280" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
-              <YAxis stroke="#6B7280" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
-              <Tooltip content={<CustomTooltip />} />
-              <Line type="monotone" dataKey="scans" stroke="#6366F1" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: '#6366F1' }} />
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <div style={{ height: 240, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>Pas encore de données. Partagez votre carte NFC pour commencer.</p>
+      <div className={cx.tabs} role="tablist" aria-label="Statistiques">
+        {([['scans', 'Scans · 30 j'], ['liens', 'Liens cliqués'], ['appareils', 'Appareils']] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} className={`${cx.tab} ${tab === k ? cx.tabOn : ''}`} onClick={() => setTab(k)}>{label}</button>
+        ))}
+      </div>
+
+      <div className={cx.content} role="tabpanel">
+        {tab === 'scans' && (
+          <div className={cx.card}>
+            <p className={cx.cardTitle}>Scans — 30 derniers jours</p>
+            {lineData.length > 0 ? (
+              <div className={cx.chart}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={lineData}>
+                    <XAxis dataKey="date" stroke="#64748B" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
+                    <YAxis stroke="#64748B" allowDecimals={false} tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} width={28} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line type="monotone" dataKey="scans" stroke="#6366F1" strokeWidth={2.5} dot={false} activeDot={{ r: 4, fill: '#6366F1' }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            ) : <p className={cx.empty}>Pas encore de données. Partagez votre carte NFC pour commencer.</p>}
           </div>
         )}
-      </div>
 
-      <div className="dash-analytics-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* Top links */}
-        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 24 }}>Top liens cliqués</h3>
-          {barData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={barData} layout="vertical">
-                <XAxis type="number" stroke="#6B7280" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
-                <YAxis type="category" dataKey="name" width={80} stroke="#6B7280" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="clicks" fill="#6366F1" radius={3} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p style={{ color: 'var(--t-text-muted)', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de clics.</p>
-          )}
-        </div>
+        {tab === 'liens' && (
+          <div className={cx.card}>
+            <p className={cx.cardTitle}>Liens les plus cliqués</p>
+            {barData.length > 0 ? (
+              <div className={cx.chart}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={barData} layout="vertical">
+                    <XAxis type="number" allowDecimals={false} stroke="#64748B" tick={{ fontSize: 10, fontFamily: 'Space Mono, monospace' }} />
+                    <YAxis type="category" dataKey="name" width={90} stroke="#64748B" tick={{ fontSize: 11, fontFamily: 'DM Sans, sans-serif' }} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Bar dataKey="clicks" fill="#6366F1" radius={6} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : <p className={cx.empty}>Pas encore de clics sur vos liens.</p>}
+          </div>
+        )}
 
-        {/* Device breakdown */}
-        <div style={{ background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 8, padding: 28 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 24 }}>Appareils</h3>
-          {deviceData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={deviceData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} dataKey="value">
-                  {deviceData.map((_, i) => (
-                    <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Legend
-                  formatter={(value) => <span style={{ color: 'var(--t-text-sub)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <p style={{ color: 'var(--t-text-muted)', fontSize: 14, padding: '32px 0', textAlign: 'center' }}>Pas encore de données.</p>
-          )}
-        </div>
+        {tab === 'appareils' && (
+          <div className={cx.card}>
+            <p className={cx.cardTitle}>Appareils des visiteurs</p>
+            {deviceData.length > 0 ? (
+              <div className={cx.chart}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={deviceData} cx="50%" cy="50%" innerRadius="45%" outerRadius="75%" paddingAngle={4} dataKey="value">
+                      {deviceData.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Legend formatter={(value) => <span style={{ color: '#334155', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{value}</span>} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : <p className={cx.empty}>Pas encore de données.</p>}
+          </div>
+        )}
       </div>
     </div>
   );

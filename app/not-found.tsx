@@ -15,7 +15,7 @@ export default function NotFound() {
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 24 }}>
           Erreur 404
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(60px, 12vw, 120px)', color: '#F8F9FC', letterSpacing: '-4px', lineHeight: 1, marginBottom: 24 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 'clamp(60px, 12vw, 120px)', color: '#F8F9FC', letterSpacing: '-4px', lineHeight: 1, marginBottom: 24 }}>
           404
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 18, marginBottom: 40, maxWidth: 400, margin: '0 auto 40px' }}>
@@ -32,7 +32,7 @@ export default function NotFound() {
             border: 'none',
             borderRadius: 8,
             color: '#fff',
-            fontFamily: 'Syne, sans-serif',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
             fontWeight: 700,
             fontSize: 16,
             textDecoration: 'none',

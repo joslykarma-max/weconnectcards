@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
+import cx from '@/components/dashboard/shell/compact.module.css';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
 
@@ -17,6 +18,7 @@ export default function PreviewClient({
   const [isPublic, setIsPublic] = useState(initialPublic);
   const [copied,   setCopied]   = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [tab, setTab]           = useState<'page' | 'qr' | 'partager'>('page');
 
   async function copy() {
     await navigator.clipboard.writeText(publicUrl);
@@ -41,150 +43,91 @@ export default function PreviewClient({
     return (
       <div style={{ maxWidth: 560, margin: '40px auto', textAlign: 'center', padding: 48, background: 'var(--t-surface)', border: 'var(--t-border-full)', borderRadius: 12 }}>
         <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>👤</span>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)', marginBottom: 8 }}>
+        <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 18, color: 'var(--t-text)', marginBottom: 8 }}>
           Aucun username défini
         </p>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 14, marginBottom: 24 }}>
           Définis ton username dans le profil pour activer ta page publique.
         </p>
-        <a href="/dashboard/profile">
+        <Link href="/dashboard/profile">
           <Button variant="gradient" size="md">Configurer mon profil →</Button>
-        </a>
+        </Link>
       </div>
     );
   }
 
+  const SHARES = [
+    { label: '💬 Partager sur WhatsApp', href: `https://wa.me/?text=Découvrez mon profil professionnel : ${encodeURIComponent(publicUrl)}`, color: '#047857', bg: '#ECFDF5' },
+    { label: '💼 Partager sur LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`, color: '#0A66C2', bg: '#EFF6FF' },
+    { label: '📧 Envoyer par e-mail',     href: `mailto:?subject=Mon profil We Connect&body=Voici mon profil : ${publicUrl}`, color: '#4338CA', bg: '#EEF2FF' },
+  ];
+
   return (
-    <div style={{ maxWidth: 900, display: 'flex', flexDirection: 'column', gap: 28 }}>
-
-      {/* Header */}
-      <div>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)', marginBottom: 6 }}>
-          Aperçu de ta carte NFC
-        </h2>
-        <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
-          C&apos;est exactement ce que verront tes prospects quand ils scannent ta carte.
-        </p>
-      </div>
-
-      {/* Status + toggle */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: isPublic ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${isPublic ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}`, borderRadius: 8, padding: '14px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 18 }}>{isPublic ? '🟢' : '🔴'}</span>
-          <div>
-            <p style={{ color: isPublic ? '#10B981' : '#EF4444', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>
-              {isPublic ? 'Profil public — visible par tous' : 'Profil privé — non visible'}
-            </p>
-            <p style={{ color: 'var(--t-text-muted)', fontSize: 12 }}>
-              {isPublic ? 'Tes prospects peuvent accéder à ta page.' : 'Active le profil pour partager ta carte.'}
-            </p>
-          </div>
+    <div className={cx.fill}>
+      {/* Public / private switch */}
+      <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 14px', borderRadius: 18, background: isPublic ? '#ECFDF5' : '#FEF2F2', border: `1px solid ${isPublic ? '#BBF7D0' : '#FECACA'}` }}>
+        <div>
+          <p style={{ margin: 0, color: isPublic ? '#047857' : '#B91C1C', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14 }}>
+            {isPublic ? 'Profil public — visible par tous' : 'Profil privé — non visible'}
+          </p>
+          <p style={{ margin: 0, color: '#64748B', fontSize: 12 }}>{isPublic ? 'Vos contacts peuvent ouvrir votre page.' : 'Activez-le pour partager votre carte.'}</p>
         </div>
-        <button
-          onClick={togglePublic}
-          disabled={toggling}
-          style={{
-            width: 52, height: 28, borderRadius: 14, border: 'none',
-            background: isPublic ? '#10B981' : 'rgba(255,255,255,0.1)',
-            position: 'relative', cursor: 'pointer', transition: 'background 0.3s', flexShrink: 0,
-          }}
-        >
-          <span style={{
-            position: 'absolute', top: 4,
-            left: isPublic ? 28 : 4,
-            width: 20, height: 20, borderRadius: '50%', background: '#fff',
-            transition: 'left 0.3s cubic-bezier(0.23,1,0.32,1)',
-          }} />
+        <button type="button" role="switch" aria-checked={isPublic} aria-label="Profil public" onClick={togglePublic} disabled={toggling}
+          style={{ width: 52, height: 44, border: 'none', background: 'none', cursor: 'pointer', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}>
+          <span style={{ position: 'relative', width: 48, height: 28, borderRadius: 999, background: isPublic ? '#10B981' : '#CBD5E1', transition: 'background 0.3s' }}>
+            <span style={{ position: 'absolute', top: 4, left: isPublic ? 24 : 4, width: 20, height: 20, borderRadius: '50%', background: '#fff', transition: 'left 0.3s cubic-bezier(0.23,1,0.32,1)', boxShadow: '0 1px 3px rgba(15,23,42,0.3)' }} />
+          </span>
         </button>
       </div>
 
-      <div className="preview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+      <div className={cx.tabs} role="tablist" aria-label="Aperçu">
+        {([['page', 'Ma page'], ['qr', 'QR code'], ['partager', 'Partager']] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} className={`${cx.tab} ${tab === k ? cx.tabOn : ''}`} onClick={() => setTab(k)}>{label}</button>
+        ))}
+      </div>
 
-        {/* QR Code + link */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 20 }}>
-              QR Code — à imprimer ou partager
-            </p>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qrUrl}
-                alt="QR Code"
-                width={220}
-                height={220}
-                style={{ borderRadius: 12, border: 'var(--t-border-full)' }}
-              />
+      <div className={cx.content} role="tabpanel">
+        {tab === 'page' && (
+          <div className={cx.card} style={{ padding: 8 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2px 6px' }}>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 1.5, color: '#64748B', textTransform: 'uppercase' }}>Aperçu en direct</span>
+              <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600, color: '#4F46E5', textDecoration: 'none' }}>Ouvrir ↗</a>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--t-row)', border: 'var(--t-border-full)', borderRadius: 6, padding: '10px 14px' }}>
-                <span style={{ color: '#818CF8', flex: 1, fontFamily: 'Space Mono, monospace', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {publicUrl}
-                </span>
-                <button
-                  onClick={copy}
-                  style={{ background: copied ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.15)', border: `1px solid ${copied ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.3)'}`, borderRadius: 4, padding: '4px 12px', color: copied ? '#10B981' : '#818CF8', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1, cursor: 'pointer', flexShrink: 0, transition: 'all 0.2s' }}
-                >
-                  {copied ? '✓ Copié !' : 'Copier'}
-                </button>
-              </div>
-              <a href={qrUrl} download={`qr-${username}.png`}>
-                <Button variant="secondary" size="sm" style={{ width: '100%' }}>
-                  ⬇ Télécharger le QR Code
-                </Button>
-              </a>
-            </div>
-          </Card>
-
-          {/* Share buttons */}
-          <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 16 }}>
-              Partager le lien
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: '💬 Partager sur WhatsApp', href: `https://wa.me/?text=Découvrez mon profil professionnel : ${encodeURIComponent(publicUrl)}`, color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)' },
-                { label: '💼 Partager sur LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(publicUrl)}`, color: '#0A66C2', bg: 'rgba(10,102,194,0.1)', border: 'rgba(10,102,194,0.2)' },
-                { label: '📧 Envoyer par email',     href: `mailto:?subject=Mon profil We Connect&body=Voici mon profil : ${publicUrl}`, color: '#818CF8', bg: 'rgba(99,102,241,0.1)', border: 'rgba(99,102,241,0.2)' },
-              ].map((s) => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: s.bg, border: `1px solid ${s.border}`, borderRadius: 6, textDecoration: 'none', color: s.color, fontFamily: 'DM Sans, sans-serif', fontSize: 14, fontWeight: 500 }}>
-                  {s.label}
-                </a>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Live preview */}
-        <Card padding="sm">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, padding: '0 8px' }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase' }}>
-              Aperçu live
-            </p>
-            <a href={publicUrl} target="_blank" rel="noopener noreferrer"
-              style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textDecoration: 'none', textTransform: 'uppercase' }}>
-              Ouvrir ↗
-            </a>
-          </div>
-          <div style={{ borderRadius: 8, overflow: 'hidden', border: 'var(--t-border-full)', background: 'var(--t-sidebar)' }}>
             {isPublic ? (
-              <iframe
-                src={publicUrl}
-                className="preview-iframe"
-                style={{ width: '100%', height: 520, border: 'none', display: 'block' }}
-                title="Aperçu profil public"
-              />
+              <iframe src={`/${username}`} title="Aperçu du profil public" style={{ flex: 1, minHeight: 360, width: '100%', border: 'none', borderRadius: 14, display: 'block', background: '#fff' }} />
             ) : (
-              <div className="preview-iframe" style={{ height: 520, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <span style={{ fontSize: 40 }}>🔒</span>
-                <p style={{ color: 'var(--t-text-muted)', fontSize: 14, textAlign: 'center', maxWidth: 200 }}>
-                  Active le profil public pour voir l&apos;aperçu
-                </p>
-              </div>
+              <p className={cx.empty}>🔒 Activez le profil public pour voir l’aperçu.</p>
             )}
           </div>
-        </Card>
+        )}
+
+        {tab === 'qr' && (
+          <div className={cx.card} style={{ alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={qrUrl} alt="QR code de votre page" width={200} height={200} style={{ borderRadius: 16, boxShadow: '0 8px 24px -10px rgba(15,42,68,0.4)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', maxWidth: 420, background: '#F4F7FB', border: '1px solid #EDF1F6', borderRadius: 14, padding: '6px 6px 6px 14px' }}>
+              <span style={{ color: '#4F46E5', flex: 1, fontFamily: 'Space Mono, monospace', fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{publicUrl}</span>
+              <button type="button" onClick={copy} style={{ minHeight: 40, padding: '0 14px', borderRadius: 10, border: 'none', cursor: 'pointer', background: copied ? '#D1FAE5' : '#E0E7FF', color: copied ? '#047857' : '#3730A3', fontWeight: 700, fontSize: 13 }}>
+                {copied ? '✓ Copié' : 'Copier'}
+              </button>
+            </div>
+            <a href={qrUrl} download={`qr-${username}.png`} style={{ width: '100%', maxWidth: 420, minHeight: 46, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 999, background: '#0F172A', color: '#fff', fontWeight: 700, fontSize: 14.5, textDecoration: 'none', boxShadow: '0 3px 0 #000' }}>
+              ⬇ Télécharger le QR code
+            </a>
+          </div>
+        )}
+
+        {tab === 'partager' && (
+          <div className={cx.card} style={{ justifyContent: 'flex-start' }}>
+            <p className={cx.cardTitle}>Partager votre page</p>
+            {SHARES.map((sh) => (
+              <a key={sh.label} href={sh.href} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', minHeight: 52, padding: '0 16px', borderRadius: 16, background: sh.bg, color: sh.color, fontSize: 15, fontWeight: 600, textDecoration: 'none' }}>
+                {sh.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -62,7 +62,7 @@ export default function AdminLoginModal({ onClose }: { onClose: () => void }) {
             </svg>
           </div>
           <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 15, color: '#F8F9FC', lineHeight: 1 }}>
+            <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 15, color: '#F8F9FC', lineHeight: 1 }}>
               Admin
             </p>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 8, letterSpacing: 2, color: '#EF4444', textTransform: 'uppercase', marginTop: 3 }}>

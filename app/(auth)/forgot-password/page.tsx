@@ -31,7 +31,7 @@ export default function ForgotPasswordPage() {
   return (
     <div style={{ width: '100%', maxWidth: 420 }}>
       <div style={{ textAlign: 'center', marginBottom: 40 }}>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 32, letterSpacing: '-1px', color: '#F8F9FC', marginBottom: 10 }}>
           Mot de passe oublié
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 15 }}>
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           <div style={{ textAlign: 'center' }}>
             <span style={{ fontSize: 48, display: 'block', marginBottom: 16 }}>📬</span>
-            <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 20, color: '#10B981', marginBottom: 8 }}>
+            <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 20, color: '#10B981', marginBottom: 8 }}>
               Email envoyé !
             </h2>
             <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.6 }}>

@@ -45,7 +45,7 @@ export default function LostCardPage() {
         }}>
           💳
         </div>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 10 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC', marginBottom: 10 }}>
           Cette carte a été perdue
         </h1>
         <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, marginBottom: 28, fontFamily: 'DM Sans, sans-serif' }}>
@@ -59,7 +59,7 @@ export default function LostCardPage() {
             background: 'linear-gradient(135deg, #4338CA, #6366F1)',
             borderRadius: 8,
             color: '#fff',
-            fontFamily: 'Syne, sans-serif',
+            fontFamily: 'Plus Jakarta Sans, sans-serif',
             fontWeight: 700,
             fontSize: 14,
             textDecoration: 'none',

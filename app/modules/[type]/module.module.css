@@ -25,8 +25,8 @@
 }
 .panel { background: var(--panel); border-radius: 28px; padding: 86px 22px 24px; text-align: center; }
 .kicker { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--ink); opacity: 0.7; margin: 0 0 8px; }
-.h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(28px, 7.5vw, 44px); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
-.tagline { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(16px, 4.2vw, 21px); color: var(--ink); opacity: 0.85; margin: 10px 0 0; }
+.h1 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(28px, 7.5vw, 44px); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
+.tagline { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: clamp(16px, 4.2vw, 21px); color: var(--ink); opacity: 0.85; margin: 10px 0 0; }
 .desc { font-size: 15px; line-height: 1.65; color: #334155; margin: 14px auto 20px; max-width: 560px; }
 .primary {
   display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0 28px; border-radius: 999px;
@@ -40,7 +40,7 @@
 
 /* White cards */
 .card { background: #FFFFFF; border: 1px solid #EDF1F6; border-radius: 24px; box-shadow: 0 6px 28px rgba(15, 42, 68, 0.07); padding: 18px; }
-.cardTitle { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 19px; color: #0F172A; margin: 0 0 12px; }
+.cardTitle { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 19px; color: #0F172A; margin: 0 0 12px; }
 .features { list-style: none; margin: 0; padding: 0; display: grid; }
 .feature { display: flex; gap: 14px; padding: 12px 2px; }
 .feature + .feature { border-top: 1px solid #EEF1F5; }
@@ -56,10 +56,10 @@
 .steps .cardTitle { color: var(--ink); }
 .steps ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .steps li { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.75); border-radius: 16px; padding: 12px 14px; font-size: 14.5px; line-height: 1.45; color: #1E293B; }
-.stepNum { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.stepNum { width: 32px; height: 32px; border-radius: 50%; background: var(--ink); color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 14px; flex-shrink: 0; }
 
 .cta { text-align: center; padding: 18px 8px 8px; }
-.cta h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(22px, 5.5vw, 28px); color: #0F172A; margin: 0 0 8px; }
+.cta h2 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(22px, 5.5vw, 28px); color: #0F172A; margin: 0 0 8px; }
 .cta p { color: #64748B; font-size: 14.5px; margin: 0 0 16px; }
 .ctaActions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
 

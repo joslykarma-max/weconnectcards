@@ -53,7 +53,7 @@ function TableQRSection({ username, tableCount }: { username: string; tableCount
     Promise.all(
       Array.from({ length: count }, (_, i) =>
         QRCode.toDataURL(`${APP_URL}/m/${username}/menu?table=${i + 1}`, {
-          color: { dark: '#F8F9FC', light: '#00000000' },
+          color: { dark: '#0F172A', light: '#00000000' },
           width: 200, margin: 1,
           errorCorrectionLevel: 'M',
         }),
@@ -66,29 +66,29 @@ function TableQRSection({ username, tableCount }: { username: string; tableCount
   return (
     <Card padding="md">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>QR Codes Tables</h3>
-        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280', letterSpacing: 1 }}>{tableCount} table{tableCount > 1 ? 's' : ''}</span>
+        <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A' }}>QR Codes Tables</h3>
+        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#64748B', letterSpacing: 1 }}>{tableCount} table{tableCount > 1 ? 's' : ''}</span>
       </div>
-      <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 16 }}>Imprimez et posez chaque QR sur la table correspondante. Le client scanne → voit le menu → passe sa commande directement.</p>
+      <p style={{ color: '#64748B', fontSize: 12, marginBottom: 16 }}>Imprimez et posez chaque QR sur la table correspondante. Le client scanne → voit le menu → passe sa commande directement.</p>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 12 }}>
         {Array.from({ length: tableCount }, (_, i) => {
           const n   = i + 1;
           const url = qrUrls[i];
           return (
-            <div key={n} style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+            <div key={n} style={{ background: '#FFFFFF', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 10, padding: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
               {url ? (
                 <img src={url} alt={`QR Table ${n}`} style={{ width: 90, height: 90, imageRendering: 'pixelated', background: '#23263A', borderRadius: 6 }} />
               ) : (
-                <div style={{ width: 90, height: 90, background: 'rgba(255,255,255,0.04)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 90, height: 90, background: 'rgba(15,23,42,0.04)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <span style={{ color: '#374151', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>...</span>
                 </div>
               )}
-              <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, color: '#F8F9FC' }}>Table {n}</p>
+              <p style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 13, color: '#0F172A' }}>Table {n}</p>
               {url && (
                 <a
                   href={url}
                   download={`table-${n}-qr.png`}
-                  style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#818CF8', textDecoration: 'none', letterSpacing: 1, textTransform: 'uppercase' }}
+                  style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4F46E5', textDecoration: 'none', letterSpacing: 1, textTransform: 'uppercase' }}
                 >
                   Télécharger ↓
                 </a>
@@ -129,31 +129,31 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#4B5563', textTransform: 'uppercase' }}>
+      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#94A3B8', textTransform: 'uppercase' }}>
         Vue client · {allItems.length} plat{allItems.length !== 1 ? 's' : ''} disponible{allItems.length !== 1 ? 's' : ''}
       </p>
 
       {/* Phone frame */}
       <div style={{
         width: '100%', maxWidth: 360, height: 660,
-        background: '#08090C',
+        background: '#F4F7FB',
         borderRadius: 18,
-        border: '2px solid rgba(255,255,255,0.1)',
-        boxShadow: '0 0 0 6px rgba(255,255,255,0.03), 0 24px 60px rgba(0,0,0,0.5)',
+        border: '2px solid rgba(15,23,42,0.1)',
+        boxShadow: '0 0 0 6px rgba(15,23,42,0.03), 0 24px 60px rgba(0,0,0,0.5)',
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
         position: 'relative',
       }}>
         {/* Status bar mock */}
         <div style={{ height: 28, background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0 }}>
-          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280' }}>9:41</span>
-          <div style={{ width: 60, height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 4 }} />
-          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#6B7280' }}>●●●</span>
+          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#64748B' }}>9:41</span>
+          <div style={{ width: 60, height: 8, background: 'rgba(15,23,42,0.06)', borderRadius: 4 }} />
+          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#64748B' }}>●●●</span>
         </div>
 
         {/* Back link mock */}
         <div style={{ padding: '8px 16px 0', flexShrink: 0 }}>
-          <span style={{ color: '#6B7280', fontSize: 11, fontFamily: 'DM Sans, sans-serif', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <span style={{ color: '#64748B', fontSize: 11, fontFamily: 'DM Sans, sans-serif', display: 'flex', alignItems: 'center', gap: 4 }}>
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             Voir le profil
           </span>
@@ -164,29 +164,29 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
           {/* Header */}
           <div style={{ textAlign: 'center', marginBottom: 18 }}>
             <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 7, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 8 }}>Menu</p>
-            <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 18, color: '#F8F9FC', marginBottom: 4 }}>
+            <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 18, color: '#0F172A', marginBottom: 4 }}>
               {info.restaurantName || 'Votre Restaurant'}
             </h1>
-            {info.address   && <p style={{ color: '#9CA3AF', fontSize: 11, marginBottom: 2 }}>📍 {info.address}</p>}
-            {info.openHours && <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'Space Mono, monospace' }}>🕐 {info.openHours}</p>}
+            {info.address   && <p style={{ color: '#64748B', fontSize: 11, marginBottom: 2 }}>📍 {info.address}</p>}
+            {info.openHours && <p style={{ color: '#64748B', fontSize: 10, fontFamily: 'Space Mono, monospace' }}>🕐 {info.openHours}</p>}
           </div>
 
           {categories.length === 0 ? (
             <div style={{ textAlign: 'center', paddingTop: 32 }}>
               <span style={{ fontSize: 32, display: 'block', marginBottom: 12 }}>🍽️</span>
-              <p style={{ color: '#4B5563', fontSize: 12 }}>Ajoutez des catégories pour voir l&apos;aperçu.</p>
+              <p style={{ color: '#94A3B8', fontSize: 12 }}>Ajoutez des catégories pour voir l&apos;aperçu.</p>
             </div>
           ) : (
             <>
               {/* Category tabs */}
               <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4, marginBottom: 14, scrollbarWidth: 'none' } as React.CSSProperties}>
                 <button onClick={() => setSelectedCat('all')}
-                  style={{ flexShrink: 0, padding: '5px 10px', borderRadius: 14, background: selectedCat === 'all' ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === 'all' ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === 'all' ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 10, whiteSpace: 'nowrap' }}>
+                  style={{ flexShrink: 0, padding: '5px 10px', borderRadius: 14, background: selectedCat === 'all' ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${selectedCat === 'all' ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.08)'}`, color: selectedCat === 'all' ? '#4F46E5' : '#64748B', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 10, whiteSpace: 'nowrap' }}>
                   Tout
                 </button>
                 {categories.map(cat => (
                   <button key={cat.id} onClick={() => setSelectedCat(cat.id)}
-                    style={{ flexShrink: 0, padding: '5px 10px', borderRadius: 14, background: selectedCat === cat.id ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${selectedCat === cat.id ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, color: selectedCat === cat.id ? '#818CF8' : '#9CA3AF', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 10, whiteSpace: 'nowrap' }}>
+                    style={{ flexShrink: 0, padding: '5px 10px', borderRadius: 14, background: selectedCat === cat.id ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${selectedCat === cat.id ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.08)'}`, color: selectedCat === cat.id ? '#4F46E5' : '#64748B', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 10, whiteSpace: 'nowrap' }}>
                     {cat.emoji} {cat.name}
                   </button>
                 ))}
@@ -200,13 +200,13 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
                     <div key={cat.id}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                         <span style={{ fontSize: 14 }}>{cat.emoji}</span>
-                        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 13, color: '#F8F9FC' }}>{cat.name}</h2>
+                        <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 13, color: '#0F172A' }}>{cat.name}</h2>
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                         {cat.items.filter(i => i.available !== false).map(item => {
                           const qty = cart[item.id] || 0;
                           return (
-                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 10px', background: '#181B26', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 8, transition: 'border-color 0.2s' }}>
+                            <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 10px', background: '#FFFFFF', border: `1px solid ${qty > 0 ? 'rgba(99,102,241,0.35)' : 'rgba(15,23,42,0.07)'}`, borderRadius: 8, transition: 'border-color 0.2s' }}>
                               {item.imageUrl ? (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img src={item.imageUrl} alt={item.name} style={{ width: 52, height: 52, borderRadius: 6, objectFit: 'cover', flexShrink: 0, display: 'block' }} />
@@ -214,22 +214,22 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
                                 <span style={{ fontSize: 24, flexShrink: 0 }}>{item.emoji}</span>
                               )}
                               <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ color: '#F8F9FC', fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
-                                {item.description && <p style={{ color: '#6B7280', fontSize: 10, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>}
-                                <p style={{ color: '#818CF8', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 2 }}>
+                                <p style={{ color: '#0F172A', fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</p>
+                                {item.description && <p style={{ color: '#64748B', fontSize: 10, marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>}
+                                <p style={{ color: '#4F46E5', fontSize: 10, fontFamily: 'Space Mono, monospace', marginTop: 2 }}>
                                   {item.price.toLocaleString('fr-FR')} {info.currency}
                                 </p>
                               </div>
                               {qty === 0 ? (
                                 <button onClick={() => add(item.id)}
-                                  style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#818CF8', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, lineHeight: 1 }}>+</button>
+                                  style={{ width: 26, height: 26, borderRadius: '50%', background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', color: '#4F46E5', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, lineHeight: 1 }}>+</button>
                               ) : (
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
                                   <button onClick={() => sub(item.id)}
                                     style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#EF4444', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>−</button>
-                                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 12, color: '#F8F9FC', minWidth: 14, textAlign: 'center' }}>{qty}</span>
+                                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 12, color: '#0F172A', minWidth: 14, textAlign: 'center' }}>{qty}</span>
                                   <button onClick={() => add(item.id)}
-                                    style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#818CF8', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>+</button>
+                                    style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.4)', color: '#4F46E5', fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>+</button>
                                 </div>
                               )}
                             </div>
@@ -247,17 +247,17 @@ function MenuPreview({ info, categories }: { info: Info; categories: MenuCategor
         {cartCount > 0 && (
           <div style={{ padding: '10px 14px 14px', background: 'rgba(8,9,12,0.97)', borderTop: '1px solid rgba(99,102,241,0.2)', flexShrink: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ color: '#9CA3AF', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}>{cartCount} article{cartCount > 1 ? 's' : ''}</span>
-              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#818CF8' }}>{cartTotal.toLocaleString('fr-FR')} {info.currency}</span>
+              <span style={{ color: '#64748B', fontSize: 11, fontFamily: 'DM Sans, sans-serif' }}>{cartCount} article{cartCount > 1 ? 's' : ''}</span>
+              <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#4F46E5' }}>{cartTotal.toLocaleString('fr-FR')} {info.currency}</span>
             </div>
-            <div style={{ padding: '10px', background: 'linear-gradient(135deg, #059669, #10B981)', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 12, textAlign: 'center', cursor: 'default' }}>
+            <div style={{ padding: '10px', background: 'linear-gradient(135deg, #059669, #10B981)', borderRadius: 8, color: '#fff', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 12, textAlign: 'center', cursor: 'default' }}>
               💬 Envoyer la commande
             </div>
           </div>
         )}
       </div>
 
-      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#4B5563', textAlign: 'center', letterSpacing: 1 }}>
+      <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#94A3B8', textAlign: 'center', letterSpacing: 1 }}>
         Le panier est interactif · les prix sont en temps réel
       </p>
     </div>
@@ -395,11 +395,11 @@ export default function MenuDashboard({
       <input ref={updateImageRef}  type="file" accept="image/*" style={{ display: 'none' }} onChange={handleUpdateItemImage} />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
+      <div className="dash-page-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+        <button className="module-back-btn" onClick={() => router.back()} style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>←</button>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: '#F8F9FC' }}>🍽️ Menu Restaurant</h2>
-          <p style={{ color: '#6B7280', fontSize: 13 }}>
+          <h2 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 22, color: '#0F172A' }}>🍽️ Menu Restaurant</h2>
+          <p style={{ color: '#64748B', fontSize: 13 }}>
             {categories.length} catégorie{categories.length !== 1 ? 's' : ''} · {totalItems} plat{totalItems !== 1 ? 's' : ''}
           </p>
         </div>
@@ -409,18 +409,18 @@ export default function MenuDashboard({
         {/* Col 1: info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <Card padding="md">
-            <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 18 }}>Informations</h3>
+            <h3 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A', marginBottom: 18 }}>Informations</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <Input label="Nom du restaurant" placeholder="Chez Kofi" value={info.restaurantName} onChange={setInfoField('restaurantName')} />
               <Input label="Adresse" placeholder="Cocody, Abidjan" value={info.address} onChange={setInfoField('address')} />
               <Input label="Horaires" placeholder="Lun–Sam : 8h–22h" value={info.openHours} onChange={setInfoField('openHours')} />
               <Input label="WhatsApp commandes" placeholder="+229 97 00 00 00" value={info.whatsapp} onChange={setInfoField('whatsapp')} hint="Reçoit les commandes formatées" />
               <div>
-                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Devise</p>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 }}>Devise</p>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {['FCFA', 'XOF', 'EUR', 'USD', 'MAD'].map(c => (
                     <button key={c} onClick={() => setInfo(p => ({ ...p, currency: c }))}
-                      style={{ padding: '5px 10px', background: info.currency === c ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${info.currency === c ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 5, color: info.currency === c ? '#818CF8' : '#9CA3AF', fontSize: 11, cursor: 'pointer', fontFamily: 'Space Mono, monospace' }}>
+                      style={{ padding: '5px 10px', background: info.currency === c ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${info.currency === c ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.08)'}`, borderRadius: 5, color: info.currency === c ? '#4F46E5' : '#64748B', fontSize: 11, cursor: 'pointer', fontFamily: 'Space Mono, monospace' }}>
                       {c}
                     </button>
                   ))}
@@ -428,15 +428,15 @@ export default function MenuDashboard({
               </div>
               <Input label="Lien menu PDF (optionnel)" placeholder="https://drive.google.com/..." value={info.menuUrl} onChange={setInfoField('menuUrl')} hint="En complément du menu digital" />
               <div>
-                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 8 }}>Nombre de tables</p>
+                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#64748B', textTransform: 'uppercase', marginBottom: 8 }}>Nombre de tables</p>
                 <input
                   type="number" min={0} max={99}
                   value={info.tableCount || ''}
                   onChange={e => setInfo(p => ({ ...p, tableCount: Math.min(99, Math.max(0, Number(e.target.value) || 0)) }))}
                   placeholder="0"
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+                  style={{ width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 12px', color: '#0F172A', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
                 />
-                <p style={{ color: '#6B7280', fontSize: 11, marginTop: 5 }}>Génère un QR code par table ci-dessous</p>
+                <p style={{ color: '#64748B', fontSize: 11, marginTop: 5 }}>Génère un QR code par table ci-dessous</p>
               </div>
             </div>
           </Card>
@@ -450,20 +450,20 @@ export default function MenuDashboard({
         {/* Col 2: editor */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>Carte du menu</p>
+            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#64748B', textTransform: 'uppercase' }}>Carte du menu</p>
             <button onClick={() => { setAddingCat(true); setAddingItemTo(null); }}
-              style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, padding: '6px 14px', color: '#818CF8', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600 }}>
+              style={{ fontSize: 13, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, padding: '6px 14px', color: '#4F46E5', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600 }}>
               + Catégorie
             </button>
           </div>
 
           {addingCat && (
             <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 10, padding: 16 }}>
-              <p style={{ color: '#818CF8', fontSize: 12, fontFamily: 'Syne, sans-serif', fontWeight: 600, marginBottom: 12 }}>Nouvelle catégorie</p>
+              <p style={{ color: '#4F46E5', fontSize: 12, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, marginBottom: 12 }}>Nouvelle catégorie</p>
               <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
                 {CAT_EMOJIS.map(e => (
                   <button key={e} onClick={() => setNewCatEmoji(e)}
-                    style={{ fontSize: 18, background: newCatEmoji === e ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${newCatEmoji === e ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
+                    style={{ fontSize: 18, background: newCatEmoji === e ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${newCatEmoji === e ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.06)'}`, borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
                     {e}
                   </button>
                 ))}
@@ -473,21 +473,21 @@ export default function MenuDashboard({
                   onChange={e => setNewCatName(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') addCategory(); if (e.key === 'Escape') { setAddingCat(false); setNewCatName(''); } }}
                   placeholder="Entrées, Plats, Boissons..."
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}
+                  style={{ flex: 1, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}
                 />
                 <button onClick={addCategory}
-                  style={{ padding: '10px 16px', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#818CF8', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>Créer</button>
+                  style={{ padding: '10px 16px', background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 6, color: '#4F46E5', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap' }}>Créer</button>
                 <button onClick={() => { setAddingCat(false); setNewCatName(''); }}
-                  style={{ padding: '10px 12px', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, color: '#6B7280', cursor: 'pointer' }}>×</button>
+                  style={{ padding: '10px 12px', background: 'none', border: '1px solid rgba(15,23,42,0.08)', borderRadius: 6, color: '#64748B', cursor: 'pointer' }}>×</button>
               </div>
             </div>
           )}
 
           {categories.length === 0 && !addingCat && (
-            <div style={{ textAlign: 'center', padding: '48px 24px', background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 12 }}>
+            <div style={{ textAlign: 'center', padding: '48px 24px', background: 'rgba(15,23,42,0.02)', border: '1px dashed rgba(15,23,42,0.08)', borderRadius: 12 }}>
               <span style={{ fontSize: 40, display: 'block', marginBottom: 12 }}>🍽️</span>
-              <p style={{ color: '#6B7280', fontSize: 13, marginBottom: 4 }}>Aucune catégorie.</p>
-              <p style={{ color: '#4B5563', fontSize: 12 }}>Cliquez sur « + Catégorie » pour créer votre carte.</p>
+              <p style={{ color: '#64748B', fontSize: 13, marginBottom: 4 }}>Aucune catégorie.</p>
+              <p style={{ color: '#94A3B8', fontSize: 12 }}>Cliquez sur « + Catégorie » pour créer votre carte.</p>
             </div>
           )}
 
@@ -495,25 +495,25 @@ export default function MenuDashboard({
             const isOpen       = openCatIds.has(cat.id);
             const isAddingHere = addingItemTo === cat.id;
             return (
-              <div key={cat.id} style={{ background: '#181B26', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, overflow: 'hidden' }}>
+              <div key={cat.id} style={{ background: '#FFFFFF', border: '1px solid rgba(15,23,42,0.07)', borderRadius: 10, overflow: 'hidden' }}>
                 <div onClick={() => toggleCat(cat.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', cursor: 'pointer', userSelect: 'none' }}>
                   <span style={{ fontSize: 20 }}>{cat.emoji}</span>
-                  <span style={{ flex: 1, fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC' }}>{cat.name}</span>
-                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#6B7280' }}>{cat.items.length} plat{cat.items.length !== 1 ? 's' : ''}</span>
+                  <span style={{ flex: 1, fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 15, color: '#0F172A' }}>{cat.name}</span>
+                  <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: '#64748B' }}>{cat.items.length} plat{cat.items.length !== 1 ? 's' : ''}</span>
                   <button onClick={e => { e.stopPropagation(); removeCategory(cat.id); }} title="Supprimer"
-                    style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', lineHeight: 1 }}>×</button>
-                  <span style={{ color: '#6B7280', fontSize: 11, transform: isOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', display: 'inline-block' }}>▶</span>
+                    style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 18, padding: '2px 6px', lineHeight: 1 }}>×</button>
+                  <span style={{ color: '#64748B', fontSize: 11, transform: isOpen ? 'rotate(90deg)' : 'rotate(0)', transition: 'transform 0.2s', display: 'inline-block' }}>▶</span>
                 </div>
 
                 {isOpen && (
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ borderTop: '1px solid rgba(15,23,42,0.05)' }}>
                     {cat.items.length === 0 && !isAddingHere && (
-                      <p style={{ color: '#4B5563', fontSize: 12, padding: '12px 16px', fontFamily: 'Space Mono, monospace' }}>Aucun plat.</p>
+                      <p style={{ color: '#94A3B8', fontSize: 12, padding: '12px 16px', fontFamily: 'Space Mono, monospace' }}>Aucun plat.</p>
                     )}
 
                     {cat.items.map(item => (
-                      <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', opacity: item.available ? 1 : 0.45 }}>
+                      <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: '1px solid rgba(15,23,42,0.04)', opacity: item.available ? 1 : 0.45 }}>
                         <button title="Changer la photo"
                           onClick={() => { setUpdatingImageFor(item.id); updateImageRef.current?.click(); }}
                           style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}>
@@ -521,16 +521,16 @@ export default function MenuDashboard({
                             // eslint-disable-next-line @next/next/no-img-element
                             <img src={item.imageUrl} alt="" style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', display: 'block', flexShrink: 0 }} />
                           ) : (
-                            <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 6, background: 'rgba(15,23,42,0.04)', border: '1px dashed rgba(15,23,42,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
                               {uploading === 'update' && updatingImageFor === item.id ? '⏳' : item.emoji}
                             </div>
                           )}
                         </button>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>{item.name}</p>
-                          {item.description && <p style={{ color: '#6B7280', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>}
+                          <p style={{ color: '#0F172A', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500 }}>{item.name}</p>
+                          {item.description && <p style={{ color: '#64748B', fontSize: 11, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</p>}
                         </div>
-                        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: '#818CF8', flexShrink: 0 }}>
+                        <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 12, color: '#4F46E5', flexShrink: 0 }}>
                           {item.price.toLocaleString('fr-FR')} {info.currency}
                         </span>
                         <button onClick={() => toggleAvailable(cat.id, item.id)}
@@ -538,7 +538,7 @@ export default function MenuDashboard({
                           {item.available ? 'Dispo' : 'Épuisé'}
                         </button>
                         <button onClick={() => removeItem(cat.id, item.id)}
-                          style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 18, padding: '2px 6px', flexShrink: 0, lineHeight: 1 }}>×</button>
+                          style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', fontSize: 18, padding: '2px 6px', flexShrink: 0, lineHeight: 1 }}>×</button>
                       </div>
                     ))}
 
@@ -547,7 +547,7 @@ export default function MenuDashboard({
                         <div style={{ display: 'flex', gap: 6, marginBottom: 10, flexWrap: 'wrap' }}>
                           {FOOD_EMOJIS.map(e => (
                             <button key={e} onClick={() => setNewItem(p => ({ ...p, emoji: e }))}
-                              style={{ fontSize: 17, background: newItem.emoji === e ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${newItem.emoji === e ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 5, padding: '3px 6px', cursor: 'pointer' }}>
+                              style={{ fontSize: 17, background: newItem.emoji === e ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${newItem.emoji === e ? 'rgba(99,102,241,0.4)' : 'rgba(15,23,42,0.06)'}`, borderRadius: 5, padding: '3px 6px', cursor: 'pointer' }}>
                               {e}
                             </button>
                           ))}
@@ -556,19 +556,19 @@ export default function MenuDashboard({
                           <input autoFocus type="text" value={newItem.name}
                             onChange={e => setNewItem(p => ({ ...p, name: e.target.value }))}
                             placeholder="Nom du plat *"
-                            style={{ flex: 2, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}
+                            style={{ flex: 2, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 14, outline: 'none' }}
                           />
                           <input type="number" value={newItem.price}
                             onChange={e => setNewItem(p => ({ ...p, price: e.target.value }))}
                             placeholder={`Prix ${info.currency}`}
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 10px', color: '#F8F9FC', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none' }}
+                            style={{ flex: 1, background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 10px', color: '#0F172A', fontFamily: 'Space Mono, monospace', fontSize: 14, outline: 'none' }}
                           />
                         </div>
                         <input type="text" value={newItem.description}
                           onChange={e => setNewItem(p => ({ ...p, description: e.target.value }))}
                           placeholder="Description courte (optionnel)"
                           onKeyDown={e => { if (e.key === 'Enter') addItem(cat.id); }}
-                          style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '10px 12px', color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
+                          style={{ width: '100%', background: 'rgba(15,23,42,0.04)', border: '1px solid rgba(15,23,42,0.1)', borderRadius: 6, padding: '10px 12px', color: '#0F172A', fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none', boxSizing: 'border-box', marginBottom: 10 }}
                         />
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                           {newItem.imageUrl ? (
@@ -582,7 +582,7 @@ export default function MenuDashboard({
                             </div>
                           ) : (
                             <button onClick={() => { setUploadError(''); newItemFileRef.current?.click(); }} disabled={uploading === 'new'}
-                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(255,255,255,0.04)', border: '1px dashed rgba(255,255,255,0.12)', borderRadius: 6, color: '#6B7280', cursor: uploading === 'new' ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
+                              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', background: 'rgba(15,23,42,0.04)', border: '1px dashed rgba(15,23,42,0.12)', borderRadius: 6, color: '#64748B', cursor: uploading === 'new' ? 'not-allowed' : 'pointer', fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
                               {uploading === 'new' ? '⏳ Envoi...' : '📸 Ajouter une photo'}
                             </button>
                           )}
@@ -594,16 +594,16 @@ export default function MenuDashboard({
                         )}
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={() => addItem(cat.id)} disabled={!newItem.name.trim()}
-                            style={{ flex: 1, padding: '10px', background: newItem.name.trim() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${newItem.name.trim() ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 6, color: newItem.name.trim() ? '#818CF8' : '#6B7280', cursor: newItem.name.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13 }}>
+                            style={{ flex: 1, padding: '10px', background: newItem.name.trim() ? 'rgba(99,102,241,0.2)' : 'rgba(15,23,42,0.04)', border: `1px solid ${newItem.name.trim() ? 'rgba(99,102,241,0.3)' : 'rgba(15,23,42,0.06)'}`, borderRadius: 6, color: newItem.name.trim() ? '#4F46E5' : '#64748B', cursor: newItem.name.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 13 }}>
                             Ajouter au menu
                           </button>
                           <button onClick={() => { setAddingItemTo(null); setNewItem({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' }); }}
-                            style={{ padding: '10px 14px', background: 'none', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 6, color: '#6B7280', cursor: 'pointer', fontSize: 16 }}>×</button>
+                            style={{ padding: '10px 14px', background: 'none', border: '1px solid rgba(15,23,42,0.06)', borderRadius: 6, color: '#64748B', cursor: 'pointer', fontSize: 16 }}>×</button>
                         </div>
                       </div>
                     ) : (
                       <button onClick={() => { setAddingItemTo(cat.id); setNewItem({ emoji: '🍽️', name: '', description: '', price: '', imageUrl: '' }); }}
-                        style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', color: '#6366F1', cursor: 'pointer', fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 13, textAlign: 'left' }}>
+                        style={{ width: '100%', padding: '12px 16px', background: 'none', border: 'none', color: '#6366F1', cursor: 'pointer', fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 600, fontSize: 13, textAlign: 'left' }}>
                         + Ajouter un plat
                       </button>
                     )}

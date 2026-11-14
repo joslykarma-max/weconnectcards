@@ -119,7 +119,7 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6366F1', textTransform: 'uppercase', marginBottom: 8 }}>
           Admin
         </p>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)', marginBottom: 4 }}>
+        <h1 style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 24, color: 'var(--t-text)', marginBottom: 4 }}>
           Clients
         </h1>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 14, fontFamily: 'DM Sans, sans-serif' }}>
@@ -266,7 +266,7 @@ export default function ClientsAdminClient({ initialClients }: { initialClients:
                   </div>
 
                   {/* Cards count */}
-                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14 }}>
+                  <span style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 700, fontSize: 14 }}>
                     <span style={{ color: client.activeCards > 0 ? '#10B981' : '#374151' }}>{client.activeCards}</span>
                     <span style={{ color: '#4B5563', fontSize: 11 }}> / {client.cardCount}</span>
                   </span>

@@ -1,0 +1,23 @@
+/* Compact, scroll-free layout for dashboard screens shown in a panel:
+   fixed header rows (indicators, tabs) + one content area that takes the remaining height */
+.fill { height: 100%; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.kpis { flex-shrink: 0; display: grid; grid-template-columns: repeat(var(--cols, 4), minmax(0, 1fr)); gap: 8px; }
+.kpi { min-width: 0; padding: 10px 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #EDF1F6; box-shadow: 0 3px 0 #E2E8F0; }
+.kpiValue { display: block; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 22px; line-height: 1.1; color: #0F172A; }
+.kpiLabel { display: block; margin-top: 2px; font-size: 11px; line-height: 1.25; color: #64748B; overflow: hidden; text-overflow: ellipsis; }
+.kpiTrend { font-size: 11px; font-weight: 700; color: #059669; margin-left: 4px; }
+
+.tabs { flex-shrink: 0; display: flex; gap: 6px; padding: 4px; border-radius: 16px; background: #EEF2F7; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { flex: 1 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 0 12px; border-radius: 12px; border: none; cursor: pointer; background: transparent; color: #475569; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+.tabOn { background: #FFFFFF; color: #0F172A; box-shadow: 0 2px 0 #E2E8F0, 0 6px 14px -8px rgba(15, 42, 68, 0.3); }
+.tab:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; }
+
+.content { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 2px; }
+.card { height: 100%; min-height: 220px; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 20px; background: #FFFFFF; border: 1px solid #EDF1F6; box-shadow: 0 6px 22px rgba(15, 42, 68, 0.06); }
+.cardTitle { margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; color: #0F172A; }
+.chart { flex: 1; min-height: 180px; }
+.empty { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 14px; color: #64748B; padding: 16px; }
+
+@media (max-width: 359px) { .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .kpiValue { font-size: 26px; } .kpi { padding: 14px 16px; } }
