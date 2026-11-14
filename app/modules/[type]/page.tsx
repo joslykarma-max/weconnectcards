@@ -17,6 +17,31 @@ const MODULES: Record<string, {
   bg:       string;
   border:   string;
 }> = {
+  profile: {
+    emoji:   '💼',
+    name:    'Carte de visite pro',
+    tagline: 'Votre carte de visite, toujours à jour',
+    desc:    'Un contact de votre carte NFC avec un smartphone ouvre votre profil professionnel : photo, poste, entreprise, coordonnées et liens. Vous le modifiez quand vous voulez, sans jamais réimprimer de carte.',
+    color:   '#6366F1', bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.2)',
+    features: [
+      { icon: '🔗', title: 'Tous vos liens',             body: 'Téléphone, WhatsApp, email, LinkedIn, Instagram, site web, localisation, Calendly, portfolio et liens personnalisés.' },
+      { icon: '🎨', title: 'Quatre styles d\'affichage',  body: 'Clair, Classique, Grille ou Carte Pro : choisissez la présentation qui vous ressemble.' },
+      { icon: '📇', title: 'Contact enregistré en un tap', body: 'Votre interlocuteur ajoute vos coordonnées à son répertoire et peut vous laisser les siennes.' },
+      { icon: '📊', title: 'Statistiques de scans',       body: 'Suivez combien de fois votre profil est consulté et quels liens sont ouverts.' },
+    ],
+    useCases: [
+      { icon: '🧑‍💼', label: 'Entrepreneurs & dirigeants' },
+      { icon: '💻', label: 'Freelances & consultants' },
+      { icon: '🏠', label: 'Agents & commerciaux' },
+      { icon: '🎓', label: 'Jeunes professionnels' },
+    ],
+    steps: [
+      'Commandez et activez votre carte',
+      'Renseignez photo, poste et liens dans votre dashboard',
+      'Approchez votre carte d\'un smartphone : votre profil s\'ouvre',
+    ],
+  },
+
   loyalty: {
     emoji:   '🎯',
     name:    'Carte de fidélité',
@@ -273,7 +298,7 @@ export default async function ModuleDetailPage({ params }: Props) {
           <LogoHorizontal symbolSize="sm" />
         </Link>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link href="/#modules" style={{ color: '#9CA3AF', fontSize: 14, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
+          <Link href="/#how-it-works" style={{ color: '#9CA3AF', fontSize: 14, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
             ← Tous les modules
           </Link>
           <Link href="/register" style={{ padding: '8px 18px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 6, color: '#fff', fontSize: 14, textDecoration: 'none', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>

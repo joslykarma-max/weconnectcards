@@ -109,7 +109,7 @@
 .title {
   margin: 8px 0 0;
   font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(32px, 10vw, 54px); line-height: 1.02; letter-spacing: -0.04em;
+  font-size: clamp(30px, 9.4vw, 48px); line-height: 1.04; letter-spacing: -0.03em;
   text-wrap: balance;
 }
 .titleAccent { display: block; color: var(--hx-accent); transition: color var(--text-ms) ease var(--hx-color-delay, 0ms); }
@@ -383,7 +383,7 @@
   }
   .colText { display: flex; flex-direction: column; align-items: flex-start; }
   .colStage { display: flex; flex-direction: column; align-items: center; text-align: center; }
-  .title { font-size: clamp(48px, 5.3vw, 78px); }
+  .title { font-size: clamp(40px, 3.9vw, 56px); letter-spacing: -0.03em; }   /* Syne 800 is wide: 3 lines max */
   .sub { margin-left: 0; max-width: 470px; }
   .ctas { justify-content: flex-start; }
   .stage { width: calc(100% + 80px); margin: 0 -40px; }

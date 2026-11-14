@@ -10,7 +10,7 @@ const PRODUCT_LINKS = [
   { label: 'Comment ça marche', href: '/comment-ca-marche' },
   { label: 'Features',          href: '/features' },
   { label: 'Tarifs',            href: '/tarifs' },
-  { label: 'Modules',           href: '/#modules' },
+  { label: 'Modules',           href: '/#how-it-works' },
   { label: 'Équipe',            href: '/features' },
 ];
 

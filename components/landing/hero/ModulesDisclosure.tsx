@@ -28,7 +28,7 @@ export default function ModulesDisclosure() {
               </Link>
             ))}
           </div>
-          <a href="#modules" className={styles.modAll}>Voir le détail des modules →</a>
+          <a href="#how-it-works" className={styles.modAll}>Voir les usages selon votre profil →</a>
         </div>
       </div>
     </div>
