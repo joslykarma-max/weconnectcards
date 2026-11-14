@@ -122,12 +122,12 @@ const STEPS = [
 const usages = (slugs: string[]) => slugs.map((slug) => MODULES.find((m) => m.slug === slug)!).filter(Boolean);
 const PERSO_USAGES = [
   { slug: 'profile', emoji: '💼', name: 'Carte de visite pro', desc: 'Votre profil professionnel, toujours à jour', accent: '#6366F1' },
-  ...usages(['portfolio', 'medical']),
+  ...usages(['portfolio', 'medical', 'review']),
 ];
-const PRO_USAGES = usages(['loyalty', 'access', 'certificate', 'member', 'event']);
+const PRO_USAGES = usages(['loyalty', 'menu', 'review', 'access', 'certificate', 'member', 'event']);   // Tap to Review works for both
 
 const PRO_STEPS = [
-  { number: '01', title: 'Choisissez le module', desc: 'Fidélité, accès, certificat, adhésion ou pass événement : chaque carte est dédiée à un usage précis.' },
+  { number: '01', title: 'Choisissez le module', desc: 'Fidélité, menu restaurant, accès, certificat, adhésion ou pass événement : chaque carte est dédiée à un usage précis.' },
   { number: '02', title: 'Indiquez le nombre de cartes', desc: 'Commandez pour vos clients, membres, salariés, invités ou produits, avec une personnalisation à vos couleurs.' },
   { number: '03', title: 'Recevez votre devis', desc: 'La facturation dépend du module choisi et du nombre de cartes commandées.' },
   { number: '04', title: 'Recevez et pilotez', desc: 'Les cartes arrivent prêtes à l’emploi. Vous mettez à jour le contenu et suivez les scans depuis un seul espace.' },
@@ -144,7 +144,7 @@ function UsageButtons({ title, items }: { title: string; items: { slug: string; 
   return (
     <div style={{ marginTop: 8 }}>
       <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: '#64748B', textTransform: 'uppercase', textAlign: 'center', marginBottom: 16 }}>{title}</p>
-      <div className="lp-grid-fit" style={{ '--lp-min': '210px', gap: 12 } as React.CSSProperties}>
+      <div className="hiw-usages">
         {items.map((m) => (
           <Link key={m.slug} href={`/modules/${m.slug}`} className="lp-card hiw-usage" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', minHeight: 72, textDecoration: 'none' }}>
             <span aria-hidden style={{ width: 44, height: 44, borderRadius: 14, background: `${m.accent}14`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, flexShrink: 0 }}>{m.emoji}</span>
@@ -290,6 +290,10 @@ export default function HowItWorks() {
           .steps-alt-visual { order: 1 !important; }
           .hiw-pro-grid     { grid-template-columns: 1fr !important; gap: 40px !important; }
         }
+        /* Module buttons: equal widths, last row centred */
+        .hiw-usages { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+        .hiw-usages > a { flex: 0 1 280px; }
+        @media (max-width: 640px) { .hiw-usages > a { flex-basis: 100%; } }
         @media (hover: hover) {
           .hiw-usage { transition: transform 0.25s ease, box-shadow 0.25s ease; }
           .hiw-usage:hover { transform: translateY(-3px); box-shadow: 0 14px 34px rgba(15,42,68,0.12); }
