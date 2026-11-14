@@ -1,105 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Image from 'next/image';
+import NextLink from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Input, Textarea } from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import Card from '@/components/ui/Card';
-import Badge from '@/components/ui/Badge';
 import { SECTORS } from '@/lib/sectors';
+import st from './profile.module.css';
 import { DEFAULT_DISPLAY_MODE, type DisplayMode } from '@/lib/display-mode';
-
-const LS_SPLIT  = 'profile-split-pct';
-const LS_WIDTH  = 'profile-total-width';
-
-/** True below the breakpoint — the editor then stacks into a single column. */
-function useIsMobile(breakpoint = 900) {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`);
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, [breakpoint]);
-  return isMobile;
-}
-
-function useResizableLayout(initialSplit = 50, initialWidth = 1100) {
-  const [pct, setPct]       = useState(initialSplit);
-  const [width, setWidth]   = useState(initialWidth);
-  const containerRef        = useRef<HTMLDivElement>(null);
-  const dragModeRef         = useRef<'split' | 'width' | null>(null);
-  const startXRef           = useRef(0);
-  const startWidthRef       = useRef(0);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const s = window.localStorage.getItem(LS_SPLIT);
-    if (s) { const n = parseFloat(s); if (!isNaN(n) && n >= 25 && n <= 75) setPct(n); }
-    const w = window.localStorage.getItem(LS_WIDTH);
-    if (w) { const n = parseFloat(w); if (!isNaN(n) && n >= 600 && n <= 2400) setWidth(n); }
-  }, []);
-
-  function getClientX(e: MouseEvent | TouchEvent) {
-    return 'touches' in e ? e.touches[0].clientX : e.clientX;
-  }
-
-  useEffect(() => {
-    function onMove(e: MouseEvent | TouchEvent) {
-      if (!dragModeRef.current || !containerRef.current) return;
-      const x = getClientX(e);
-      if (dragModeRef.current === 'split') {
-        const rect = containerRef.current.getBoundingClientRect();
-        setPct(Math.max(25, Math.min(75, ((x - rect.left) / rect.width) * 100)));
-      } else if (dragModeRef.current === 'width') {
-        setWidth(Math.max(600, Math.min(2400, startWidthRef.current + x - startXRef.current)));
-      }
-    }
-    function onUp() {
-      if (dragModeRef.current) {
-        try {
-          if (dragModeRef.current === 'split') window.localStorage.setItem(LS_SPLIT, String(pct));
-          if (dragModeRef.current === 'width') window.localStorage.setItem(LS_WIDTH, String(width));
-        } catch {}
-        dragModeRef.current = null;
-        document.body.style.cursor = '';
-        document.body.style.userSelect = '';
-      }
-    }
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    document.addEventListener('touchmove', onMove, { passive: true });
-    document.addEventListener('touchend', onUp);
-    return () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onUp);
-    };
-  }, [pct, width]);
-
-  function onSplitDown(e: React.MouseEvent | React.TouchEvent) {
-    dragModeRef.current = 'split';
-    if (!('touches' in e)) {
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-    }
-  }
-
-  function onWidthDown(e: React.MouseEvent | React.TouchEvent) {
-    dragModeRef.current = 'width';
-    startXRef.current = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    startWidthRef.current = width;
-    if (!('touches' in e)) {
-      document.body.style.cursor = 'ew-resize';
-      document.body.style.userSelect = 'none';
-    }
-  }
-
-  return { pct, width, containerRef, onSplitDown, onWidthDown };
-}
 
 type Link = { id: string; type: string; label: string; url: string; order: number; isActive: boolean };
 type Profile = {
@@ -478,693 +385,256 @@ export default function ProfileEditor({ profile, profileId, isMain, profiles }: 
     router.refresh();
   }
 
-  const { pct, width, containerRef, onSplitDown, onWidthDown } = useResizableLayout(50, 1100);
-  const isMobile = useIsMobile();
+  const [tab, setTab] = useState<'infos' | 'liens' | 'style' | 'visibilite' | 'apercu'>('infos');
+  const TABS = [
+    { key: 'infos',      label: 'Infos' },
+    { key: 'liens',      label: `Liens · ${links.length}` },
+    { key: 'style',      label: 'Style' },
+    { key: 'visibilite', label: 'Visibilité' },
+    { key: 'apercu',     label: 'Aperçu' },
+  ] as const;
+
+  const preview = profile?.username ? (
+    profile.isPublic ? (
+      <iframe key={displayMode} src={`/${profile.username}?mode=${displayMode}`} className={st.previewFrame} title="Aperçu du profil" />
+    ) : (
+      <div className={st.previewOff}>
+        <span aria-hidden>🔒</span>
+        <p>Activez le profil public dans <NextLink href="/dashboard/preview">Aperçu</NextLink> pour voir la prévisualisation.</p>
+      </div>
+    )
+  ) : null;
 
   return (
-    <div ref={containerRef} style={{
-      width: isMobile ? '100%' : width, maxWidth: '100%', display: 'flex',
-      flexDirection: isMobile ? 'column' : 'row', alignItems: 'stretch',
-      gap: isMobile ? 20 : 0, position: 'relative',
-    }}>
-      {/* Profile form (left column) */}
-      <div style={{ flex: isMobile ? '1 1 auto' : `0 0 calc(${pct}% - 14px)`, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-        {profiles.length > 1 && (
-          <Card padding="md">
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 10 }}>
-              Profil en cours d&apos;édition
-            </p>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {profiles.map((p) => {
-                const current = p.id === profileId;
-                const label   = labels[p.id] ?? p.label;
-                const chip: React.CSSProperties = {
-                  display: 'flex', alignItems: 'center', gap: 4, borderRadius: 8,
-                  flex: isMobile ? '1 1 140px' : undefined, minWidth: 0,
-                  background: current ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)',
-                  border: `1px solid ${current ? '#6366F1' : 'rgba(255,255,255,0.1)'}`,
-                  color: current ? '#818CF8' : '#9CA3AF',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-                };
-                const iconBtn: React.CSSProperties = {
-                  background: 'none', border: 'none', cursor: 'pointer', color: 'inherit',
-                  padding: '4px 6px', fontSize: 13, lineHeight: 1, flexShrink: 0,
-                };
+    <div className={st.editor}>
+      <div className={st.main}>
+        <div className={st.tabs} role="tablist" aria-label="Sections du profil">
+          {TABS.map((t) => (
+            <button key={t.key} type="button" role="tab" aria-selected={tab === t.key}
+              className={`${st.tab} ${tab === t.key ? st.tabOn : ''} ${t.key === 'apercu' ? st.tabPreview : ''}`}
+              onClick={() => setTab(t.key)}>{t.label}</button>
+          ))}
+        </div>
 
-                if (renamingId === p.id) {
-                  return (
-                    <div key={p.id} style={{ ...chip, padding: '4px 4px 4px 8px' }}>
-                      <input
-                        autoFocus
-                        value={renameValue}
-                        maxLength={40}
-                        placeholder="Nom de la carte"
-                        aria-label="Nouveau nom de la carte"
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') saveRename(p.id);
-                          if (e.key === 'Escape') setRenamingId(null);
-                        }}
-                        style={{
-                          flex: 1, minWidth: 0, width: 140, background: 'rgba(0,0,0,0.25)', color: '#F8F9FC',
-                          border: '1px solid rgba(255,255,255,0.15)', borderRadius: 6, padding: '6px 8px',
-                          fontFamily: 'DM Sans, sans-serif', fontSize: 13, outline: 'none',
-                        }}
-                      />
-                      <button onClick={() => saveRename(p.id)} disabled={savingRename} aria-label="Enregistrer le nom" style={{ ...iconBtn, color: '#10B981', opacity: savingRename ? 0.5 : 1 }}>✓</button>
-                      <button onClick={() => setRenamingId(null)} disabled={savingRename} aria-label="Annuler" style={iconBtn}>✕</button>
-                    </div>
-                  );
-                }
+        <div className={st.body} role="tabpanel">
+          {/* ── Infos ───────────────────────────────────────────── */}
+          {tab === 'infos' && (
+            <div className={st.stack}>
+              {profiles.length > 1 && (
+                <div className={st.switcher} aria-label="Profil en cours d'édition">
+                  {profiles.map((p) => {
+                    const current = p.id === profileId;
+                    const label   = labels[p.id] ?? p.label;
+                    if (renamingId === p.id) {
+                      return (
+                        <div key={p.id} className={`${st.chip} ${st.chipOn}`}>
+                          <input autoFocus value={renameValue} maxLength={40} placeholder="Nom de la carte" aria-label="Nouveau nom de la carte"
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => { if (e.key === 'Enter') saveRename(p.id); if (e.key === 'Escape') setRenamingId(null); }}
+                            className={st.chipInput} />
+                          <button type="button" onClick={() => saveRename(p.id)} disabled={savingRename} aria-label="Enregistrer le nom" className={st.chipIcon}>✓</button>
+                          <button type="button" onClick={() => setRenamingId(null)} disabled={savingRename} aria-label="Annuler" className={st.chipIcon}>✕</button>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={p.id} className={`${st.chip} ${current ? st.chipOn : ''}`}>
+                        <button type="button" onClick={() => startRename(p)} aria-label={`Renommer ${label}`} className={st.chipIcon}>✎</button>
+                        <button type="button" className={st.chipMain}
+                          onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}>
+                          {label}<small>/{p.username}</small>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
-                return (
-                  <div key={p.id} style={chip}>
-                    <button
-                      onClick={() => startRename(p)}
-                      title="Renommer"
-                      aria-label={`Renommer ${label}`}
-                      style={{ ...iconBtn, padding: '10px 4px 10px 12px', display: 'flex' }}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 20h9" />
-                        <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => router.push(p.id === profiles[0].id ? '/dashboard/profile' : `/dashboard/profile?profile=${p.id}`)}
-                      style={{
-                        flex: 1, minWidth: 0, overflowWrap: 'anywhere', textAlign: 'left',
-                        padding: '8px 12px 8px 6px', background: 'none', border: 'none', cursor: 'pointer',
-                        color: 'inherit', fontFamily: 'inherit', fontSize: 13, fontWeight: current ? 600 : 400,
-                      }}
-                    >
-                      {label}
-                      <span style={{ display: 'block', fontSize: 11, opacity: 0.7 }}>/{p.username}</span>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
-        )}
-        <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
-            Photo de profil
-          </h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 4, flexWrap: 'wrap' }}>
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #6366F1, #06B6D4)', padding: 2, flexShrink: 0 }}>
-              <div style={{ width: '100%', height: '100%', borderRadius: '50%', overflow: 'hidden', background: '#12141C', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {avatar ? (
-                  <Image src={avatar} alt="Avatar" width={72} height={72} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                ) : (
-                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    {form.displayName.charAt(0).toUpperCase() || '?'}
-                  </span>
-                )}
-              </div>
-            </div>
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                style={{ display: 'none' }}
-                onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }}
-              />
-              <Button variant="secondary" size="sm" loading={uploading} onClick={() => fileInputRef.current?.click()}>
-                {uploading ? 'Upload...' : avatar ? 'Changer la photo' : 'Ajouter une photo'}
-              </Button>
-              <p style={{ color: '#6B7280', fontSize: 12, marginTop: 8 }}>JPG, PNG · Max 5 Mo</p>
-            </div>
-          </div>
-        </Card>
-
-        <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
-            Informations du profil
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <Input label="Titre" value={form.displayName} onChange={set('displayName')} placeholder="Sophie Martin" />
-            <Input label="Titre / Poste" value={form.title} onChange={set('title')} placeholder="CEO & Founder" />
-            <Input label="Entreprise" value={form.company} onChange={set('company')} placeholder="Acme Corp" />
-            <Textarea label="Bio" value={form.bio} onChange={set('bio')} placeholder="Une courte présentation..." style={{ minHeight: 80 }} />
-            {displayMode === 'light' && (
-              <Input label="Accroche" value={form.tagline} onChange={set('tagline')} placeholder="Innover. Inspirer. Réaliser." hint="Phrase courte affichée sous ton nom (mode Clair)." />
-            )}
-            <Input label="Nom d'utilisateur" value={form.username} onChange={set('username')} hint={`weconnect.cards/${form.username || '…'}`} />
-          </div>
-
-          {/* Visibility toggles */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16, marginTop: 8 }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
-              Champs visibles sur la page publique
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {VISIBILITY_FIELDS.map((f) => {
-                const visible = !hiddenFields.includes(f.key);
-                return (
-                  <div key={f.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: visible ? '#D1D5DB' : '#4B5563' }}>
-                      {f.label}
-                    </span>
-                    <button
-                      onClick={() => toggleField(f.key)}
-                      style={{
-                        width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', position: 'relative',
-                        background: visible ? '#6366F1' : 'rgba(255,255,255,0.1)',
-                        transition: 'background 0.2s',
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span style={{
-                        position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%', background: '#fff',
-                        left: visible ? 21 : 3,
-                        transition: 'left 0.2s',
-                      }} />
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </Card>
-
-        {/* Theme */}
-        <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 16 }}>
-            Thème de carte
-          </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-            {THEMES.map((t) => (
-              <button
-                key={t.value}
-                onClick={() => setForm((p) => ({ ...p, theme: t.value }))}
-                style={{
-                  padding: '14px 16px',
-                  background:   t.bg,
-                  border: `2px solid ${form.theme === t.value ? '#6366F1' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 6,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  transition: 'all 0.2s',
-                }}
-              >
-                <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 13, color: '#F8F9FC' }}>{t.label}</span>
-                {form.theme === t.value && (
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12"/>
-                  </svg>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Display mode selector */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16, marginTop: 4 }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
-              Mode d'affichage
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(96px, 1fr))', gap: 8 }}>
-              {DISPLAY_MODES.map((m) => (
-                <button
-                  key={m.value}
-                  onClick={() => setDisplayMode(m.value)}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    padding: '12px 8px',
-                    border: `2px solid ${displayMode === m.value ? '#6366F1' : 'rgba(255,255,255,0.07)'}`,
-                    borderRadius: 8,
-                    background: displayMode === m.value ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.02)',
-                    cursor: 'pointer',
-                    color: displayMode === m.value ? '#818CF8' : '#6B7280',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  {m.preview}
-                  <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 11, color: displayMode === m.value ? '#818CF8' : '#9CA3AF' }}>
-                    {m.label}
-                  </span>
-                  <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 10, color: '#4B5563', textAlign: 'center', lineHeight: 1.3 }}>
-                    {m.desc}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Background image */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 16 }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#6B7280', textTransform: 'uppercase', marginBottom: 12 }}>
-              Image de fond (optionnel)
-            </p>
-            <input
-              ref={bgFileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              style={{ display: 'none' }}
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) { void uploadBackground(f); } e.target.value = ''; }}
-            />
-            {bgImage ? (
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div style={{
-                  width: 72, height: 48, borderRadius: 6, overflow: 'hidden', flexShrink: 0,
-                  backgroundImage: `url(${bgImage})`, backgroundSize: 'cover', backgroundPosition: 'center',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: '#9CA3AF', fontSize: 12, marginBottom: 8, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    Image définie
-                  </p>
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <Button variant="secondary" size="sm" loading={uploadingBg} onClick={() => bgFileInputRef.current?.click()}>
-                      Changer
-                    </Button>
-                    <button onClick={() => setBgImage(null)}
-                      style={{ padding: '5px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 5, color: '#EF4444', fontSize: 12, cursor: 'pointer', fontFamily: 'DM Sans, sans-serif' }}>
-                      Supprimer
-                    </button>
-                  </div>
+              <div className={st.photoRow}>
+                <div className={st.avatar}>
+                  {avatar
+                    ? <Image src={avatar} alt="Photo de profil" width={64} height={64} />
+                    : <span>{form.displayName.charAt(0).toUpperCase() || '?'}</span>}
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadAvatar(f); }} />
+                <div>
+                  <button type="button" className={st.secondary} onClick={() => fileInputRef.current?.click()} disabled={uploading}>
+                    {uploading ? 'Envoi…' : avatar ? 'Changer la photo' : 'Ajouter une photo'}
+                  </button>
+                  <p className={st.hint}>JPG ou PNG · 5 Mo max</p>
                 </div>
               </div>
-            ) : (
-              <button onClick={() => bgFileInputRef.current?.click()} disabled={uploadingBg}
-                style={{
-                  width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)',
-                  borderRadius: 6, color: '#6B7280', cursor: uploadingBg ? 'wait' : 'pointer',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-                }}>
-                {uploadingBg ? '⏳ Upload...' : '🖼 Ajouter une image de fond'}
-              </button>
-            )}
-            <p style={{ color: '#4B5563', fontSize: 11, marginTop: 8, fontFamily: 'DM Sans, sans-serif' }}>
-              Une overlay sombre est ajoutée automatiquement pour que le texte reste lisible.
-            </p>
-          </div>
-        </Card>
 
-        {/* Annuaire */}
-        <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 4 }}>
-            Annuaire We Connect
-          </h3>
-          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', marginBottom: 16 }}>
-            Apparaissez dans l'annuaire public des membres du réseau.
-          </p>
-
-          {/* Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: inDirectory ? 16 : 0 }}>
-            <div>
-              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#F8F9FC', fontWeight: 600 }}>
-                Visible dans l'annuaire
-              </p>
-              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#6B7280', marginTop: 2 }}>
-                {inDirectory ? "Votre profil est visible dans l'annuaire" : "Votre profil est masqué de l'annuaire"}
-              </p>
-            </div>
-            <button
-              onClick={() => setInDirectory((v) => !v)}
-              style={{
-                width: 44, height: 24, borderRadius: 12, border: 'none', cursor: 'pointer', flexShrink: 0,
-                background: inDirectory ? 'linear-gradient(90deg, #6366F1, #06B6D4)' : 'rgba(255,255,255,0.1)',
-                position: 'relative', transition: 'background 0.2s',
-              }}
-            >
-              <span style={{
-                position: 'absolute', top: 3, left: inDirectory ? 23 : 3,
-                width: 18, height: 18, borderRadius: '50%', background: '#fff',
-                transition: 'left 0.2s', display: 'block',
-              }} />
-            </button>
-          </div>
-
-          {/* Sector selector — only when visible */}
-          {inDirectory && (
-            <div>
-              <label style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#9CA3AF', display: 'block', marginBottom: 6 }}>
-                Secteur d'activité
-              </label>
-              <select
-                value={sector}
-                onChange={(e) => setSector(e.target.value)}
-                style={{
-                  width: '100%', padding: '10px 12px',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: `1px solid ${sector ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.1)'}`,
-                  borderRadius: 8, color: sector ? '#F8F9FC' : '#6B7280',
-                  fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                  outline: 'none', cursor: 'pointer', appearance: 'none',
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 12px center',
-                  paddingRight: 36,
-                }}
-              >
-                <option value="" style={{ background: '#181B26', color: '#6B7280' }}>Choisir un secteur…</option>
-                {SECTORS.map((s) => (
-                  <option key={s} value={s} style={{ background: '#181B26' }}>{s}</option>
-                ))}
-              </select>
-              {!sector && (
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: '#EF4444', marginTop: 6 }}>
-                  Sélectionnez un secteur pour apparaître dans les filtres de l'annuaire.
-                </p>
+              <div className={st.grid2}>
+                <label className={st.field}><span>Nom</span><input value={form.displayName} onChange={set('displayName')} placeholder="Sophie Martin" /></label>
+                <label className={st.field}><span>Poste</span><input value={form.title} onChange={set('title')} placeholder="CEO & Founder" /></label>
+                <label className={st.field}><span>Entreprise</span><input value={form.company} onChange={set('company')} placeholder="Acme Corp" /></label>
+                <label className={st.field}><span>Adresse du profil</span><input value={form.username} onChange={set('username')} /><small>weconnect.cards/{form.username || '…'}</small></label>
+              </div>
+              <label className={st.field}><span>Bio</span><textarea value={form.bio} onChange={set('bio')} placeholder="Une courte présentation…" rows={3} /></label>
+              {displayMode === 'light' && (
+                <label className={st.field}><span>Accroche</span><input value={form.tagline} onChange={set('tagline')} placeholder="Innover. Inspirer. Réaliser." /><small>Phrase courte affichée sous votre nom (mode Clair)</small></label>
               )}
             </div>
           )}
-        </Card>
 
-        <Button variant="gradient" size="lg" loading={saving} onClick={saveProfile} style={{ width: '100%' }}>
-          {saved ? '✓ Sauvegardé !' : saving ? 'Sauvegarde...' : 'Sauvegarder le profil'}
-        </Button>
-        {saveError && (
-          <p style={{ color: '#F87171', fontSize: 13, fontFamily: 'DM Sans, sans-serif', marginTop: -8 }}>{saveError}</p>
-        )}
-      </div>
-
-      {/* Middle drag handle (split ratio) */}
-      {!isMobile && <div
-        onMouseDown={onSplitDown}
-        onTouchStart={onSplitDown}
-        style={{
-          width: 28,
-          cursor: 'col-resize',
-          position: 'relative',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          userSelect: 'none',
-        }}
-        title="Redimensionner les colonnes"
-      >
-        <div style={{
-          width: 4,
-          height: 60,
-          borderRadius: 2,
-          background: 'rgba(99,102,241,0.25)',
-          transition: 'background 0.2s',
-        }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
-        />
-      </div>}
-
-      {/* Links */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, minWidth: 0 }}>
-        <Card padding="md">
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 20 }}>
-            Liens ({links.length})
-          </h3>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
-            {links.map((link) => editingId === link.id ? (
-              <div
-                key={link.id}
-                style={{
-                  display: 'flex', flexDirection: 'column', gap: 8,
-                  padding: 12,
-                  background: 'rgba(99,102,241,0.06)',
-                  border: '1px solid rgba(99,102,241,0.25)',
-                  borderRadius: 6,
-                }}
-              >
-                <select
-                  value={editType}
-                  onChange={(e) => setEditType(e.target.value)}
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 4, padding: '8px 10px',
-                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-                    outline: 'none', cursor: 'pointer',
-                  }}
-                >
-                  {LINK_TYPES.map((t) => (
-                    <option key={t.value} value={t.value} style={{ background: '#181B26' }}>{t.label}</option>
+          {/* ── Liens ───────────────────────────────────────────── */}
+          {tab === 'liens' && (
+            <div className={st.stack}>
+              {links.length > 0 && (
+                <ul className={st.links}>
+                  {links.map((link) => editingId === link.id ? (
+                    <li key={link.id} className={`${st.linkRow} ${st.linkEditing}`}>
+                      <select value={editType} onChange={(e) => setEditType(e.target.value)} className={st.select} aria-label="Type de lien">
+                        {LINK_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
+                      <input placeholder="Titre" value={editLabel} onChange={(e) => setEditLabel(e.target.value)} aria-label="Titre du lien" className={st.input}
+                        onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }} />
+                      <input placeholder={LINK_FORM_CONFIG[editType]?.placeholder ?? 'https://…'} value={editUrl} onChange={(e) => setEditUrl(e.target.value)} className={st.input}
+                        aria-label={LINK_FORM_CONFIG[editType]?.inputLabel ?? 'Adresse du lien'}
+                        onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }} />
+                      <div className={st.row}>
+                        <button type="button" className={st.primarySm} onClick={() => saveEdit(link.id)} disabled={savingEdit}>{savingEdit ? '…' : 'Enregistrer'}</button>
+                        <button type="button" className={st.secondary} onClick={cancelEdit}>Annuler</button>
+                      </div>
+                    </li>
+                  ) : (
+                    <li key={link.id} className={st.linkRow}>
+                      <span className={st.linkType}>{LINK_TYPES.find((t) => t.value === link.type)?.label ?? link.type}</span>
+                      <span className={st.linkText}><strong>{link.label}</strong><small>{link.url}</small></span>
+                      <button type="button" className={st.iconBtn} onClick={() => startEdit(link)} aria-label={`Modifier ${link.label}`}>✎</button>
+                      <button type="button" className={`${st.iconBtn} ${st.danger}`} onClick={() => deleteLink(link.id)} aria-label={`Supprimer ${link.label}`}>🗑</button>
+                    </li>
                   ))}
-                </select>
-                <input
-                  placeholder="Titre"
-                  value={editLabel}
-                  onChange={(e) => setEditLabel(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
-                  aria-label="Label du lien"
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 4, padding: '8px 10px',
-                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-                    outline: 'none',
-                  }}
-                />
-                <input
-                  placeholder={LINK_FORM_CONFIG[editType]?.placeholder ?? 'https://...'}
-                  value={editUrl}
-                  onChange={(e) => setEditUrl(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') saveEdit(link.id); if (e.key === 'Escape') cancelEdit(); }}
-                  aria-label={LINK_FORM_CONFIG[editType]?.inputLabel ?? 'URL du lien'}
-                  style={{
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 4, padding: '8px 10px',
-                    color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 13,
-                    outline: 'none',
-                  }}
-                />
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <Button variant="gradient" size="sm" loading={savingEdit} onClick={() => saveEdit(link.id)} style={{ flex: 1 }}>
-                    Sauvegarder
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={cancelEdit} style={{ flex: 1 }}>
-                    Annuler
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div
-                key={link.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 14px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  borderRadius: 6,
-                }}
-              >
-                <Badge variant="electric">{link.type}</Badge>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: '#F8F9FC', fontSize: 13, fontFamily: 'DM Sans, sans-serif', fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {link.label}
-                  </p>
-                  <p style={{ color: '#6B7280', fontSize: 11, fontFamily: 'Space Mono, monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {link.url}
-                  </p>
-                </div>
-                <button
-                  onClick={() => startEdit(link)}
-                  aria-label={`Modifier le lien ${link.label}`}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: '#818CF8', padding: 4, flexShrink: 0,
-                    opacity: 0.7, transition: 'opacity 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.7')}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                </button>
-                <button
-                  onClick={() => deleteLink(link.id)}
-                  aria-label={`Supprimer le lien ${link.label}`}
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: '#EF4444', padding: 4, flexShrink: 0,
-                    opacity: 0.6, transition: 'opacity 0.2s',
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                  onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-                  </svg>
-                </button>
-              </div>
-            ))}
-          </div>
-
-          {/* Add link */}
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 20 }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase', marginBottom: 14 }}>
-              Ajouter un lien
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-
-              {/* Type selector as pill grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                {LINK_TYPES.map((t) => (
-                  <button
-                    key={t.value}
-                    onClick={() => handleTypeChange(t.value)}
-                    style={{
-                      padding: '8px 4px',
-                      borderRadius: 6,
-                      border: `1px solid ${newLinkType === t.value ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.07)'}`,
-                      background: newLinkType === t.value ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.02)',
-                      color: newLinkType === t.value ? '#818CF8' : '#9CA3AF',
-                      fontFamily: 'DM Sans, sans-serif',
-                      fontSize: 12,
-                      cursor: 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Portfolio → redirect to module builder */}
-              {newLinkType === 'portfolio' ? (
-                <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: 8, padding: '16px', textAlign: 'center' }}>
-                  <p style={{ color: '#818CF8', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 14, marginBottom: 6 }}>
-                    🎵 Portfolio Artiste
-                  </p>
-                  <p style={{ color: '#6B7280', fontSize: 12, marginBottom: 14, fontFamily: 'DM Sans, sans-serif' }}>
-                    Crée une page portfolio avec bannière, liens plateformes, bio et email de booking.
-                  </p>
-                  <Button variant="gradient" size="sm" onClick={() => router.push('/dashboard/modules/portfolio')} style={{ width: '100%' }}>
-                    Créer mon portfolio →
-                  </Button>
-                </div>
-              ) : (
-                <>
-                  {/* Dynamic input based on type */}
-                  <div>
-                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1.5, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>
-                      {LINK_FORM_CONFIG[newLinkType]?.inputLabel ?? 'Valeur'}
-                    </p>
-                    <input
-                      placeholder={LINK_FORM_CONFIG[newLinkType]?.placeholder ?? ''}
-                      value={newLinkValue}
-                      onChange={(e) => setNewLinkValue(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }}
-                      style={{
-                        width: '100%', boxSizing: 'border-box',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: 6, padding: '10px 14px',
-                        color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-
-                  {/* Label (editable, pre-filled with auto-label) */}
-                  <div>
-                    <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 1.5, color: '#6B7280', textTransform: 'uppercase', marginBottom: 6 }}>
-                      Titre
-                    </p>
-                    <input
-                      placeholder="Ex: Mon WhatsApp pro"
-                      value={newLinkLabel}
-                      onChange={(e) => setNewLinkLabel(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }}
-                      style={{
-                        width: '100%', boxSizing: 'border-box',
-                        background: 'rgba(255,255,255,0.03)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: 6, padding: '10px 14px',
-                        color: '#F8F9FC', fontFamily: 'DM Sans, sans-serif', fontSize: 14,
-                        outline: 'none',
-                      }}
-                    />
-                  </div>
-
-                  <Button variant="secondary" size="sm" onClick={addLink} style={{ width: '100%' }}>
-                    + Ajouter
-                  </Button>
-                </>
+                </ul>
               )}
-            </div>
-          </div>
-        </Card>
 
-        {/* Live preview */}
-        {profile?.username && (
-          <Card padding="sm">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: '#6B7280', textTransform: 'uppercase' }}>
-                Aperçu — {DISPLAY_MODES.find((m) => m.value === displayMode)?.label}
-              </p>
-              <a
-                href={`/${profile.username}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#818CF8', textDecoration: 'none', textTransform: 'uppercase' }}
-              >
-                Ouvrir ↗
-              </a>
+              <div className={st.card}>
+                <p className={st.cardTitle}>Ajouter un lien</p>
+                <div className={st.typePills}>
+                  {LINK_TYPES.map((t) => (
+                    <button key={t.value} type="button" className={`${st.pill} ${newLinkType === t.value ? st.pillOn : ''}`} onClick={() => handleTypeChange(t.value)}>{t.label}</button>
+                  ))}
+                </div>
+                {newLinkType === 'portfolio' ? (
+                  <div className={st.portfolio}>
+                    <p><strong>🎵 Portfolio Artiste</strong> Une page avec bannière, plateformes, bio et e-mail de booking.</p>
+                    <button type="button" className={st.primarySm} onClick={() => router.push('/dashboard/modules/portfolio')}>Créer mon portfolio →</button>
+                  </div>
+                ) : (
+                  <div className={st.grid2}>
+                    <label className={st.field}><span>{LINK_FORM_CONFIG[newLinkType]?.inputLabel ?? 'Valeur'}</span>
+                      <input placeholder={LINK_FORM_CONFIG[newLinkType]?.placeholder ?? ''} value={newLinkValue} onChange={(e) => setNewLinkValue(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }} />
+                    </label>
+                    <label className={st.field}><span>Titre</span>
+                      <input placeholder="Ex : Mon WhatsApp pro" value={newLinkLabel} onChange={(e) => setNewLinkLabel(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') void addLink(); }} />
+                    </label>
+                    <button type="button" className={`${st.secondary} ${st.span2}`} onClick={addLink}>+ Ajouter le lien</button>
+                  </div>
+                )}
+              </div>
             </div>
+          )}
 
-            {profile.isPublic ? (
-              <div style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <iframe
-                  key={displayMode}
-                  src={`/${profile.username}?mode=${displayMode}`}
-                  style={{ width: '100%', height: isMobile ? 560 : 480, border: 'none', display: 'block' }}
-                  title="Aperçu profil"
-                />
+          {/* ── Style ───────────────────────────────────────────── */}
+          {tab === 'style' && (
+            <div className={st.stack}>
+              <div>
+                <p className={st.cardTitle}>Mode d’affichage</p>
+                <div className={st.modes}>
+                  {DISPLAY_MODES.map((m) => (
+                    <button key={m.value} type="button" className={`${st.mode} ${displayMode === m.value ? st.modeOn : ''}`} onClick={() => setDisplayMode(m.value)} aria-pressed={displayMode === m.value}>
+                      {m.preview}
+                      <strong>{m.label}</strong>
+                    </button>
+                  ))}
+                </div>
               </div>
-            ) : (
-              <div style={{
-                height: 200, borderRadius: 8, border: '1px dashed rgba(255,255,255,0.1)',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10,
-              }}>
-                <span style={{ fontSize: 28 }}>🔒</span>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#6B7280', textAlign: 'center', maxWidth: 200 }}>
-                  Activez le profil public dans <a href="/dashboard/preview" style={{ color: '#818CF8' }}>Aperçu carte</a> pour voir la prévisualisation.
-                </p>
+              <div>
+                <p className={st.cardTitle}>Couleur de la carte</p>
+                <div className={st.themes}>
+                  {THEMES.map((t) => (
+                    <button key={t.value} type="button" className={`${st.theme} ${form.theme === t.value ? st.themeOn : ''}`} style={{ background: t.bg }}
+                      onClick={() => setForm((p) => ({ ...p, theme: t.value }))} aria-pressed={form.theme === t.value}>
+                      {t.label}{form.theme === t.value && ' ✓'}
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
-          </Card>
-        )}
+              <div>
+                <p className={st.cardTitle}>Image de fond <small>(modes sombres)</small></p>
+                <input ref={bgFileInputRef} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) { void uploadBackground(f); } e.target.value = ''; }} />
+                {bgImage ? (
+                  <div className={st.bgRow}>
+                    <span className={st.bgThumb} style={{ backgroundImage: `url(${bgImage})` }} />
+                    <button type="button" className={st.secondary} onClick={() => bgFileInputRef.current?.click()} disabled={uploadingBg}>{uploadingBg ? 'Envoi…' : 'Changer'}</button>
+                    <button type="button" className={`${st.secondary} ${st.danger}`} onClick={() => setBgImage(null)}>Supprimer</button>
+                  </div>
+                ) : (
+                  <button type="button" className={st.dashed} onClick={() => bgFileInputRef.current?.click()} disabled={uploadingBg}>{uploadingBg ? 'Envoi…' : '🖼 Ajouter une image de fond'}</button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Visibilité ──────────────────────────────────────── */}
+          {tab === 'visibilite' && (
+            <div className={st.stack}>
+              <div className={st.card}>
+                <p className={st.cardTitle}>Champs visibles sur votre page</p>
+                {VISIBILITY_FIELDS.map((f) => {
+                  const visible = !hiddenFields.includes(f.key);
+                  return (
+                    <div key={f.key} className={st.switchRow}>
+                      <span>{f.label}</span>
+                      <button type="button" role="switch" aria-checked={visible} aria-label={`${f.label} visible`} className={st.switchBtn} onClick={() => toggleField(f.key)}>
+                        <span className={st.switch}><span className={st.knob} /></span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className={st.card}>
+                <div className={st.switchRow}>
+                  <span><strong>Annuaire We Connect</strong><small>{inDirectory ? 'Votre profil est visible dans l’annuaire' : 'Votre profil est masqué de l’annuaire'}</small></span>
+                  <button type="button" role="switch" aria-checked={inDirectory} aria-label="Visible dans l’annuaire" className={st.switchBtn} onClick={() => setInDirectory((v) => !v)}>
+                    <span className={st.switch}><span className={st.knob} /></span>
+                  </button>
+                </div>
+                {inDirectory && (
+                  <label className={st.field}><span>Secteur d’activité</span>
+                    <select value={sector} onChange={(e) => setSector(e.target.value)}>
+                      <option value="">Choisir un secteur…</option>
+                      {SECTORS.map((sec) => <option key={sec} value={sec}>{sec}</option>)}
+                    </select>
+                    {!sector && <small className={st.warn}>Choisissez un secteur pour apparaître dans les filtres.</small>}
+                  </label>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── Aperçu (phones; always visible on the right on desktop) ── */}
+          {tab === 'apercu' && <div className={st.previewTab}>{preview}</div>}
+        </div>
+
+        <div className={st.saveBar}>
+          {saveError && <p className={st.error} role="alert">{saveError}</p>}
+          <button type="button" className={st.primary} onClick={saveProfile} disabled={saving}>
+            {saved ? '✓ Enregistré' : saving ? 'Enregistrement…' : 'Enregistrer le profil'}
+          </button>
+        </div>
       </div>
 
-      {/* Right-edge resize handle (total width) */}
-      {!isMobile && <div
-        onMouseDown={onWidthDown}
-        onTouchStart={onWidthDown}
-        style={{
-          width: 14,
-          cursor: 'ew-resize',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          userSelect: 'none',
-          marginLeft: 8,
-        }}
-        title="Élargir / rétrécir"
-      >
-        <div style={{
-          width: 4,
-          height: 60,
-          borderRadius: 2,
-          background: 'rgba(99,102,241,0.25)',
-          transition: 'background 0.2s',
-        }}
-          onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.6)'; }}
-          onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.25)'; }}
-        />
-      </div>}
+      {preview && (
+        <aside className={st.side} aria-label="Aperçu en direct">
+          <div className={st.sideHead}>
+            <span>Aperçu · {DISPLAY_MODES.find((m) => m.value === displayMode)?.label}</span>
+            <a href={`/${profile?.username}`} target="_blank" rel="noopener noreferrer">Ouvrir ↗</a>
+          </div>
+          {preview}
+        </aside>
+      )}
     </div>
   );
 }

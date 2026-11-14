@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import ModulesClient from './ModulesClient';
 import type { ModuleDoc, UserDoc } from '@/lib/types';
+import { getUserSnap } from '@/lib/user-doc';
 
 const MODULES = [
   { type: 'profile',     name: 'Profil digital',          emoji: '👤', desc: 'Carte de visite digitale : contact, liens et bio', pro: false },
@@ -22,7 +23,7 @@ export default async function ModulesPage() {
 
   const [modulesSnap, userSnap] = await Promise.all([
     adminDb.collection('modules').where('profileId', '==', user.uid).get(),
-    adminDb.collection('users').doc(user.uid).get(),
+    getUserSnap(user.uid),
   ]);
 
   const activeModules = modulesSnap.docs.map((d) => {

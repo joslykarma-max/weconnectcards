@@ -2,13 +2,14 @@ import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import TeamClient from './TeamClient';
 import type { TeamDoc, TeamMemberDoc, UserDoc, AgentCardDoc, AgentEventDoc } from '@/lib/types';
+import { getUserSnap } from '@/lib/user-doc';
 
 export default async function TeamPage() {
   const user = await requireAuth();
 
   const [userSnap, teamSnap, ownerScansSnap, ownerClicksSnap, agentsSnap, eventsSnap] =
     await Promise.all([
-      adminDb.collection('users').doc(user.uid).get(),
+      getUserSnap(user.uid),
       adminDb.collection('teams').doc(user.uid).get(),
       adminDb.collection('scans').where('userId', '==', user.uid).get(),
       adminDb.collection('linkClicks').where('profileId', '==', user.uid).get(),

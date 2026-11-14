@@ -1404,12 +1404,32 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
   const [showPin, setShowPin]   = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [denied, setDenied]     = useState(false);
-  const storedPin = String(config.pin || '');
-  const hasPin    = storedPin.length > 0;
+  const [checking, setChecking] = useState(false);
+  const [pinError, setPinError] = useState('');
+  // The protected record is never in the page: the server releases it after checking the PIN
+  const [extra, setExtra]       = useState<Record<string, unknown> | null>(null);
+  const hasPin = config.hasPin === true;
+  const record: Record<string, unknown> = { ...config, ...(extra ?? {}) };
 
-  function checkPin() {
-    if (pin === storedPin) { setUnlocked(true); setDenied(false); }
-    else                   { setDenied(true); setPin(''); }
+  async function checkPin() {
+    if (!pin.trim() || checking) return;
+    setChecking(true);
+    try {
+      const res  = await fetch('/api/modules/medical/unlock', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, pin }),
+      });
+      const data = await res.json().catch(() => ({})) as { fields?: Record<string, unknown>; error?: string };
+      if (res.ok && data.fields) {
+        setExtra(data.fields); setUnlocked(true); setDenied(false); setPinError('');
+      } else {
+        setDenied(true); setPinError(data.error ?? 'Code incorrect. Réessayez.');
+      }
+    } catch {
+      setDenied(true); setPinError('Connexion impossible. Réessayez.');
+    } finally {
+      setPin(''); setChecking(false);
+    }
   }
 
   const birthDate = config.birthDate
@@ -1521,8 +1541,8 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
                 )}
               </button>
             </div>
-            {denied && <p style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12 }}>Code incorrect. Réessayez.</p>}
-            <button onClick={checkPin} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
+            {denied && <p role="alert" style={{ color: '#EF4444', fontSize: 13, textAlign: 'center', marginBottom: 12 }}>{pinError || 'Code incorrect. Réessayez.'}</p>}
+            <button onClick={checkPin} disabled={checking} aria-busy={checking} style={{ width: '100%', padding: '13px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', border: 'none', borderRadius: 8, color: '#fff', fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer' }}>
               Déverrouiller
             </button>
           </div>
@@ -1530,14 +1550,14 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
           /* Infos déverrouillées */
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
-              { label: 'Conditions chroniques', value: config.conditions,     icon: '🏥' },
-              { label: 'Médicaments',           value: config.medications,    icon: '💊' },
-              { label: 'Vaccinations',           value: config.vaccinations,   icon: '💉' },
-              { label: 'Médecin traitant',       value: config.doctorName,     icon: '👨‍⚕️' },
-              { label: 'Tél. médecin',           value: config.doctorPhone,    icon: '📞' },
-              { label: 'Hôpital de référence',  value: config.hospital,       icon: '🏨' },
-              { label: 'N° assuré',              value: config.insuranceNumber,icon: '📋' },
-              { label: 'Notes',                  value: config.notes,          icon: '📝' },
+              { label: 'Conditions chroniques', value: record.conditions,     icon: '🏥' },
+              { label: 'Médicaments',           value: record.medications,    icon: '💊' },
+              { label: 'Vaccinations',           value: record.vaccinations,   icon: '💉' },
+              { label: 'Médecin traitant',       value: record.doctorName,     icon: '👨‍⚕️' },
+              { label: 'Tél. médecin',           value: record.doctorPhone,    icon: '📞' },
+              { label: 'Hôpital de référence',  value: record.hospital,       icon: '🏨' },
+              { label: 'N° assuré',              value: record.insuranceNumber,icon: '📋' },
+              { label: 'Notes',                  value: record.notes,          icon: '📝' },
             ].filter(r => r.value).map(row => (
               <div key={row.label} style={{ display: 'flex', gap: 12, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8 }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}>{row.icon}</span>
@@ -1548,25 +1568,25 @@ function MedicalModule({ config, username }: { config: Record<string, unknown>; 
               </div>
             ))}
 
-            {!!(config.emergency2Name || config.emergency2Phone) && (
+            {!!(record.emergency2Name || record.emergency2Phone) && (
               <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 8, padding: '12px 14px' }}>
                 <p style={{ color: '#818CF8', fontSize: 10, fontFamily: 'Space Mono, monospace', letterSpacing: 2, marginBottom: 8 }}>2ÈME CONTACT</p>
-                {!!config.emergency2Name && (
+                {!!record.emergency2Name && (
                   <p style={{ color: '#F8F9FC', fontSize: 14, fontWeight: 600 }}>
-                    {String(config.emergency2Name)}{!!config.emergency2Rel && <span style={{ color: '#9CA3AF', fontWeight: 400 }}> — {String(config.emergency2Rel)}</span>}
+                    {String(record.emergency2Name)}{!!record.emergency2Rel && <span style={{ color: '#9CA3AF', fontWeight: 400 }}> — {String(record.emergency2Rel)}</span>}
                   </p>
                 )}
-                {!!config.emergency2Phone && (
-                  <a href={`tel:${String(config.emergency2Phone)}`}
+                {!!record.emergency2Phone && (
+                  <a href={`tel:${String(record.emergency2Phone)}`}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '8px 14px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: 6, textDecoration: 'none', color: '#818CF8', fontSize: 14, fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-                    📞 {String(config.emergency2Phone)}
+                    📞 {String(record.emergency2Phone)}
                   </a>
                 )}
               </div>
             )}
 
             {hasPin && (
-              <button onClick={() => { setUnlocked(false); setPin(''); }}
+              <button onClick={() => { setUnlocked(false); setExtra(null); setPin(''); }}
                 style={{ marginTop: 4, background: 'none', border: 'none', color: '#6B7280', fontSize: 12, cursor: 'pointer', fontFamily: 'Space Mono, monospace' }}>
                 🔒 Reverrouiller
               </button>

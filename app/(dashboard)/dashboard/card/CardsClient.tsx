@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import LogoSymbol from '@/components/logo/LogoSymbol';
 import Button from '@/components/ui/Button';
 import Badge from '@/components/ui/Badge';
+import clair from '@/components/dashboard/shell/clair.module.css';
+import cs from './cards.module.css';
 import { DEACTIVATION_REASONS } from '@/lib/cards';
 import type { DeactivationReason } from '@/lib/types';
 
@@ -1224,35 +1226,32 @@ function CardsClientInner({ cards, profile, userPlan }: {
 
   const isEssentiel = userPlan === 'essentiel';
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28, maxWidth: 860 }}>
+  const awaiting = cards.some((c) => c.status === 'pending' || c.status === 'shipped');
+  const [tab, setTab] = useState<'cartes' | 'activer' | 'infos'>('cartes');
 
-      {/* Payment success */}
+  return (
+    <div className={`${clair.scope} ${cs.wrap}`}>
       <PaymentSuccessBanner />
 
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+      <div className={cs.head}>
         <div>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 22, color: 'var(--t-text)', marginBottom: 4 }}>
-            Mes cartes NFC
-          </h2>
-          <p style={{ color: 'var(--t-text-muted)', fontSize: 14 }}>
-            {cards.length === 0
-              ? 'Aucune carte commandée pour l\'instant.'
-              : `${cards.length} carte${cards.length > 1 ? 's' : ''} sur ce compte.`}
+          <p className={cs.title}>Mes cartes NFC</p>
+          <p className={cs.sub}>
+            {cards.length === 0 ? 'Aucune carte commandée pour l’instant.' : `${cards.length} carte${cards.length > 1 ? 's' : ''} sur ce compte.`}
           </p>
         </div>
-        <Button variant="gradient" size="md" onClick={() => setOrderOpen(true)}>
-          + Commander une carte
-        </Button>
+        <button type="button" className={cs.order} onClick={() => setOrderOpen(true)}>+ Commander</button>
       </div>
 
-      {/* Cards list */}
-      {cards.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>
-            Mes cartes
-          </p>
+      <div className={cs.tabs} role="tablist" aria-label="Ma carte">
+        {([['cartes', `Mes cartes · ${cards.length}`], ['activer', awaiting ? 'Activer ●' : 'Activer'], ['infos', 'Caractéristiques']] as const).map(([k, label]) => (
+          <button key={k} type="button" role="tab" aria-selected={tab === k} className={`${cs.tab} ${tab === k ? cs.tabOn : ''}`} onClick={() => setTab(k)}>{label}</button>
+        ))}
+      </div>
+
+      <div className={cs.body} role="tabpanel">
+        {tab === 'cartes' && (cards.length > 0 ? (
+          <div className={cs.list}>
           {cards.map((card) => {
             const status   = STATUS_BADGE[card.status] ?? STATUS_BADGE.pending;
             const edStyle  = EDITION_STYLES[card.edition] ?? EDITION_STYLES.midnight;
@@ -1268,12 +1267,8 @@ function CardsClientInner({ cards, profile, userPlan }: {
                 title={isDeactivated ? undefined : 'Configurer le profil de cette carte'}
                 onClick={() => openCardProfile(card)}
                 onKeyDown={(e) => { if (e.key === 'Enter') openCardProfile(card); }}
-                style={{
-                  background: 'var(--t-surface)',
-                  border: `1px solid ${card.status === 'active' ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 10, padding: '16px 20px', cursor: isDeactivated ? 'default' : 'pointer',
-                  opacity: openingProfile === card.id ? 0.6 : isDeactivated ? 0.75 : 1,
-                }}
+                className={`${cs.cardRow} ${card.status === 'active' ? cs.cardActive : ''}`}
+                style={{ cursor: isDeactivated ? 'default' : 'pointer', opacity: openingProfile === card.id ? 0.6 : isDeactivated ? 0.75 : 1 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                   <div style={{
@@ -1291,8 +1286,10 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       )}
                     </div>
                     <p style={{ color: 'var(--t-text-muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
-                      {edStyle.name} · Commandée le{' '}
-                      {new Date(card.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      {edStyle.name}
+                      {card.orderedAt && !Number.isNaN(Date.parse(card.orderedAt)) && (
+                        <> · Commandée le {new Date(card.orderedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}</>
+                      )}
                     </p>
                     {isDeactivated ? (
                       <p style={{ color: '#F87171', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
@@ -1305,7 +1302,7 @@ function CardsClientInner({ cards, profile, userPlan }: {
                           : ' · nouvelle carte pas encore connectée'}
                       </p>
                     ) : (
-                      <p style={{ color: '#818CF8', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                      <p style={{ color: '#4F46E5', fontSize: 12, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
                         👤 {card.profileUsername
                           ? `Profil : /${card.profileUsername}`
                           : 'Profil non configuré — clique pour le créer'}
@@ -1327,7 +1324,7 @@ function CardsClientInner({ cards, profile, userPlan }: {
                       </p>
                     )}
                     {card.status === 'shipped' && (
-                      <p style={{ color: '#818CF8', fontSize: 11, fontFamily: 'DM Sans, sans-serif', marginTop: 4 }}>
+                      <p style={{ color: '#4F46E5', fontSize: 12, fontFamily: 'DM Sans, sans-serif', marginTop: 4 }}>
                         {status.desc}
                       </p>
                     )}
@@ -1386,80 +1383,49 @@ function CardsClientInner({ cards, profile, userPlan }: {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Empty state */}
-      {cards.length === 0 && (
-        <div style={{
-          background: 'var(--t-surface)', border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 12, padding: 40, textAlign: 'center',
-        }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>💳</div>
-          <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: 'var(--t-text)', marginBottom: 8 }}>
-            Aucune carte encore
-          </p>
-          <p style={{ color: 'var(--t-text-muted)', fontSize: 13, fontFamily: 'DM Sans, sans-serif', marginBottom: 20, maxWidth: 340, margin: '0 auto 20px' }}>
-            Commande ta première carte NFC We Connect et partage ton profil digital d&apos;un simple tap.
-          </p>
-          <Button variant="gradient" size="md" onClick={() => setOrderOpen(true)}>
-            Commander ma première carte
-          </Button>
-        </div>
-      )}
-
-      {/* Card format info */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        {[
-          { label: 'Format',        value: '85.6 × 54 mm — standard CB' },
-          { label: 'Puce',          value: 'NFC NTAG213/215' },
-          { label: 'Compatibilité', value: 'iOS & Android · Portée 10 cm' },
-          { label: 'Livraison',     value: 'Bénin · Togo · Burkina Faso' },
-        ].map((item) => (
-          <div key={item.label} style={{
-            background: 'var(--t-surface)', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 8, padding: '10px 14px', flex: '1 1 160px',
-          }}>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: 'var(--t-text-muted)', marginBottom: 4, textTransform: 'uppercase' }}>
-              {item.label}
-            </p>
-            <p style={{ color: 'var(--t-text)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>{item.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Activate section */}
-      <div style={{ background: 'var(--t-surface)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 24 }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 3, color: 'var(--t-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
-          Activer une carte
-        </p>
-        <p style={{ color: 'var(--t-text-muted)', fontSize: 13, lineHeight: 1.7, marginBottom: 16 }}>
-          Tu as reçu ta carte ? Entre le code NFC imprimé dans l&apos;emballage pour l&apos;activer.
-        </p>
-        {activateSuccess ? (
-          <div style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.2)', borderRadius: 8, padding: '12px 16px', color: '#10B981', fontFamily: 'DM Sans, sans-serif', fontSize: 14 }}>
-            ✅ Carte activée avec succès !
           </div>
         ) : (
-          <>
-            <input
-              value={nfcCode}
-              onChange={(e) => setNfcCode(e.target.value.toUpperCase())}
-              placeholder="WC-XXXXXX"
-              style={{
-                width: '100%', marginBottom: 10,
-                background: 'rgba(255,255,255,0.03)',
-                border: `1px solid ${activateError ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.1)'}`,
-                borderRadius: 8, padding: '10px 14px',
-                color: 'var(--t-text)', fontFamily: 'Space Mono, monospace',
-                fontSize: 13, letterSpacing: 3, outline: 'none', boxSizing: 'border-box',
-              }}
-            />
-            {activateError && <p style={{ color: '#EF4444', fontSize: 12, marginBottom: 10 }}>{activateError}</p>}
-            <Button variant="gradient" size="md" loading={activating} onClick={handleActivate} style={{ width: '100%' }}>
-              {activating ? 'Activation...' : 'Activer ma carte ⚡'}
-            </Button>
-          </>
+          <div className={cs.empty}>
+            <span aria-hidden>💳</span>
+            <p className={cs.emptyTitle}>Aucune carte encore</p>
+            <p className={cs.sub}>Commandez votre première carte NFC et partagez votre profil d’un simple geste.</p>
+            <button type="button" className={cs.order} onClick={() => setOrderOpen(true)}>Commander ma première carte</button>
+          </div>
+        ))}
+
+        {tab === 'activer' && (
+          <div className={cs.panel}>
+            <p className={cs.panelTitle}>Activer une carte</p>
+            <p className={cs.sub}>Vous avez reçu votre carte ? Entrez le code NFC imprimé dans l’emballage.</p>
+            {activateSuccess ? (
+              <p className={cs.success}>✅ Carte activée avec succès !</p>
+            ) : (
+              <>
+                <input value={nfcCode} onChange={(e) => setNfcCode(e.target.value.toUpperCase())} placeholder="WC-XXXXXX"
+                  aria-label="Code NFC" className={cs.code} aria-invalid={!!activateError} />
+                {activateError && <p className={cs.error} role="alert">{activateError}</p>}
+                <button type="button" className={cs.primary} onClick={handleActivate} disabled={activating}>
+                  {activating ? 'Activation…' : 'Activer ma carte ⚡'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {tab === 'infos' && (
+          <div className={cs.specs}>
+            {[
+              { label: 'Format',        value: '85,6 × 54 mm — standard carte bancaire', icon: '📐' },
+              { label: 'Puce',          value: 'NFC NTAG213/215', icon: '📶' },
+              { label: 'Compatibilité', value: 'iOS et Android · portée 10 cm', icon: '📱' },
+              { label: 'Livraison',     value: 'Bénin · Togo · Burkina Faso', icon: '🚚' },
+            ].map((item) => (
+              <div key={item.label} className={cs.spec}>
+                <span aria-hidden>{item.icon}</span>
+                <p><small>{item.label}</small>{item.value}</p>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Badge from '@/components/ui/Badge';
 import { PROFILE_MODULE } from '@/lib/modules';
+import styles from './modules.module.css';
 
 interface Module {
   type: string;
@@ -57,130 +57,47 @@ export default function ModulesClient({ modules, activeModules, profileId, isPro
   }
 
   return (
-    <div>
-      <div style={{ marginBottom: 28 }}>
-        <p style={{ color: '#9CA3AF', fontSize: 14 }}>
-          {isPro
-            ? 'Tous les modules sont disponibles.'
-            : 'Plan Essentiel : 1 module actif. Activer un module remplace le profil digital. Certains modules nécessitent le plan Pro.'}
-        </p>
-      </div>
+    <div className={styles.wrap}>
+      <p className={styles.note}>
+        {isPro
+          ? 'Tous les modules sont disponibles. Activez ceux qui vous servent.'
+          : 'Offre Essentiel : 1 module actif à la fois (il remplace le profil digital). Les modules PRO demandent l’offre Pro.'}
+      </p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+      <ul className={styles.grid}>
         {modules.map((mod) => {
           const isActive  = !!states[mod.type];
           const isLocked  = mod.pro && !isPro;
           const isLoading = loading === mod.type;
+          const href      = mod.type === PROFILE_MODULE ? '/dashboard/profile' : `/dashboard/modules/${mod.type}`;
 
           return (
-            <div
-              key={mod.type}
-              style={{
-                background: '#12141C',
-                border: `1px solid ${isActive ? 'rgba(99,102,241,0.3)' : 'rgba(255,255,255,0.07)'}`,
-                borderRadius: 8,
-                padding: 24,
-                transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
-                opacity: isLocked ? 0.6 : 1,
-                position: 'relative',
-              }}
-            >
-              {isLocked && (
-                <div style={{ position: 'absolute', top: 12, right: 12 }}>
-                  <Badge variant="electric">PRO</Badge>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-                <span style={{ fontSize: 28 }}>{mod.emoji}</span>
-                {/* Toggle */}
-                <button
-                  onClick={() => toggle(mod.type, mod.pro)}
-                  disabled={isLocked || isLoading}
-                  style={{
-                    width: 44, height: 24,
-                    borderRadius: 12,
-                    border: 'none',
-                    background: isActive ? '#6366F1' : 'rgba(255,255,255,0.1)',
-                    position: 'relative',
-                    cursor: isLocked ? 'not-allowed' : 'pointer',
-                    transition: 'background 0.3s',
-                    flexShrink: 0,
-                    marginTop: 4,
-                  }}
-                >
-                  <span style={{
-                    position: 'absolute',
-                    top: 2, left: isActive ? 22 : 2,
-                    width: 20, height: 20,
-                    borderRadius: '50%',
-                    background: '#fff',
-                    transition: 'left 0.3s cubic-bezier(0.23,1,0.32,1)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    {isLoading && (
-                      <svg className="animate-spin" width="10" height="10" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="#6366F1" strokeWidth="3" strokeDasharray="30 70" />
-                      </svg>
-                    )}
-                  </span>
-                </button>
+            <li key={mod.type} className={`${styles.tile} ${isActive ? styles.on : ''} ${isLocked ? styles.locked : ''}`}>
+              <div className={styles.top}>
+                <span className={styles.emoji} aria-hidden>{mod.emoji}</span>
+                {isLocked ? (
+                  <span className={styles.pro}>PRO</span>
+                ) : (
+                  <button type="button" role="switch" aria-checked={isActive} aria-label={`${isActive ? 'Désactiver' : 'Activer'} ${mod.name}`}
+                    className={styles.switchBtn} onClick={() => toggle(mod.type, mod.pro)} disabled={isLoading}>
+                    <span className={styles.switch}><span className={styles.knob}>{isLoading && <span className={styles.spin} />}</span></span>
+                  </button>
+                )}
               </div>
-
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 6 }}>
-                {mod.name}
-              </h3>
-              <p style={{ color: '#6B7280', fontSize: 13, lineHeight: 1.6 }}>
-                {mod.desc}
-              </p>
-
-              {isActive && !isLocked && (
-                <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                  <Link href={mod.type === PROFILE_MODULE ? '/dashboard/profile' : `/dashboard/modules/${mod.type}`} style={{
-                    color: '#818CF8', fontFamily: 'Space Mono, monospace',
-                    fontSize: 9, letterSpacing: 2, textTransform: 'uppercase',
-                    textDecoration: 'none',
-                  }}>
-                    Configurer →
-                  </Link>
-                </div>
-              )}
-            </div>
+              <p className={styles.name}>{mod.name}</p>
+              <p className={styles.desc}>{mod.desc}</p>
+              {isActive && !isLocked
+                ? <Link href={href} className={styles.configure}>Configurer →</Link>
+                : <span className={styles.state}>{isLocked ? 'Offre Pro' : 'Inactif'}</span>}
+            </li>
           );
         })}
-      </div>
+      </ul>
 
-      {/* Custom module card */}
-      <div style={{
-        marginTop: 24,
-        background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(6,182,212,0.05))',
-        border: '1px solid rgba(99,102,241,0.25)',
-        borderRadius: 8, padding: 24,
-        display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
-      }}>
-        <span style={{ fontSize: 32, flexShrink: 0 }}>✦</span>
-        <div style={{ flex: 1, minWidth: 200 }}>
-          <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 16, color: '#F8F9FC', marginBottom: 4 }}>
-            Module sur mesure
-          </h3>
-          <p style={{ color: '#6B7280', fontSize: 13, lineHeight: 1.6, margin: 0 }}>
-            Vous avez un besoin spécifique que nos modules existants ne couvrent pas ?
-            Décrivez-le — notre équipe développe votre module sur mesure et l&apos;intègre à votre profil.
-          </p>
-        </div>
-        <button
-          onClick={() => router.push('/dashboard/modules/custom')}
-          style={{
-            padding: '12px 24px',
-            background: 'linear-gradient(135deg, #4338CA, #6366F1)',
-            border: 'none', borderRadius: 8,
-            color: '#fff', fontFamily: 'Syne, sans-serif',
-            fontWeight: 700, fontSize: 14, cursor: 'pointer',
-            whiteSpace: 'nowrap', flexShrink: 0,
-          }}
-        >
-          Commander →
-        </button>
+      <div className={styles.custom}>
+        <span className={styles.customIcon} aria-hidden>✦</span>
+        <p className={styles.customText}><strong>Module sur mesure</strong><span>Un besoin spécifique ? Nous le développons pour vous.</span></p>
+        <button type="button" className={styles.customBtn} onClick={() => router.push('/dashboard/modules/custom')}>Demander →</button>
       </div>
     </div>
   );

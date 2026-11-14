@@ -2,6 +2,7 @@ import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import CardsClient from './CardsClient';
 import type { CardDoc, ProfileDoc, UserDoc } from '@/lib/types';
+import { getUserSnap } from '@/lib/user-doc';
 
 export default async function CardPage() {
   const user = await requireAuth();
@@ -9,7 +10,7 @@ export default async function CardPage() {
   const [cardsSnap, profileSnap, userSnap, ownProfilesSnap] = await Promise.all([
     adminDb.collection('cards').where('userId', '==', user.uid).get(),
     adminDb.collection('profiles').doc(user.uid).get(),
-    adminDb.collection('users').doc(user.uid).get(),
+    getUserSnap(user.uid),
     adminDb.collection('profiles').where('uid', '==', user.uid).get(),
   ]);
 

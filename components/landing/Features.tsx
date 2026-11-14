@@ -5,7 +5,7 @@ const icon = (d: React.ReactNode) => (
 );
 
 const FEATURES = [
-  { accent: '#6366F1', title: 'Analytics temps réel', desc: 'Scans par jour, pays, appareils et modules les plus visités.',
+  { accent: '#6366F1', title: 'Analytics temps réel', desc: 'Scans par jour, appareils et liens les plus ouverts.',
     icon: icon(<polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />) },
   { accent: '#06B6D4', title: '9 modules métier', desc: 'Fidélité, menu, accès, médical… activez seulement ce qui vous sert.',
     icon: icon(<><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 9h6v6H9z" /></>) },

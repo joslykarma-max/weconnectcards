@@ -1,7 +1,10 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import LogoHorizontal from '@/components/logo/LogoHorizontal';
+import Nav from '@/components/landing/Nav';
+import Footer from '@/components/landing/Footer';
+import LightBubbles from '@/components/ui/LightBubbles';
+import styles from './module.module.css';
 
 interface Props { params: Promise<{ type: string }> }
 
@@ -285,116 +288,97 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// « Clair » palette derived from the module colour (same family as the light profile pages)
+function mix(hex: string, target: string, amount: number): string {
+  const n = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [a, b] = [n(hex), n(target)];
+  return '#' + a.map((v, i) => Math.round(v + (b[i] - v) * amount).toString(16).padStart(2, '0')).join('');
+}
+function lightPalette(color: string) {
+  return {
+    accent: color,
+    panel:  mix(color, '#FFFFFF', 0.78),   // pastel hero panel
+    soft:   mix(color, '#FFFFFF', 0.9),    // icon circles, pills
+    ink:    mix(color, '#0B1220', 0.72),   // headings on pastel
+    bubble: mix(color, '#FFFFFF', 0.25),
+  };
+}
+
 export default async function ModuleDetailPage({ params }: Props) {
   const { type } = await params;
   const mod = MODULES[type];
   if (!mod) notFound();
+  const pal = lightPalette(mod.color);
+  const vars = { '--accent': pal.accent, '--panel': pal.panel, '--soft': pal.soft, '--ink': pal.ink } as React.CSSProperties;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#08090C', color: '#F8F9FC' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '0 40px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, background: 'rgba(8,9,12,0.9)', backdropFilter: 'blur(12px)', zIndex: 50 }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <LogoHorizontal symbolSize="sm" />
-        </Link>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <Link href="/#how-it-works" style={{ color: '#9CA3AF', fontSize: 14, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-            ← Tous les modules
-          </Link>
-          <Link href="/register" style={{ padding: '8px 18px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 6, color: '#fff', fontSize: 14, textDecoration: 'none', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-            Démarrer
-          </Link>
-        </div>
-      </nav>
+    <div className={styles.page} style={vars}>
+      <LightBubbles tints={[pal.bubble, '#9FA8F7']} />
+      <Nav />
 
-      {/* Hero */}
-      <div style={{ padding: '80px 40px 60px', maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '6px 16px', background: mod.bg, border: `1px solid ${mod.border}`, borderRadius: 20, marginBottom: 28 }}>
-          <span style={{ fontSize: 16 }}>{mod.emoji}</span>
-          <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: mod.color, textTransform: 'uppercase' }}>Module We Connect</span>
-        </div>
-        <h1 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(32px, 5vw, 52px)', letterSpacing: '-1.5px', marginBottom: 20, lineHeight: 1.1 }}>
-          {mod.name}
-        </h1>
-        <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 'clamp(18px, 2.5vw, 24px)', color: mod.color, marginBottom: 20 }}>
-          {mod.tagline}
-        </p>
-        <p style={{ color: '#9CA3AF', fontSize: 17, lineHeight: 1.8, maxWidth: 640, margin: '0 auto 40px' }}>
-          {mod.desc}
-        </p>
-        <Link href="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '14px 32px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 8, color: '#fff', fontSize: 16, textDecoration: 'none', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-          Activer ce module →
-        </Link>
-      </div>
+      <main className={styles.main}>
+        <Link href="/#how-it-works" className={styles.back}>← Tous les modules</Link>
 
-      {/* Features */}
-      <div style={{ padding: '0 40px 80px', maxWidth: 1000, margin: '0 auto' }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: mod.color, textTransform: 'uppercase', marginBottom: 32, textAlign: 'center' }}>
-          Ce que vous obtenez
-        </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16, marginBottom: 80 }}>
-          {mod.features.map((f, i) => (
-            <div key={i} style={{ background: '#12141C', border: `1px solid ${mod.border}`, borderRadius: 10, padding: 24 }}>
-              <span style={{ fontSize: 24, display: 'block', marginBottom: 12 }}>{f.icon}</span>
-              <h3 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 15, color: '#F8F9FC', marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ color: '#9CA3AF', fontSize: 13, lineHeight: 1.7 }}>{f.body}</p>
-            </div>
-          ))}
-        </div>
+        {/* Hero: pastel panel with the module emblem, like the light profile header */}
+        <section className={styles.hero}>
+          <div className={styles.emblem} aria-hidden><span>{mod.emoji}</span></div>
+          <div className={styles.panel}>
+            <p className={styles.kicker}>Module We Connect</p>
+            <h1 className={styles.h1}>{mod.name}</h1>
+            <p className={styles.tagline}>{mod.tagline}</p>
+            <p className={styles.desc}>{mod.desc}</p>
+            <Link href="/register" className={styles.primary}>Activer ce module →</Link>
+          </div>
+        </section>
+
+        {/* Features */}
+        <section className={styles.card} aria-labelledby="features">
+          <h2 id="features" className={styles.cardTitle}>Ce que vous obtenez</h2>
+          <ul className={styles.features}>
+            {mod.features.map((f) => (
+              <li key={f.title} className={styles.feature}>
+                <span className={styles.icon} aria-hidden>{f.icon}</span>
+                <span>
+                  <span className={styles.featureTitle}>{f.title}</span>
+                  <span className={styles.featureBody}>{f.body}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         {/* Use cases */}
-        <div style={{ textAlign: 'center', marginBottom: 80 }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: mod.color, textTransform: 'uppercase', marginBottom: 24 }}>
-            Idéal pour
-          </p>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-            {mod.useCases.map((u, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px', background: mod.bg, border: `1px solid ${mod.border}`, borderRadius: 30 }}>
-                <span style={{ fontSize: 18 }}>{u.icon}</span>
-                <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#F8F9FC' }}>{u.label}</span>
-              </div>
+        <section className={styles.card} aria-labelledby="usecases">
+          <h2 id="usecases" className={styles.cardTitle}>Idéal pour</h2>
+          <ul className={styles.pills}>
+            {mod.useCases.map((u) => (
+              <li key={u.label}><span aria-hidden>{u.icon}</span>{u.label}</li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
 
-        {/* How it works */}
-        <div style={{ background: '#12141C', border: `1px solid ${mod.border}`, borderRadius: 12, padding: '40px 48px', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: mod.color, textTransform: 'uppercase', marginBottom: 32 }}>
-            Comment ça marche
-          </p>
-          <div style={{ display: 'flex', gap: 0, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {/* Steps */}
+        <section className={styles.steps} aria-labelledby="steps">
+          <h2 id="steps" className={styles.cardTitle}>Comment ça marche</h2>
+          <ol>
             {mod.steps.map((step, i) => (
-              <div key={i} style={{ flex: 1, minWidth: 200, padding: '0 20px', position: 'relative' }}>
-                {i < mod.steps.length - 1 && (
-                  <div style={{ position: 'absolute', top: 18, left: '60%', right: '-20%', height: 1, background: `linear-gradient(90deg, ${mod.color}44, transparent)` }} />
-                )}
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: mod.bg, border: `1px solid ${mod.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 14, color: mod.color }}>
-                  {i + 1}
-                </div>
-                <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF', lineHeight: 1.6 }}>{step}</p>
-              </div>
+              <li key={step}><span className={styles.stepNum}>{i + 1}</span>{step}</li>
             ))}
-          </div>
-        </div>
+          </ol>
+        </section>
 
-        {/* CTA bottom */}
-        <div style={{ textAlign: 'center', marginTop: 64 }}>
-          <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 28, marginBottom: 16 }}>
-            Prêt à activer {mod.name} ?
-          </h2>
-          <p style={{ color: '#9CA3AF', fontSize: 15, marginBottom: 32 }}>
-            Créez votre compte gratuitement et configurez ce module en moins de 2 minutes.
-          </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/register" style={{ padding: '14px 32px', background: 'linear-gradient(135deg, #4338CA, #6366F1)', borderRadius: 8, color: '#fff', fontSize: 15, textDecoration: 'none', fontFamily: 'Syne, sans-serif', fontWeight: 700 }}>
-              Créer mon compte →
-            </Link>
-            <Link href="/" style={{ padding: '14px 32px', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, color: '#9CA3AF', fontSize: 15, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif' }}>
-              Voir tous les modules
-            </Link>
+        {/* Bottom CTA */}
+        <section className={styles.cta}>
+          <h2>Prêt à activer {mod.name}{'\u00A0'}?</h2>
+          <p>Créez votre compte gratuitement et configurez ce module en moins de 2 minutes.</p>
+          <div className={styles.ctaActions}>
+            <Link href="/register" className={styles.primary}>Créer mon compte →</Link>
+            <Link href="/#how-it-works" className={styles.secondary}>Voir tous les modules</Link>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+
+      <div className={styles.above}><Footer /></div>
     </div>
   );
 }

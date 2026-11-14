@@ -1,0 +1,55 @@
+/* Modules — « Clair » 3D tiles that fit the panel without scrolling */
+.wrap { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.note { margin: 0; font-size: 13px; line-height: 1.5; color: #64748B; }
+
+.grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.tile {
+  position: relative; display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  padding: 10px; border-radius: 18px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1F5FB 100%);
+  border: 1px solid #FFFFFF;
+  box-shadow: inset 0 1px 0 #FFFFFF, 0 4px 0 #E2E8F0, 0 12px 20px -14px rgba(15, 42, 68, 0.35);
+}
+.on { background: linear-gradient(180deg, #FFFFFF 0%, #E0E7FF 100%); box-shadow: inset 0 1px 0 #FFFFFF, 0 4px 0 #C7D2FE, 0 12px 20px -14px rgba(67, 56, 202, 0.4); }
+.locked { opacity: 0.72; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.emoji { width: 38px; height: 38px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 21px; box-shadow: 0 2px 0 #E2E8F0; flex-shrink: 0; }
+.name { margin: 4px 0 0; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; line-height: 1.2; color: #0F172A; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.desc { display: none; margin: 0; font-size: 12.5px; line-height: 1.4; color: #64748B; }
+.configure, .state { margin-top: auto; padding-top: 4px; font-size: 12px; font-weight: 700; text-decoration: none; }
+.configure { color: #4F46E5; min-height: 28px; display: inline-flex; align-items: center; }
+.state { color: #94A3B8; font-weight: 600; }
+.pro { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 3px 7px; border-radius: 6px; background: #0F172A; color: #FFFFFF; }
+
+.switchBtn { width: 44px; height: 44px; margin: -6px -4px -6px 0; padding: 0; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.switchBtn:disabled { cursor: progress; }
+.switch { position: relative; width: 40px; height: 24px; border-radius: 999px; background: #CBD5E1; transition: background-color 250ms ease; }
+.knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3); transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1); display: flex; align-items: center; justify-content: center; }
+.switchBtn[aria-checked="true"] .switch { background: #6366F1; }
+.switchBtn[aria-checked="true"] .knob { transform: translateX(16px); }
+.spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid #C7D2FE; border-top-color: #6366F1; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.custom {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 18px;
+  background: linear-gradient(135deg, #EEF2FF, #ECFEFF); border: 1px solid #E0E7FF;
+}
+.customIcon { width: 38px; height: 38px; border-radius: 12px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; color: #6366F1; font-size: 18px; flex-shrink: 0; }
+.customText { flex: 1; min-width: 0; margin: 0; display: flex; flex-direction: column; font-size: 12.5px; color: #64748B; line-height: 1.35; }
+.customText strong { font-family: 'Syne', sans-serif; font-size: 14px; color: #0F172A; }
+.customBtn { min-height: 44px; padding: 0 16px; border-radius: 999px; border: none; cursor: pointer; background: #0F172A; color: #FFFFFF; font-weight: 700; font-size: 13.5px; white-space: nowrap; box-shadow: 0 3px 0 #000; }
+
+.switchBtn:focus-visible, .configure:focus-visible, .customBtn:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; border-radius: 10px; }
+
+@media (min-width: 760px) {
+  .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .tile { padding: 14px; }
+  .name { font-size: 14.5px; }
+  .desc { display: block; }
+}
+@media (max-height: 700px) and (max-width: 759px) {
+  .desc, .note { display: none; }
+  .tile { padding: 8px; }
+  .emoji { width: 32px; height: 32px; font-size: 18px; }
+}
+@media (prefers-reduced-motion: reduce) { .switch, .knob { transition: none; } }

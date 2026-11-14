@@ -1,0 +1,23 @@
+/* Light (« Clair ») scope for dashboard screens written with the --t-* theme variables:
+   wrapping a screen in .scope switches it — and its modals — to the light palette. */
+.scope {
+  --t-bg:          #F7F9FC;
+  --t-sidebar:     #FFFFFF;
+  --t-surface:     #FFFFFF;
+  --t-card:        #F4F7FB;
+  --t-row:         rgba(15, 23, 42, 0.03);
+  --t-border:      #EDF1F6;
+  --t-border-full: 1px solid #EDF1F6;
+  --t-text:        #0F172A;
+  --t-text-sub:    #334155;
+  --t-text-muted:  #64748B;
+  color: #0F172A;
+}
+/* Fields written with translucent-white backgrounds/borders for the dark theme */
+.scope input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
+.scope select, .scope textarea {
+  background-color: #FFFFFF !important; border-color: #E3E8EF !important; color: #0F172A !important;
+}
+.scope input::placeholder, .scope textarea::placeholder { color: #94A3B8 !important; }
+/* Dark "secondary" buttons from the shared Button component */
+.scope :global(button.bg-surface) { background-color: #FFFFFF !important; color: #0F172A !important; border-color: #E3E8EF !important; box-shadow: 0 2px 0 #E2E8F0; }

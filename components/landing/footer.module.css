@@ -42,3 +42,5 @@
   .contact .text { font-size: 13.5px; color: #9CA3AF; padding: 4px 0; }
   .bottom { margin-top: 40px; }
 }
+.mail { text-decoration: none; }
+@media (hover: hover) { .mail:hover { color: #F8F9FC; } }

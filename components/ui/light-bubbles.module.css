@@ -1,0 +1,24 @@
+.field { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.bubble { position: absolute; bottom: -170px; animation: lb-rise var(--dur) linear var(--delay) infinite; }
+.body {
+  position: absolute; inset: 0; border-radius: 50%;
+  animation-duration: calc(var(--dur) / 2); animation-timing-function: ease-in-out;
+  animation-delay: var(--delay); animation-iteration-count: infinite; animation-direction: alternate;
+}
+.swayA { animation-name: lb-sway-a; }
+.swayB { animation-name: lb-sway-b; }
+.swayC { animation-name: lb-sway-c; }
+@keyframes lb-rise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  8%   { opacity: 1; }
+  92%  { opacity: 1; }
+  100% { transform: translate3d(0, -125vh, 0); opacity: 0; }
+}
+@keyframes lb-sway-a { from { transform: translate3d(-14px, 0, 0); } to { transform: translate3d(14px, 0, 0); } }
+@keyframes lb-sway-b { from { transform: translate3d(18px, 0, 0); }  to { transform: translate3d(-18px, 0, 0); } }
+@keyframes lb-sway-c { from { transform: translate3d(-22px, 0, 0); } to { transform: translate3d(22px, 0, 0); } }
+@media (max-width: 639px) { .bubble:nth-child(n + 7) { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .bubble { animation: none; opacity: 0.6; transform: translate3d(0, var(--rest), 0); }
+  .body { animation: none; }
+}
