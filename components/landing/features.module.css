@@ -1,0 +1,39 @@
+.section {
+  position: relative; overflow: hidden;
+  padding: 64px max(16px, env(safe-area-inset-right)) 64px max(16px, env(safe-area-inset-left));
+  background:
+    radial-gradient(38% 34% at 85% 15%, rgba(245, 158, 11, 0.16) 0%, transparent 70%),
+    radial-gradient(40% 36% at 10% 80%, rgba(34, 197, 94, 0.14) 0%, transparent 70%),
+    radial-gradient(42% 38% at 60% 60%, rgba(99, 102, 241, 0.16) 0%, transparent 70%),
+    linear-gradient(180deg, #EEF6FF 0%, #F5F3FF 100%);
+}
+.head { text-align: center; max-width: 640px; margin: 0 auto 20px; }
+.eyebrow { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 4px; color: #6366F1; text-transform: uppercase; margin: 0 0 10px; }
+.title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(24px, 6.4vw, 42px); line-height: 1.12; letter-spacing: -0.02em; color: #0F172A; margin: 0; text-wrap: balance; }
+
+.glass {
+  list-style: none; margin: 0 auto; max-width: 1040px; padding: 10px;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.82); border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 24px 60px -20px rgba(15, 42, 68, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass { background: rgba(255, 255, 255, 0.5); -webkit-backdrop-filter: blur(22px) saturate(1.6); backdrop-filter: blur(22px) saturate(1.6); }
+}
+.tile {
+  display: flex; flex-direction: column; gap: 6px; padding: 14px 12px;
+  border-radius: 20px; background: rgba(255, 255, 255, 0.75); border: 1px solid rgba(255, 255, 255, 0.9);
+}
+.icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+.name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14.5px; line-height: 1.2; color: #0F172A; }
+.desc { font-size: 12.5px; line-height: 1.45; color: #64748B; }
+
+@media (min-width: 900px) {
+  .section { padding-top: 90px; padding-bottom: 90px; }
+  .head { margin-bottom: 32px; }
+  .glass { grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 16px; gap: 12px; }
+  .tile { padding: 20px; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 14px; }
+  .name { font-size: 16px; flex: 1; }
+  .desc { flex-basis: 100%; font-size: 14px; }
+}

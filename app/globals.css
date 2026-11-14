@@ -332,13 +332,6 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
   /* Section padding */
   .section-responsive { padding: 64px 20px !important; }
 
-  /* Footer */
-  .footer-main { padding: 48px 20px 32px !important; }
-  .footer-grid {
-    grid-template-columns: 1fr 1fr !important;
-    gap: 40px 24px !important;
-  }
-
   /* Dashboard grids */
   .dash-kpis           { grid-template-columns: 1fr 1fr !important; }
   .dash-overview-grid  { grid-template-columns: 1fr !important; }
@@ -350,6 +343,5 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
 }
 
 @media (max-width: 480px) {
-  .footer-grid     { grid-template-columns: 1fr !important; }
   .dash-kpis       { grid-template-columns: 1fr 1fr !important; }
 }

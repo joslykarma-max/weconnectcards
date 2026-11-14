@@ -1,8 +1,9 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import { useScrollReveal } from '@/hooks/useScrollReveal';
+import styles from './pricing.module.css';
 
 const plans = [
   {
@@ -31,123 +32,87 @@ const plans = [
   },
 ];
 
+type PlanKey = typeof plans[number]['key'];
+
+/** Offers: on phones one plan at a time behind a Standard / Pro / Prestige selector; three columns on desktop. */
 export default function Pricing() {
-  const { ref: headerRef, visible: headerVisible } = useScrollReveal();
+  const [selected, setSelected] = useState<PlanKey>('pro');
+
   return (
-    <section id="pricing" className="lp-section lp-deferred" style={{ background: '#F4F7FB' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-      <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 64, opacity: headerVisible ? 1 : 0, transform: headerVisible ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.7s cubic-bezier(0.23,1,0.32,1)' }}>
-        <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>Tarifs</p>
-        <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(32px, 4vw, 48px)', letterSpacing: '-1px', color: '#0F172A', marginBottom: 20 }}>Choisis ta carte. Construis ton image.</h2>
-        <p style={{ color: '#64748B', fontSize: 17, maxWidth: 540, margin: '0 auto' }}>Trois éditions — chacune pensée pour un niveau d&apos;ambition. Abonnement offert dès l&apos;achat.</p>
+    <section id="pricing" className={`${styles.section} lp-deferred`}>
+      <div className={styles.head}>
+        <p className={styles.eyebrow}>Tarifs</p>
+        <h2 className={styles.title}>Choisis ta carte. Construis ton image.</h2>
+        <p className={styles.sub}>Trois offres, achat unique. Abonnement offert dès l&apos;achat.</p>
       </div>
 
-      <div className="lp-grid-fit" style={{ '--lp-min': '300px', gap: 24, alignItems: 'stretch', marginTop: 12 } as React.CSSProperties}>
+      {/* Phone selector */}
+      <div className={styles.selector} role="group" aria-label="Choisir une offre">
         {plans.map((plan) => (
-          <div
-            key={plan.key}
-            style={{
-              background: plan.badge === 'Le plus populaire'
-                ? 'linear-gradient(160deg, #EEF2FF 0%, #FFFFFF 60%)'
-                : plan.badge === 'Premium'
-                ? 'linear-gradient(160deg, #FFFBEB 0%, #FFFFFF 60%)'
-                : '#FFFFFF',
-              border: plan.badge === 'Le plus populaire'
-                ? '2px solid rgba(99,102,241,0.4)'
-                : plan.badge === 'Premium'
-                ? '2px solid rgba(245,158,11,0.35)'
-                : '1px solid #E2E8F0',
-              borderRadius: 24,
-              padding: 'clamp(24px, 5vw, 32px)',
-              position: 'relative',
-              transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
-              boxShadow: plan.badge === 'Le plus populaire'
-                ? '0 20px 60px rgba(99,102,241,0.18), 0 0 0 1px rgba(99,102,241,0.08)'
-                : plan.badge === 'Premium'
-                ? '0 12px 40px rgba(245,158,11,0.12)'
-                : '0 4px 16px rgba(0,0,0,0.06)',
-              display: 'flex', flexDirection: 'column',
-            }}
-          >
-            {plan.badge && (
-              <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: plan.key === 'pro' ? 'linear-gradient(135deg, #6366F1, #06B6D4)' : 'linear-gradient(135deg, #F59E0B, #FBBF24)', color: '#fff', fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, padding: '4px 14px', borderRadius: 4, whiteSpace: 'nowrap', textTransform: 'uppercase' }}>{plan.badge}</div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-              <span style={{ fontSize: 24 }}>{plan.icon}</span>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, letterSpacing: 3, color: plan.color, textTransform: 'uppercase' }}>Carte {plan.name}</p>
-            </div>
-            <p style={{ color: '#64748B', fontSize: 13, lineHeight: 1.6, marginBottom: 24 }}>{plan.tagline}</p>
-
-            <div style={{ marginBottom: 24 }}>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 44, color: '#0F172A' }}>{plan.price}</span>
-              <span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, color: '#94A3B8', marginLeft: 6 }}>FCFA</span>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#94A3B8', letterSpacing: 2, marginTop: 4 }}>Achat unique</p>
-            </div>
-
-            <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 20, marginBottom: 20, flex: 1 }}>
-              {plan.features.map((f, j) => (
-                <div key={j} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" style={{ color: plan.color, flexShrink: 0, marginTop: 3 }}>
-                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span style={{ color: '#475569', fontSize: 13.5, lineHeight: 1.5 }}>{f}</span>
-                </div>
-              ))}
-            </div>
-
-            {plan.option && (
-              <div style={{ background: `${plan.color}08`, border: `1px solid ${plan.color}20`, borderRadius: 6, padding: '8px 12px', marginBottom: 16 }}>
-                <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 10, color: plan.color, letterSpacing: 1 }}>💡 {plan.option}</p>
-              </div>
-            )}
-
-            <div style={{ marginBottom: 20 }}>
-              <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 2, color: '#94A3B8', textTransform: 'uppercase', marginBottom: 4 }}>Idéal pour</p>
-              <p style={{ color: '#64748B', fontSize: 12, lineHeight: 1.5 }}>{plan.ideal}</p>
-            </div>
-
-            <Link href={plan.href} style={{ display: 'block' }}>
-              <Button variant={plan.variant} size="md" style={{ width: '100%' }}>{plan.cta}</Button>
-            </Link>
-          </div>
+          <button key={plan.key} type="button" aria-pressed={selected === plan.key} onClick={() => setSelected(plan.key)}
+            className={`${styles.selBtn} ${selected === plan.key ? styles.selOn : ''}`}
+            style={selected === plan.key ? { borderColor: plan.color, color: plan.color } : undefined}>
+            <span className={styles.selName}>{plan.name}</span>
+            <span className={styles.selPrice}>{plan.price} F</span>
+          </button>
         ))}
       </div>
 
-      <div style={{ marginTop: 32, background: '#FFFFFF', border: '1px solid #EDF1F6', borderRadius: 20, padding: '20px clamp(16px, 5vw, 28px)', textAlign: 'center' }}>
-        <p style={{ color: '#64748B', fontSize: 13.5, lineHeight: 1.7 }}>
-          Après la période d&apos;abonnement offerte (6 ou 12 mois), le réabonnement est de{' '}
-          <strong style={{ color: '#0F172A' }}>2 000 FCFA/mois</strong> pour conserver l&apos;accès aux services en ligne.
-        </p>
+      <div className={styles.grid}>
+        {plans.map((plan) => (
+          <article key={plan.key}
+            className={`${styles.card} ${selected === plan.key ? styles.cardSelected : ''}`}
+            style={{
+              borderColor: plan.key === 'pro' ? 'rgba(99,102,241,0.45)' : plan.key === 'prestige' ? 'rgba(245,158,11,0.4)' : '#E2E8F0',
+              background: plan.key === 'pro' ? 'linear-gradient(160deg, #EEF2FF 0%, #FFFFFF 60%)' : plan.key === 'prestige' ? 'linear-gradient(160deg, #FFFBEB 0%, #FFFFFF 60%)' : '#FFFFFF',
+            }}>
+            {plan.badge && (
+              <div className={styles.badge} style={{ background: plan.key === 'pro' ? 'linear-gradient(135deg, #6366F1, #06B6D4)' : 'linear-gradient(135deg, #F59E0B, #FBBF24)' }}>{plan.badge}</div>
+            )}
+            <div className={styles.cardHead}>
+              <span className={styles.planIcon} aria-hidden>{plan.icon}</span>
+              <p className={styles.planName} style={{ color: plan.color }}>Carte {plan.name}</p>
+            </div>
+            <p className={styles.tagline}>{plan.tagline}</p>
+            <p className={styles.price}>{plan.price}<span>FCFA</span><small>Achat unique</small></p>
+            <ul className={styles.features}>
+              {plan.features.map((f) => (
+                <li key={f}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" style={{ color: plan.color }} aria-hidden>
+                    <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            {plan.option && <p className={styles.option} style={{ color: plan.color, background: `${plan.color}0D`, borderColor: `${plan.color}26` }}>💡 {plan.option}</p>}
+            <p className={styles.ideal}><span>Idéal pour</span>{plan.ideal}</p>
+            <Link href={plan.href} style={{ display: 'block', marginTop: 'auto' }}>
+              <Button variant={plan.variant} size="md" style={{ width: '100%' }}>{plan.cta}</Button>
+            </Link>
+          </article>
+        ))}
       </div>
 
-      <div style={{ marginTop: 32, background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 24, padding: 'clamp(20px, 5vw, 28px) clamp(20px, 5vw, 36px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: 20 }}>⚡</span>
+      <div className={styles.terms}>
+        <p className={styles.renew}>
+          Après la période d&apos;abonnement offerte (6 ou 12 mois), le réabonnement est de{' '}
+          <strong>2 000 FCFA/mois</strong> pour conserver l&apos;accès aux services en ligne.
+        </p>
+        <div className={styles.upgrade}>
+          <div className={styles.upgradeText}>
+            <p className={styles.upgradeTitle}>⚡ Vous avez déjà une carte Standard ?</p>
+            <p>Passez votre compte en Pro pour débloquer 3 modules simultanés, le QR dynamique avancé et la gestion multi-cartes.</p>
           </div>
-          <div>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 700, fontSize: 17, color: '#0F172A', marginBottom: 4 }}>Vous avez déjà une carte Standard ?</p>
-            <p style={{ color: '#64748B', fontSize: 14, lineHeight: 1.5 }}>Passez votre compte en Pro pour débloquer 3 modules simultanés, le QR dynamique avancé et la gestion multi-cartes.</p>
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flexWrap: 'wrap' }}>
-          <div style={{ textAlign: 'center' }}>
-            <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 30, color: '#0F172A', lineHeight: 1 }}>
-              5 500<span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 15, color: '#94A3B8', marginLeft: 4 }}>FCFA</span>
-            </p>
-            <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#94A3B8', letterSpacing: 2, marginTop: 4 }}>UNIQUE</p>
-          </div>
-          <Link href="/dashboard/settings?upgrade=pro">
-            <Button variant="gradient" size="md">Passer mon compte en Pro →</Button>
+          <p className={styles.upgradePrice}>5 500<span>FCFA</span><small>Unique</small></p>
+          <Link href="/dashboard/settings?upgrade=pro" className={styles.upgradeLink}>
+            <Button variant="gradient" size="md" style={{ width: '100%' }}>Passer mon compte en Pro →</Button>
           </Link>
         </div>
-      </div>
-
-      <p style={{ textAlign: 'center', color: '#94A3B8', fontSize: 12, fontFamily: 'DM Sans, sans-serif', marginTop: 20, lineHeight: 1.7 }}>
-        L&apos;achat d&apos;une carte Pro ou Prestige active automatiquement un compte Pro.
-        <br/>L&apos;upgrade à 5 500 FCFA est à usage unique pour les détenteurs de carte Standard.
-      </p>
+        <p className={styles.fine}>
+          L&apos;achat d&apos;une carte Pro ou Prestige active automatiquement un compte Pro.
+          <br />L&apos;upgrade à 5 500 FCFA est à usage unique pour les détenteurs de carte Standard.
+        </p>
       </div>
     </section>
   );
