@@ -1,26 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import Link from 'next/link';
-import LogoHorizontal from '@/components/logo/LogoHorizontal';
-import Button from '@/components/ui/Button';
+import Image from 'next/image';
+import MobileNavigation, { type NavLink } from './MobileNavigation';
+import styles from './nav.module.css';
 
-const navLinks = [
+const NAV_LINKS: NavLink[] = [
   { href: '/comment-ca-marche', label: 'Comment ça marche' },
   { href: '/features',          label: 'Features' },
   { href: '/tarifs',            label: 'Tarifs' },
 ];
 
 export default function Nav() {
-  const [scrolled, setScrolled]     = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen]     = useState(false);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handler);
-    return () => window.removeEventListener('scroll', handler);
-  }, []);
+  const rootRef   = useRef<HTMLElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const menuId    = useId();
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -29,147 +26,55 @@ export default function Nav() {
       .catch(() => {});
   }, []);
 
-  const navBg = '#FFFFFF';
-  const navBlur = 'none';
-  const navBorder = '1px solid rgba(0,0,0,0.08)';
+  // Close the menu on Escape or a tap outside the header
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { setMenuOpen(false); burgerRef.current?.focus(); } };
+    const onDown = (e: PointerEvent) => { if (!rootRef.current?.contains(e.target as Node)) setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('pointerdown', onDown);
+    return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDown); };
+  }, [menuOpen]);
 
   return (
-    <nav
-      style={{
-        position: 'fixed',
-        top: 0, left: 0, right: 0,
-        zIndex: 100,
-        transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
-        background: navBg,
-        backdropFilter: navBlur,
-        borderBottom: navBorder,
-      }}
-    >
-      {/* ── Top bar ── */}
-      <div style={{
-        maxWidth: 1280,
-        margin: '0 auto',
-        padding: '0 24px',
-        height: 64,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 24,
-      }}>
-        <Link href="/" style={{ textDecoration: 'none', flexShrink: 0 }}>
-          <LogoHorizontal symbolSize="md" />
+    <header ref={rootRef} className={styles.nav}>
+      <div className={styles.bar}>
+        <Link href="/" className={styles.logo} aria-label="We Connect — accueil">
+          <Image src="/logo-symbol.png" alt="" width={57} height={30} priority className={styles.logoSymbol} />
+          <Image src="/logo-wordmark.png" alt="" width={175} height={30} priority className={styles.logoWordmark} />
         </Link>
 
-        {/* Desktop links */}
-        <div className="nav-links-desktop" style={{ display: 'flex', gap: 32, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#374151', textDecoration: 'none', transition: 'color 0.2s' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#6366F1')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#374151')}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        <nav className={styles.links} aria-label="Navigation principale">
+          {NAV_LINKS.map((l) => <Link key={l.href} href={l.href} className={styles.link}>{l.label}</Link>)}
+        </nav>
 
-        {/* Desktop CTAs */}
-        <div className="nav-actions-desktop" style={{ display: 'flex', gap: 12, alignItems: 'center', flexShrink: 0 }}>
-          {isLoggedIn ? (
-            <Link href="/dashboard">
-              <Button variant="ghost" size="sm">Dashboard →</Button>
-            </Link>
-          ) : (
-            <Link href="/login">
-              <Button variant="ghost" size="sm">Connexion</Button>
-            </Link>
-          )}
-          <Link href="/register">
-            <Button variant="gradient" size="sm">Commander ma carte</Button>
+        <div className={styles.actions}>
+          <Link href={isLoggedIn ? '/dashboard' : '/login'} className={styles.login}>
+            {isLoggedIn ? 'Dashboard →' : 'Connexion'}
           </Link>
-        </div>
-
-        {/* Mobile hamburger */}
-        <button
-          className="nav-hamburger"
-          onClick={() => setMenuOpen((o) => !o)}
-          aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
-          style={{
-            background: 'none',
-            border: '1px solid rgba(0,0,0,0.12)',
-            borderRadius: 8,
-            cursor: 'pointer',
-            padding: '8px 10px',
-            color: '#374151',
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'border-color 0.2s',
-          }}
-        >
-          {menuOpen ? (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-          ) : (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          )}
-        </button>
-      </div>
-
-      {/* ── Mobile menu drawer ── */}
-      <div style={{
-        overflow: 'hidden',
-        maxHeight: menuOpen ? 500 : 0,
-        transition: 'max-height 0.35s cubic-bezier(0.23,1,0.32,1)',
-        borderTop: menuOpen ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent',
-      }}>
-        <div style={{ padding: '12px 24px 28px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              style={{
-                fontFamily: 'DM Sans, sans-serif',
-                fontSize: 16,
-                color: '#374151',
-                textDecoration: 'none',
-                padding: '13px 4px',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
-                display: 'block',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
-            {isLoggedIn ? (
-              <Link href="/dashboard" onClick={() => setMenuOpen(false)} style={{ display: 'block' }}>
-                <Button variant="ghost" size="md" style={{ width: '100%' }}>Dashboard →</Button>
-              </Link>
+          <Link href="/register" className={styles.order}>
+            <span className={styles.orderShort}>Commander</span>
+            <span className={styles.orderLong}>Commander ma carte</span>
+          </Link>
+          <button
+            ref={burgerRef}
+            type="button"
+            className={styles.burger}
+            onClick={() => setMenuOpen((o) => !o)}
+            aria-expanded={menuOpen}
+            aria-controls={menuId}
+            aria-label={menuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+          >
+            {menuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M18 6L6 18M6 6l12 12" /></svg>
             ) : (
-              <Link href="/login" onClick={() => setMenuOpen(false)} style={{ display: 'block' }}>
-                <Button variant="ghost" size="md" style={{ width: '100%' }}>Connexion</Button>
-              </Link>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
             )}
-            <Link href="/register" onClick={() => setMenuOpen(false)} style={{ display: 'block' }}>
-              <Button variant="gradient" size="md" style={{ width: '100%' }}>
-                Commander ma carte
-              </Button>
-            </Link>
-          </div>
+          </button>
         </div>
       </div>
-    </nav>
+
+      {menuOpen && <MobileNavigation id={menuId} links={NAV_LINKS} isLoggedIn={isLoggedIn} onClose={() => setMenuOpen(false)} />}
+    </header>
   );
 }

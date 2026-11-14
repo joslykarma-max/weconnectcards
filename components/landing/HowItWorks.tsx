@@ -28,7 +28,7 @@ const STEPS = [
           <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, color: '#fff', letterSpacing: 1 }}>4 ÉDITIONS</span>
         </div>
         <div style={{ position: 'absolute', bottom: -16, left: -16, background: '#FFFFFF', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 10, padding: '8px 14px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', animation: 'livePulse 2s ease-in-out infinite' }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#22C55E', animation: 'lpBlink 2s ease-in-out infinite' }} />
           <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 12, color: '#0F172A', fontWeight: 500 }}>Livraison Afrique + Monde</span>
         </div>
       </div>
@@ -110,7 +110,7 @@ const STEPS = [
           <div style={{ width: 80, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2, margin: '16px auto 0' }} />
         </div>
         <div style={{ position: 'absolute', bottom: -20, right: -20, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-          <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#F3F0FF', border: '1px solid rgba(139,92,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, animation: 'pulseGlow 2s ease-in-out infinite' }}>📶</div>
+          <div style={{ width: 50, height: 50, borderRadius: '50%', background: '#F3F0FF', border: '1px solid rgba(139,92,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, boxShadow: '0 0 28px rgba(99,102,241,0.35)', animation: 'lpBreath 2.4s ease-in-out infinite' }}>📶</div>
           <span style={{ fontFamily: 'Space Mono, monospace', fontSize: 7, color: '#8B5CF6', letterSpacing: 2, textTransform: 'uppercase', textAlign: 'center' }}>NFC</span>
         </div>
       </div>
@@ -141,7 +141,7 @@ function StepRow({ step, index }: { step: typeof STEPS[0]; index: number }) {
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="section-responsive" style={{ padding: '100px 40px', background: 'linear-gradient(180deg, #EEF2FF 0%, #FFFFFF 30%, #FFFFFF 70%, #F0F9FF 100%)', position: 'relative', overflow: 'hidden' }}>
+    <section id="how-it-works" className="lp-section lp-deferred" style={{ background: 'linear-gradient(180deg, #EEF2FF 0%, #FFFFFF 30%, #FFFFFF 70%, #F0F9FF 100%)', overflow: 'hidden' }}>
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
       <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(99,102,241,0.04) 0%, transparent 70%)', pointerEvents: 'none' }} />
 

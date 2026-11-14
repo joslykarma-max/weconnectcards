@@ -1,0 +1,90 @@
+/* Floating header: a white pill so the official (dark blue) logo stays readable on every hero background */
+.nav {
+  position: fixed; z-index: 100;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  max-width: 1240px; margin: 0 auto;
+}
+.bar {
+  height: 60px; padding: 0 8px 0 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.10);
+}
+.logo { display: flex; align-items: center; flex-shrink: 0; min-height: 44px; padding: 0 4px; }
+.logoSymbol { display: block; width: auto; height: 28px; }
+.logoWordmark { display: none; width: auto; height: 30px; }
+.links { display: none; flex: 1; justify-content: center; gap: 4px; }
+.link {
+  min-height: 44px; padding: 0 14px; border-radius: 12px;
+  display: inline-flex; align-items: center;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; color: #334155; text-decoration: none;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+.actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.login {
+  display: none; min-height: 44px; padding: 0 16px; border-radius: 14px; align-items: center;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: #0F172A; text-decoration: none;
+  transition: background-color 200ms ease;
+}
+.order {
+  min-height: 44px; padding: 0 16px; border-radius: 14px;
+  display: inline-flex; align-items: center; white-space: nowrap;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; color: #fff; text-decoration: none;
+  background: linear-gradient(135deg, #6366F1, #06B6D4);
+  box-shadow: 0 6px 18px -6px rgba(99, 102, 241, 0.6);
+}
+.orderLong { display: none; }
+.burger {
+  width: 44px; height: 44px; border-radius: 14px; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: #F1F5F9; border: none; color: #0F172A; cursor: pointer;
+}
+.link:focus-visible, .login:focus-visible, .order:focus-visible, .burger:focus-visible, .menuLink:focus-visible {
+  outline: 2px solid #6366F1; outline-offset: 2px;
+}
+@media (hover: hover) {
+  .link:hover { background: #F1F5F9; color: #0F172A; }
+  .login:hover { background: #F1F5F9; }
+}
+
+/* Mobile menu */
+.menu {
+  margin-top: 8px; padding: 8px;
+  background: #fff; border: 1px solid rgba(15, 23, 42, 0.07); border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+  max-height: calc(100dvh - 100px); overflow-y: auto; overscroll-behavior: contain;
+  transform-origin: top center;
+  animation: nav-menu-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes nav-menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } to { opacity: 1; transform: none; } }
+.menuLink {
+  min-height: 52px; padding: 0 14px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 500; color: #0F172A; text-decoration: none;
+}
+.menuLink + .menuLink { border-top: 1px solid #F1F5F9; }
+.menuActions { display: grid; gap: 8px; padding: 8px 6px 6px; }
+.menuActions .login, .menuActions .order { display: flex; justify-content: center; min-height: 50px; font-size: 15px; }
+.menuActions .login { background: #F1F5F9; }
+
+@media (min-width: 400px) {
+  .logoSymbol { display: none; }
+  .logoWordmark { display: block; }
+}
+@media (min-width: 540px) {
+  .orderShort { display: none; }
+  .orderLong { display: inline; }
+}
+@media (min-width: 900px) {
+  .links { display: flex; }
+  .login { display: inline-flex; }
+  .burger, .menu { display: none; }
+  .order { padding: 0 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .menu { animation: none; }
+}

@@ -208,6 +208,10 @@ body {
   50%      { box-shadow:0 0 0 8px rgba(34,197,94,0);   }
 }
 
+/* Compositor-only pulses (transform / opacity) for always-on decorations */
+@keyframes lpBlink  { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.8); } }
+@keyframes lpBreath { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+
 /* ── Animated gradient background ───────────────────────────── */
 @keyframes gradMove {
   0%,100% { background-position:0% 50%;   }
@@ -278,18 +282,30 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
 
 /* ─── Responsive — Mobile ───────────────────────────────────────── */
 
+/* ─── Landing sections (« Clair » family: white, soft pastel, rounded) ── */
+.lp-section {
+  position: relative;
+  padding: 100px max(40px, env(safe-area-inset-right)) 100px max(40px, env(safe-area-inset-left));
+}
+/* Below-the-fold sections: skip rendering work until they approach the viewport */
+.lp-deferred { content-visibility: auto; contain-intrinsic-size: auto 1000px; }
+.lp-card {
+  background: #FFFFFF;
+  border: 1px solid #EDF1F6;
+  border-radius: 24px;
+  box-shadow: 0 6px 28px rgba(15, 42, 68, 0.07);
+}
+.lp-grid-fit { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(var(--lp-min, 260px), 100%), 1fr)); }
+@media (max-width: 768px) {
+  .lp-section { padding: 64px max(16px, env(safe-area-inset-right)) 64px max(16px, env(safe-area-inset-left)); }
+}
+
 /* Defaults (desktop) */
-.nav-hamburger  { display: none; }
 .bottom-nav     { display: none; }
 .topbar-back    { display: none; }
 .module-back-btn { display: flex; }
 
 @media (max-width: 768px) {
-  /* Nav */
-  .nav-links-desktop   { display: none !important; }
-  .nav-actions-desktop { display: none !important; }
-  .nav-hamburger       { display: flex !important; }
-
   /* Dashboard sidebar ↔ bottom nav */
   .sidebar          { display: none !important; }
   .bottom-nav       { display: flex !important; }
@@ -299,32 +315,6 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
   .topbar-back      { display: flex !important; }
   .module-back-btn  { display: none !important; }
   .module-3col      { grid-template-columns: 1fr !important; }
-
-  /* Hero */
-  .hero-grid {
-    grid-template-columns: 1fr !important;
-    padding: 52px 20px 56px !important;
-    gap: 44px !important;
-    text-align: center;
-  }
-  .hero-text  { text-align: center !important; }
-  .hero-ctas  { justify-content: center !important; }
-  .hero-stats { justify-content: center !important; }
-
-  /* Card deck — scale to fit mobile width */
-  .card-deck-wrapper {
-    width: 100%;
-    overflow: hidden;
-    display: flex !important;
-    justify-content: center;
-    align-items: flex-start;
-    height: 230px;
-  }
-  .card-deck-scale {
-    transform: scale(0.84);
-    transform-origin: top center;
-    flex-shrink: 0;
-  }
 
   /* Steps grid (HowItWorks) */
   .steps-grid {
@@ -355,7 +345,5 @@ html.light .sidebar-item.active { background: rgba(99,102,241,0.08); color: #433
 
 @media (max-width: 480px) {
   .footer-grid     { grid-template-columns: 1fr !important; }
-  .card-deck-scale { transform: scale(0.74); }
-  .card-deck-wrapper { height: 204px; }
   .dash-kpis       { grid-template-columns: 1fr 1fr !important; }
 }

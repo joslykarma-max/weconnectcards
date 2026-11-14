@@ -34,7 +34,7 @@ const plans = [
 export default function Pricing() {
   const { ref: headerRef, visible: headerVisible } = useScrollReveal();
   return (
-    <section id="pricing" className="section-responsive" style={{ padding: '100px 40px', background: '#F8FAFC', position: 'relative' }}>
+    <section id="pricing" className="lp-section lp-deferred" style={{ background: '#F4F7FB' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
       <div ref={headerRef} style={{ textAlign: 'center', marginBottom: 64, opacity: headerVisible ? 1 : 0, transform: headerVisible ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.7s cubic-bezier(0.23,1,0.32,1)' }}>
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#6366F1', textTransform: 'uppercase', marginBottom: 16 }}>Tarifs</p>
@@ -42,7 +42,7 @@ export default function Pricing() {
         <p style={{ color: '#64748B', fontSize: 17, maxWidth: 540, margin: '0 auto' }}>Trois éditions — chacune pensée pour un niveau d&apos;ambition. Abonnement offert dès l&apos;achat.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, alignItems: 'stretch' }}>
+      <div className="lp-grid-fit" style={{ '--lp-min': '300px', gap: 24, alignItems: 'stretch', marginTop: 12 } as React.CSSProperties}>
         {plans.map((plan) => (
           <div
             key={plan.key}
@@ -57,8 +57,8 @@ export default function Pricing() {
                 : plan.badge === 'Premium'
                 ? '2px solid rgba(245,158,11,0.35)'
                 : '1px solid #E2E8F0',
-              borderRadius: 16,
-              padding: 32,
+              borderRadius: 24,
+              padding: 'clamp(24px, 5vw, 32px)',
               position: 'relative',
               transition: 'all 0.3s cubic-bezier(0.23,1,0.32,1)',
               boxShadow: plan.badge === 'Le plus populaire'
@@ -114,14 +114,14 @@ export default function Pricing() {
         ))}
       </div>
 
-      <div style={{ marginTop: 32, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '20px 28px', textAlign: 'center' }}>
+      <div style={{ marginTop: 32, background: '#FFFFFF', border: '1px solid #EDF1F6', borderRadius: 20, padding: '20px clamp(16px, 5vw, 28px)', textAlign: 'center' }}>
         <p style={{ color: '#64748B', fontSize: 13.5, lineHeight: 1.7 }}>
           Après la période d&apos;abonnement offerte (6 ou 12 mois), le réabonnement est de{' '}
           <strong style={{ color: '#0F172A' }}>2 000 FCFA/mois</strong> pour conserver l&apos;accès aux services en ligne.
         </p>
       </div>
 
-      <div style={{ marginTop: 32, background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 12, padding: '28px 36px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
+      <div style={{ marginTop: 32, background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(6,182,212,0.04))', border: '1px solid rgba(99,102,241,0.15)', borderRadius: 24, padding: 'clamp(20px, 5vw, 28px) clamp(20px, 5vw, 36px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #6366F1, #06B6D4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <span style={{ fontSize: 20 }}>⚡</span>
@@ -131,7 +131,7 @@ export default function Pricing() {
             <p style={{ color: '#64748B', fontSize: 14, lineHeight: 1.5 }}>Passez votre compte en Pro pour débloquer 3 modules simultanés, le QR dynamique avancé et la gestion multi-cartes.</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexShrink: 0, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, minWidth: 0, flexWrap: 'wrap' }}>
           <div style={{ textAlign: 'center' }}>
             <p style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 30, color: '#0F172A', lineHeight: 1 }}>
               5 500<span style={{ fontFamily: 'Syne, sans-serif', fontWeight: 600, fontSize: 15, color: '#94A3B8', marginLeft: 4 }}>FCFA</span>

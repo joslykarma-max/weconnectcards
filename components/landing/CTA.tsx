@@ -16,14 +16,14 @@ export default function CTA() {
   const { ref, visible } = useScrollReveal(0.1);
 
   return (
-    <section style={{ padding: '120px 40px', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'linear-gradient(135deg, #1e1b4b 0%, #0F172A 40%, #0c1a2e 100%)' }}>
+    <section className="lp-section lp-deferred" style={{ overflow: 'hidden', textAlign: 'center', background: 'linear-gradient(135deg, #1e1b4b 0%, #0F172A 40%, #0c1a2e 100%)' }}>
       {/* Grid */}
       <div className="grid-bg" style={{ position: 'absolute', inset: 0, opacity: 0.4 }} />
 
       {/* Glows */}
-      <div style={{ position: 'absolute', top: '20%', left: '15%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)', filter: 'blur(60px)', pointerEvents: 'none', animation: 'orb1 18s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.14) 0%, transparent 70%)', filter: 'blur(55px)', pointerEvents: 'none', animation: 'orb2 22s ease-in-out infinite' }} />
-      <div style={{ position: 'absolute', top: '50%', right: '30%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)', filter: 'blur(50px)', pointerEvents: 'none', animation: 'orb3 15s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', top: '20%', left: '15%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%)', pointerEvents: 'none', animation: 'orb1 18s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', bottom: '10%', right: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(6,182,212,0.14) 0%, transparent 70%)', pointerEvents: 'none', animation: 'orb2 22s ease-in-out infinite' }} />
+      <div style={{ position: 'absolute', top: '50%', right: '30%', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)', pointerEvents: 'none', animation: 'orb3 15s ease-in-out infinite' }} />
 
       <div ref={ref} style={{ position: 'relative', zIndex: 1, maxWidth: 720, margin: '0 auto', opacity: visible ? 1 : 0, transform: visible ? 'translateY(0)' : 'translateY(40px)', transition: 'all 0.9s cubic-bezier(0.23,1,0.32,1)' }}>
         {/* Social proof */}
@@ -33,11 +33,11 @@ export default function CTA() {
               {p.emoji}
             </div>
           ))}
-          <span style={{ marginLeft: 16, fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF' }}>+10 000 professionnels nous font confiance</span>
+          <span style={{ marginLeft: 16, fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: '#9CA3AF', textAlign: 'left' }}>Livraison partout en Afrique et dans le monde</span>
         </div>
 
         <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 9, letterSpacing: 4, color: '#818CF8', textTransform: 'uppercase', marginBottom: 24 }}>
-          Rejoignez-les maintenant
+          Prêt à vous lancer ?
         </p>
 
         <h2 style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 'clamp(48px, 6vw, 80px)', letterSpacing: '-2px', lineHeight: 1, color: '#F8F9FC', marginBottom: 28 }}>
