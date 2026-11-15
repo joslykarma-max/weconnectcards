@@ -15,6 +15,7 @@ export default function Launcher({ s }: { s: LauncherStats }) {
   const tiles: Tile[] = [
     { href: '/dashboard/profile',   label: 'Mon profil',   emoji: '👤', soft: '#E0E7FF', edge: '#C7D2FE', stat: 'Infos, liens, style' },
     { href: '/dashboard/card',      label: 'Ma carte',     emoji: '💳', soft: '#DBEAFE', edge: '#BFDBFE', stat: plural(s.activeCards, 'carte active', 'cartes actives') },
+    { href: '/ma-carte',            label: 'Carte virtuelle', emoji: '📱', soft: '#E0E7FF', edge: '#A5B4FC', stat: 'QR plein écran' },
     { href: '/dashboard/modules',   label: 'Modules',      emoji: '🧩', soft: '#CFFAFE', edge: '#A5F3FC', stat: plural(s.activeModules, 'actif', 'actifs') },
     { href: '/dashboard/activite',  label: 'Activité',     emoji: '⚡', soft: '#FEF3C7', edge: '#FDE68A', stat: 'Vue d’ensemble' },
     { href: '/dashboard/analytics', label: 'Statistiques', emoji: '📊', soft: '#EDE9FE', edge: '#DDD6FE', stat: `${s.scans30} scans · 30 j` },

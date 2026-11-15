@@ -1,0 +1,18 @@
+{
+  "name": "Ma carte We Connect",
+  "short_name": "Ma carte",
+  "description": "Votre carte de visite We Connect, toujours dans votre téléphone.",
+  "id": "/ma-carte",
+  "start_url": "/ma-carte",
+  "scope": "/ma-carte",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F7FB",
+  "theme_color": "#F4F7FB",
+  "lang": "fr",
+  "icons": [
+    { "src": "/icons/carte-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/carte-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/carte-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -155,5 +155,5 @@ export function slugify(raw: string): string {
 export const RESERVED_USERNAMES = new Set([
   'admin', 'api', 'activate', 'annuaire', 'carte-perdue', 'comment-ca-marche', 'contact',
   'dashboard', 'features', 'forgot-password', 'login', 'm', 'modules', 'nfc', 'qr',
-  'register', 'tarifs', 'icon', 'favicon', 'robots', 'sitemap',
+  'register', 'tarifs', 'icon', 'favicon', 'robots', 'sitemap', 'ma-carte', 'privacy', 'icons', 'fonts',
 ]);
