@@ -7,7 +7,6 @@ import Link from 'next/link';
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 type Scan          = { device: string; scannedAt: string };
 type LoyaltyEntry  = { phone: string; stamps: number; lastStampAt?: string };
-type EventEntry    = { name: string; ticketTypeName: string; registeredAt: string; ticketPrice: number };
 type AccessEntry   = { zoneName: string; holderName?: string; status: 'granted' | 'denied'; timestamp: string };
 type MemberEntry   = { memberName: string; level: string; isActive: boolean };
 
@@ -20,7 +19,6 @@ export type OverviewProps = {
   activeModules: string[];
   menuStats:     { restaurantName: string; totalItems: number; totalCategories: number; currency: string; whatsapp?: string } | null;
   loyaltyStats:  { totalCards: number; totalStamps: number; recent: LoyaltyEntry[] } | null;
-  eventStats:    { totalRegistrations: number; totalRevenue: number; currency: string; recent: EventEntry[] } | null;
   accessStats:   { total: number; granted: number; denied: number; recent: AccessEntry[] } | null;
   memberStats:   { total: number; active: number; byLevel: Record<string, number>; recent: MemberEntry[] } | null;
 };
@@ -29,7 +27,6 @@ export type OverviewProps = {
 const MODULE_META: Record<string, { label: string; icon: string }> = {
   menu:        { label: 'Menu',        icon: '🍽️' },
   loyalty:     { label: 'Fidélité',    icon: '🎯' },
-  event:       { label: 'Événement',   icon: '🎟️' },
   access:      { label: 'Accès',       icon: '🔑' },
   member:      { label: 'Membres',     icon: '🎫' },
   review:      { label: 'Avis',        icon: '⭐' },
@@ -221,50 +218,6 @@ function LoyaltyDashboard({ stats, username }: { stats: NonNullable<OverviewProp
   );
 }
 
-/* ─── Event dashboard ────────────────────────────────────────────────────── */
-function EventDashboard({ stats, username }: { stats: NonNullable<OverviewProps['eventStats']>; username?: string }) {
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-      <Section title="🎟️ Événement" action={<SeeLink href="/dashboard/modules/event" />}>
-        <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-          <StatPill label="Inscrits"  value={stats.totalRegistrations} accent="#8B5CF6" />
-          <StatPill label={`Revenus ${stats.currency}`} value={stats.totalRevenue.toLocaleString('fr-FR')} accent="#8B5CF6" />
-        </div>
-        {username && (
-          <a href={`/m/${username}/event`} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 7, textDecoration: 'none', color: '#8B5CF6', fontFamily: 'DM Sans, sans-serif', fontSize: 13, fontWeight: 500 }}>
-            🔗 Page événement ↗
-          </a>
-        )}
-      </Section>
-
-      <Section title="Dernières inscriptions">
-        {stats.recent.length === 0 ? (
-          <EmptyState icon="🎟️" text="Aucune inscription pour le moment." />
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {stats.recent.map((e, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--t-row)', borderRadius: 6 }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(139,92,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}>🎟️</div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ color: 'var(--t-text)', fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{e.name}</p>
-                  <p style={{ color: 'var(--t-text-muted)', fontSize: 11 }}>{e.ticketTypeName}</p>
-                </div>
-                <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                  <p style={{ fontFamily: 'Space Mono, monospace', fontSize: 11, color: '#8B5CF6' }}>{e.ticketPrice.toLocaleString('fr-FR')}</p>
-                  <p style={{ color: 'var(--t-text-muted)', fontSize: 10, fontFamily: 'Space Mono, monospace' }}>
-                    {new Date(e.registeredAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-    </div>
-  );
-}
-
 /* ─── Access dashboard ───────────────────────────────────────────────────── */
 function AccessDashboard({ stats }: { stats: NonNullable<OverviewProps['accessStats']> }) {
   const rate = stats.total > 0 ? Math.round((stats.granted / stats.total) * 100) : 0;
@@ -405,7 +358,7 @@ function SimpleDashboard({ type }: { type: string }) {
 /* ─── Main component ─────────────────────────────────────────────────────── */
 export default function OverviewClient({
   profile, totalScans, totalClicks, totalContacts, recentScans,
-  activeModules, menuStats, loyaltyStats, eventStats, accessStats, memberStats,
+  activeModules, menuStats, loyaltyStats, accessStats, memberStats,
 }: OverviewProps) {
   const engagement = totalScans > 0 ? Math.min(100, Math.round((totalClicks / totalScans) * 100)) : 0;
 
@@ -452,7 +405,6 @@ export default function OverviewClient({
       {activeTab === 'nfc'         && <NfcDashboard recentScans={recentScans} profile={profile} />}
       {activeTab === 'menu'        && menuStats    && <MenuDashboard    stats={menuStats}    username={profile?.username} />}
       {activeTab === 'loyalty'     && loyaltyStats && <LoyaltyDashboard stats={loyaltyStats} username={profile?.username} />}
-      {activeTab === 'event'       && eventStats   && <EventDashboard   stats={eventStats}   username={profile?.username} />}
       {activeTab === 'access'      && accessStats  && <AccessDashboard  stats={accessStats} />}
       {activeTab === 'member'      && memberStats  && <MemberDashboard  stats={memberStats} />}
       {activeTab === 'review'      && <SimpleDashboard type="review" />}

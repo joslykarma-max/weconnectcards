@@ -51,18 +51,60 @@ Dans Firebase Console → Firestore → Index composites :
 
 ## FedaPay — Paiements
 
-### Basculer sandbox → production
-1. Changer `FEDAPAY_ENV=production` dans Vercel
-2. Changer `FEDAPAY_SECRET_KEY` pour la clé live
-3. Dans le dashboard FedaPay : configurer l'URL de callback webhook :
-   `https://weconnect.cards/api/webhooks/fedapay`
-4. Redéployer
+Tous les paiements (cartes, passage Pro, abonnement mensuel) passent par
+`lib/payments.ts`. Ce qui est acheté est enregistré dans `payments/{idTransactionFedaPay}`
+**avant** le paiement ; la confirmation ne lit que cet enregistrement et la réponse de FedaPay
+(statut + montant), jamais les paramètres de l'URL. Une transaction n'est livrée qu'une fois.
 
-### Vérifier un paiement manquant
-Si un client a payé mais n'a pas reçu sa carte :
-1. Firebase Console → Firestore → `payments` — chercher par `uid`
-2. Si absent : le webhook n'a pas été appelé. Relancer manuellement :
-   `GET https://weconnect.cards/api/webhooks/fedapay?uid=UID&cardType=pro&id=TRANSACTION_ID&source=card`
+### Activer les paiements (Vercel → Settings → Environment Variables)
+| Variable | Valeur |
+|----------|--------|
+| `FEDAPAY_ENV` | `sandbox` pour tester, `production` pour encaisser |
+| `FEDAPAY_SECRET_KEY` | Clé secrète du même environnement (`sk_sandbox_…` ou `sk_live_…`) |
+| `FEDAPAY_WEBHOOK_SECRET` | Secret du webhook (voir ci-dessous) |
+
+Sans `FEDAPAY_SECRET_KEY`, les boutons de paiement affichent « paiement en ligne pas encore disponible ».
+
+### Configurer le webhook (indispensable)
+1. Dashboard FedaPay → **Webhooks** → Nouveau webhook
+2. URL : `https://weconnect.cards/api/webhooks/fedapay`
+3. Événements : `transaction.approved`, `transaction.declined`, `transaction.canceled`
+4. Copier la **clé secrète** du webhook dans `FEDAPAY_WEBHOOK_SECRET` (Vercel) → Redéployer
+
+Le webhook livre la commande même si le client ferme la page après avoir payé. Le retour
+navigateur (`GET /api/webhooks/fedapay?id=…`) fait la même vérification ; les deux peuvent
+arriver dans n'importe quel ordre.
+
+### Vérifier un paiement
+Firestore → `payments/{idTransaction}` :
+- `pending` : pas encore confirmé par FedaPay
+- `paid` : livré (`cardId` = carte créée pour une commande)
+- `failed` : refusé / annulé, ou `fedapayStatus: amount_mismatch` (montant différent — à examiner)
+
+Si un paiement approuvé est resté `pending` (webhook pas encore configuré), ouvrir
+`https://weconnect.cards/api/webhooks/fedapay?id=ID_TRANSACTION` : la vérification est refaite
+auprès de FedaPay et la commande livrée si le paiement est bien approuvé.
+
+---
+
+## Pass Événement (cartes, bracelets, badges NFC)
+
+We Connect n'est pas une billetterie : nous fournissons les supports NFC et le contrôle des entrées.
+
+1. **Admin → Événements** : créer l'événement (l'organisateur doit avoir un compte We Connect),
+   définir les zones (Entrée principale, VIP…) et les catégories (couleur, zones autorisées,
+   règle d'entrée, association au billet obligatoire ou non, fenêtre de validité).
+2. **Créer les lots** (catégorie, support, quantité, préfixe imprimé) puis **Exporter pour
+   l'encodage** : chaque puce reçoit l'URL `https://weconnect.cards/p/<code>` de sa ligne ;
+   le numéro (ex. `VIP-0042`) est imprimé sur le support.
+3. **Tests sur place** : activer un téléphone de contrôle, scanner quelques pass, puis
+   « Remettre les entrées à zéro » dans l'admin.
+4. **L'organisateur** (tableau de bord → Événements) crée le lien staff (QR / WhatsApp),
+   suit les entrées en direct, désactive un pass perdu, exporte la fréquentation.
+
+Téléphones de contrôle : aucun compte ni application. Le lien staff pose un cookie sur le
+navigateur ; le pass tapé s'ouvre dans ce navigateur et affiche vert / rouge / orange.
+Mode « Guichet » : scanner le QR du billet (ou saisir son numéro) puis l'associer au pass tapé.
 
 ---
 

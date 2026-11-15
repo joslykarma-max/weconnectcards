@@ -14,7 +14,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/dashboard/modules/access':     'Clé d\'accès',
   '/dashboard/modules/member':     'Carte membre',
   '/dashboard/modules/loyalty':    'Fidélité',
-  '/dashboard/modules/event':      'Ticket événement',
   '/dashboard/modules/menu':       'Menu digital',
   '/dashboard/modules/portfolio':  'Portfolio',
   '/dashboard/modules/review':     'Avis clients',

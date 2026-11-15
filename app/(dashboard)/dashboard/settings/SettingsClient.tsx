@@ -19,6 +19,14 @@ function PaymentBanner() {
   const payment = params.get('payment');
   if (!payment) return null;
   const isSuccess = payment === 'success';
+  const isPending = payment === 'pending';
+  if (isPending) {
+    return (
+      <div style={{ padding: '14px 20px', borderRadius: 8, background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#B45309', fontFamily: 'DM Sans, sans-serif', fontSize: 14, marginBottom: 8 }}>
+        ⏳ Paiement en cours de confirmation. Votre compte sera mis à jour automatiquement dans quelques minutes.
+      </div>
+    );
+  }
   return (
     <div style={{
       padding: '14px 20px',
@@ -31,7 +39,7 @@ function PaymentBanner() {
       marginBottom: 8,
     }}>
       {isSuccess
-        ? '✅ Paiement réussi ! Votre plan a été mis à jour. Reconnectez-vous pour voir les changements.'
+        ? '✅ Paiement réussi ! Votre compte a été mis à jour.'
         : '❌ Paiement annulé ou échoué. Réessayez.'}
     </div>
   );

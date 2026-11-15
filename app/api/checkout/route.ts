@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
-import { createTransaction, PLANS } from '@/lib/fedapay';
+import { PLANS, isFedaPayConfigured } from '@/lib/fedapay';
+import { startPayment } from '@/lib/payments';
 import type { UserDoc, ProfileDoc } from '@/lib/types';
 
 export async function POST(req: NextRequest) {
@@ -26,24 +27,28 @@ export async function POST(req: NextRequest) {
   const userData    = userSnap.exists ? (userSnap.data() as UserDoc) : null;
   const profileData = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
 
-  if (userData?.plan === 'pro' || userData?.plan === 'equipe') {
+  // Renewing the subscription is open to every plan; only the upgrade needs an Essentiel account
+  if (plan === 'account_upgrade' && (userData?.plan === 'pro' || userData?.plan === 'equipe')) {
     return NextResponse.json({ error: 'Vous êtes déjà sur ce plan ou un plan supérieur.' }, { status: 400 });
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
+  if (!isFedaPayConfigured()) {
+    console.error('[checkout] FEDAPAY_SECRET_KEY manquante');
+    return NextResponse.json({ error: 'Le paiement en ligne n\'est pas encore disponible. Contactez-nous.' }, { status: 503 });
+  }
 
   let payment_url: string;
   try {
-    const result = await createTransaction({
-      amount:        planInfo.amount,
-      currency:      planInfo.currency,
-      description:   planInfo.label,
-      customerEmail: user.email ?? userData?.email ?? '',
-      customerName:  profileData?.displayName ?? userData?.displayName ?? user.email ?? '',
-      callbackUrl:   `${appUrl}/api/webhooks/fedapay?uid=${user.uid}&plan=${plan}`,
-      metadata:      { uid: user.uid, plan },
+    payment_url = await startPayment({
+      purchase:    { kind: plan as 'account_upgrade' | 'monthly_sub', uid: user.uid },
+      amount:      planInfo.amount,
+      currency:    planInfo.currency,
+      description: planInfo.label,
+      customer: {
+        email: user.email ?? userData?.email ?? `${user.uid}@weconnect.cards`,
+        name:  profileData?.displayName ?? userData?.displayName ?? user.email ?? 'Client We Connect',
+      },
     });
-    payment_url = result.payment_url;
   } catch (err) {
     console.error('[checkout] FedaPay error:', err);
     return NextResponse.json({

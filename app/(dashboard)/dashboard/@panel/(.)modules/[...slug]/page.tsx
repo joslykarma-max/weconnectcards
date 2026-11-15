@@ -7,7 +7,6 @@ const PAGES: Record<string, { title: string; load: () => Promise<{ default: Reac
   agency:            { title: 'Agence',               load: () => import('../../../modules/agency/page') },
   certificate:       { title: 'Certificat',           load: () => import('../../../modules/certificate/page') },
   custom:            { title: 'Module sur mesure',    load: () => import('../../../modules/custom/page') },
-  event:             { title: 'Pass événement',       load: () => import('../../../modules/event/page') },
   loyalty:           { title: 'Carte de fidélité',    load: () => import('../../../modules/loyalty/page') },
   medical:           { title: 'Carte médicale',       load: () => import('../../../modules/medical/page') },
   member:            { title: 'Carte membre',         load: () => import('../../../modules/member/page') },

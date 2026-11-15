@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
-import { adminDb } from '@/lib/firebase-admin';
-import { createTransaction, PLANS } from '@/lib/fedapay';
+import { PLANS, isFedaPayConfigured } from '@/lib/fedapay';
+import { startPayment } from '@/lib/payments';
+import { EDITIONS } from '@/lib/editions';
 import type { DeliveryInfo, CardCustomization } from '@/lib/types';
 
 type CardType = 'standard' | 'pro' | 'prestige';
@@ -30,6 +31,10 @@ export async function POST(req: NextRequest) {
 
   const { cardType, edition, metallic = false, pvcColor = 'black', customization, delivery } = body;
 
+  if (!['standard', 'pro', 'prestige'].includes(cardType) || !EDITIONS.some((e) => e.key === edition)
+      || (pvcColor !== 'white' && pvcColor !== 'black') || !['BJ', 'TG', 'BF'].includes(delivery?.country)) {
+    return NextResponse.json({ error: 'Commande invalide.' }, { status: 400 });
+  }
   if (!cardType || !edition || !delivery?.fullName || !delivery?.phone || !delivery?.address || !delivery?.city || !delivery?.country) {
     return NextResponse.json({ error: 'Champs manquants' }, { status: 400 });
   }
@@ -39,41 +44,39 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'La personnalisation (nom à afficher) est requise pour les cartes Pro et Prestige.' }, { status: 400 });
   }
 
-  const amount = computeAmount(cardType, metallic);
+  const isMetal = metallic === true;
+  const amount  = computeAmount(cardType, isMetal);
   const label  = cardType === 'prestige'
     ? 'Carte Prestige'
     : cardType === 'pro'
-      ? `Carte Pro${metallic ? ' métal' : ''}`
-      : `Carte Standard${metallic ? ' métal' : ''}`;
+      ? `Carte Pro${isMetal ? ' métal' : ''}`
+      : `Carte Standard${isMetal ? ' métal' : ''}`;
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://weconnect.cards';
-
-  await adminDb.collection('pendingOrders').doc(user.uid).set({
-    uid:       user.uid,
-    cardType,
-    edition,
-    metallic,
-    pvcColor: cardType === 'prestige' ? null : pvcColor,
-    customization: customization ?? null,
-    delivery,
-    amount,
-    createdAt: new Date().toISOString(),
-  });
-
-  const callbackUrl = `${appUrl}/api/webhooks/fedapay?uid=${user.uid}&cardType=${cardType}&edition=${encodeURIComponent(edition)}&source=card`;
+  if (!isFedaPayConfigured()) {
+    console.error('[cards/order] FEDAPAY_SECRET_KEY manquante');
+    return NextResponse.json({ error: 'Le paiement en ligne n\'est pas encore disponible. Contactez-nous pour commander.' }, { status: 503 });
+  }
 
   let payment_url: string;
   try {
-    const result = await createTransaction({
+    payment_url = await startPayment({
+      purchase: {
+        kind: 'card',
+        uid:  user.uid,
+        order: {
+          cardType,
+          edition,
+          metallic:      cardType === 'prestige' ? true : isMetal,
+          pvcColor:      cardType === 'prestige' ? null : pvcColor,
+          customization: customization ?? null,
+          delivery,
+        },
+      },
       amount,
-      currency:      'XOF',
-      description:   `${label} — We Connect`,
-      customerEmail: user.email ?? `${user.uid}@weconnect.cards`,
-      customerName:  user.name ?? delivery.fullName,
-      callbackUrl,
-      metadata:      { uid: user.uid, cardType },
+      currency:    'XOF',
+      description: `${label} — We Connect`,
+      customer:    { email: user.email ?? `${user.uid}@weconnect.cards`, name: user.name ?? delivery.fullName },
     });
-    payment_url = result.payment_url;
   } catch (err) {
     console.error('[cards/order] FedaPay error:', err);
     return NextResponse.json({

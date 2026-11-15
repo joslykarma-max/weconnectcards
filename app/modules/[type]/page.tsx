@@ -150,26 +150,27 @@ const MODULES: Record<string, {
   event: {
     emoji:   '🎟️',
     name:    'Pass Événement',
-    tagline: 'Votre événement dans la poche de vos invités',
-    desc:    'Créez un pass digital pour votre événement : date, lieu, heure, prix, description. Vos invités ont toutes les informations en un scan NFC.',
+    tagline: 'Bracelets, badges et cartes NFC pour vos événements',
+    desc:    'We Connect conçoit, configure et livre les supports NFC de votre événement. Vos agents contrôlent les entrées avec leur simple téléphone, et vous suivez la fréquentation en direct. Compatible avec votre plateforme de billetterie.',
     color:   '#8B5CF6', bg: 'rgba(139,92,246,0.08)', border: 'rgba(139,92,246,0.2)',
     features: [
-      { icon: '📅', title: 'Date & heure',         body: 'Informations affichées clairement avec formatage automatique en français.' },
-      { icon: '📍', title: 'Lieu de l\'événement', body: 'Adresse ou nom de la salle pour que vos invités arrivent au bon endroit.' },
-      { icon: '🎟️', title: 'Prix du billet',       body: 'Tarif affiché en FCFA directement sur la page.' },
-      { icon: '📝', title: 'Description libre',    body: 'Décrivez le programme, les artistes, le dress code...' },
-      { icon: '👥', title: 'Capacité',             body: 'Affichez le nombre de places pour créer de la rareté.' },
+      { icon: '⌚', title: 'Cartes, bracelets, badges', body: 'Le support adapté à chaque public, aux couleurs de votre événement, numéroté et encodé par nos soins.' },
+      { icon: '🎨', title: 'Catégories et zones',       body: 'VIP, Standard, Staff, Presse… chaque catégorie ouvre ses zones, sur les horaires que vous choisissez.' },
+      { icon: '📲', title: 'Contrôle au téléphone',     body: 'Un tap sur le téléphone de l’agent : vert, c’est bon ; rouge, c’est refusé. Sans application, sur iPhone et Android.' },
+      { icon: '🛡️', title: 'Anti-fraude',               body: 'Une seule entrée par pass, sorties et retours contrôlés, pass perdu désactivé en un geste.' },
+      { icon: '🔗', title: 'Avec votre billetterie',    body: 'Au guichet, le billet acheté en ligne est scanné puis associé au bracelet : un billet, un bracelet.' },
+      { icon: '📊', title: 'Fréquentation en direct',   body: 'Entrées par catégorie et par porte, personnes présentes, refus, export complet après l’événement.' },
     ],
     useCases: [
-      { icon: '🎶', label: 'Concerts & soirées' },
-      { icon: '🎓', label: 'Conférences & formations' },
-      { icon: '💒', label: 'Mariages & cérémonies' },
+      { icon: '🎶', label: 'Festivals & concerts' },
+      { icon: '🎓', label: 'Conférences & salons' },
+      { icon: '💒', label: 'Mariages & galas' },
       { icon: '🏆', label: 'Compétitions & tournois' },
     ],
     steps: [
-      'Renseignez les informations de votre événement',
-      'Distribuez des cartes NFC à l\'entrée ou en amont',
-      'Vos invités ont le programme complet en un tap',
+      'Vous nous décrivez votre événement : catégories, zones, quantités',
+      'Nous concevons, encodons et livrons cartes, bracelets ou badges',
+      'Votre staff contrôle les entrées au téléphone, vous suivez tout en direct',
     ],
   },
 
@@ -308,6 +309,8 @@ export default async function ModuleDetailPage({ params }: Props) {
   const { type } = await params;
   const mod = MODULES[type];
   if (!mod) notFound();
+  // Event passes are supplied by We Connect on quote, not activated from an account
+  const quote = type === 'event';
   const pal = lightPalette(mod.color);
   const vars = { '--accent': pal.accent, '--panel': pal.panel, '--soft': pal.soft, '--ink': pal.ink } as React.CSSProperties;
 
@@ -327,7 +330,7 @@ export default async function ModuleDetailPage({ params }: Props) {
             <h1 className={styles.h1}>{mod.name}</h1>
             <p className={styles.tagline}>{mod.tagline}</p>
             <p className={styles.desc}>{mod.desc}</p>
-            <Link href="/register" className={styles.primary}>Activer ce module →</Link>
+            <Link href={quote ? '/contact' : '/register'} className={styles.primary}>{quote ? 'Demander un devis →' : 'Activer ce module →'}</Link>
           </div>
         </section>
 
@@ -369,10 +372,12 @@ export default async function ModuleDetailPage({ params }: Props) {
 
         {/* Bottom CTA */}
         <section className={styles.cta}>
-          <h2>Prêt à activer {mod.name}{'\u00A0'}?</h2>
-          <p>Créez votre compte gratuitement et configurez ce module en moins de 2 minutes.</p>
+          <h2>{quote ? <>Un événement en préparation{'\u00A0'}?</> : <>Prêt à activer {mod.name}{'\u00A0'}?</>}</h2>
+          <p>{quote
+            ? 'Dites-nous le nombre d’invités, les catégories et les zones : nous vous proposons les supports NFC adaptés.'
+            : 'Créez votre compte gratuitement et configurez ce module en moins de 2 minutes.'}</p>
           <div className={styles.ctaActions}>
-            <Link href="/register" className={styles.primary}>Créer mon compte →</Link>
+            <Link href={quote ? '/contact' : '/register'} className={styles.primary}>{quote ? 'Demander un devis →' : 'Créer mon compte →'}</Link>
             <Link href="/#how-it-works" className={styles.secondary}>Voir tous les modules</Link>
           </div>
         </section>

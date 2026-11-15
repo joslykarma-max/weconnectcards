@@ -6,7 +6,7 @@ export const RESERVED_USERNAMES = new Set([
   // pages
   'admin', 'activate', 'annuaire', 'carte-perdue', 'cgu', 'comment-ca-marche', 'contact',
   'dashboard', 'features', 'forgot-password', 'login', 'logout', 'm', 'ma-carte', 'modules',
-  'nfc', 'privacy', 'qr', 'register', 'reset-password', 'tarifs',
+  'nfc', 'p', 'controle', 'privacy', 'qr', 'register', 'reset-password', 'tarifs',
   // technical routes and public folders
   'api', '_next', 'icon', 'icons', 'favicon', 'fonts', 'robots', 'sitemap', 'manifest',
 ]);

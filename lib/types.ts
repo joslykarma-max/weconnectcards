@@ -122,13 +122,26 @@ export interface CardDoc {
 
 export type DeactivationReason = 'lost' | 'stolen' | 'damaged' | 'other';
 
-// Collection: pendingOrders/{uid}
-export interface PendingOrderDoc {
-  uid:       string;
-  plan:      'essentiel' | 'pro';
-  edition:   string;
-  delivery:  DeliveryInfo;
-  createdAt: string;
+// Collection: payments/{fedapayTransactionId} — what is being bought, written before the payment
+export interface PaymentDoc {
+  kind:      'card' | 'account_upgrade' | 'monthly_sub';
+  status:    'pending' | 'paid' | 'failed';
+  amount:    number;   // expected amount, compared with FedaPay's on confirmation
+  currency:  string;
+  uid?:      string;   // account purchases
+  order?: {            // kind 'card'
+    cardType:      'standard' | 'pro' | 'prestige';
+    edition:       string;
+    metallic:      boolean;
+    pvcColor:      'white' | 'black' | null;
+    customization: CardCustomization | null;
+    delivery:      DeliveryInfo;
+  };
+  fedapayStatus?: string;  // last non-approved status seen (declined, canceled, amount_mismatch…)
+  cardId?:        string;  // card created for this payment
+  createdAt:      string;
+  paidAt?:        string;
+  updatedAt?:     string;
 }
 
 // Collection: teams/{ownerUid}
@@ -183,33 +196,7 @@ export interface MenuCategory {
 }
 
 // Event module sub-types
-export interface TicketType {
-  id:           string;
-  name:         string;
-  description?: string;
-  price:        number;
-  capacity:     number;
-}
-
-export interface AgendaItem {
-  id:       string;
-  time:     string; // HH:mm
-  title:    string;
-  speaker?: string;
-}
-
 // Collection: eventRegistrations/{profileId}_{normalizedPhone}
-export interface EventRegistration {
-  profileId:      string;
-  name:           string;
-  email?:         string;
-  phone:          string;
-  ticketTypeId:   string;
-  ticketTypeName: string;
-  ticketPrice:    number;
-  registeredAt:   string;
-}
-
 // Access module sub-types
 export interface AccessZone {
   id:                  string;

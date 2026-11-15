@@ -9,7 +9,6 @@ const MODULES = [
   { type: 'loyalty',    name: 'Carte de fidélité',       emoji: '🎯', desc: 'Tampons digitaux et récompenses clients', pro: false },
   { type: 'menu',        name: 'Menu Restaurant',          emoji: '🍽️', desc: 'QR menu interactif multilingue', pro: false },
   { type: 'review',      name: 'Tap to Review',            emoji: '⭐', desc: 'Générez des avis Google en un tap', pro: false },
-  { type: 'event',       name: 'Pass Événement',           emoji: '🎟️', desc: 'Billetterie NFC et check-in', pro: true },
   { type: 'access',      name: 'Clé d\'accès',             emoji: '🔑', desc: 'Contrôle d\'accès par zones', pro: true },
   { type: 'medical',     name: 'Carte Médicale',           emoji: '🩺', desc: 'Urgences sécurisées par PIN', pro: true },
   { type: 'certificate', name: 'Certificat Authenticité',  emoji: '🦋', desc: 'Vérification produit', pro: true },

@@ -4,6 +4,7 @@ import styles from './shell.module.css';
 export interface LauncherStats {
   name: string; avatar: string | null; username: string | null;
   scans30: number; contacts: number; activeModules: number; activeCards: number; isPro: boolean;
+  events: number; // events this account organises with We Connect NFC passes
 }
 
 interface Tile { href: string; label: string; emoji: string; soft: string; edge: string; stat?: string; badge?: string }
@@ -26,6 +27,10 @@ export default function Launcher({ s }: { s: LauncherStats }) {
     { href: '/dashboard/settings',  label: 'Paramètres',   emoji: '⚙️', soft: '#F1F5F9', edge: '#E2E8F0', stat: 'Compte et offre' },
     { href: '/annuaire',            label: 'Annuaire',     emoji: '📖', soft: '#FFEDD5', edge: '#FED7AA', stat: 'Les membres' },
   ];
+  // Organisers supplied with NFC passes get their event space first
+  if (s.events > 0) {
+    tiles.unshift({ href: '/dashboard/events', label: 'Événements', emoji: '🎟️', soft: '#EDE9FE', edge: '#C4B5FD', stat: plural(s.events, 'événement', 'événements') });
+  }
   const first = s.name.split(' ')[0] || 'à vous';
 
   return (

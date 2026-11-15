@@ -52,6 +52,17 @@ const navItems = [
     exact: false,
   },
   {
+    href: '/admin/events',
+    label: 'Événements',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/>
+        <path d="M14 5v14" strokeDasharray="2 2"/>
+      </svg>
+    ),
+    exact: false,
+  },
+  {
     href: '/admin/clients',
     label: 'Clients',
     icon: (

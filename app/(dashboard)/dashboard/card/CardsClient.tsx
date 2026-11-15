@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LogoSymbol from '@/components/logo/LogoSymbol';
 import Button from '@/components/ui/Button';
@@ -134,7 +134,6 @@ const MODULES = [
   { id: 'profile', label: 'Carte de visite',   desc: 'Liens sociaux, contact, mini bio',   icon: '👤' },
   { id: 'loyalty', label: 'Fidélité',           desc: 'Programme de points et tampons',     icon: '⭐' },
   { id: 'menu',    label: 'Menu digital',        desc: 'Carte restaurant ou café',           icon: '🍽️' },
-  { id: 'event',   label: 'Événements',          desc: 'Gestion de billets et inscriptions', icon: '🎟️' },
   { id: 'access',  label: 'Contrôle d\'accès',  desc: 'Badges et zones sécurisées',         icon: '🔐' },
   { id: 'member',  label: 'Cartes membres',      desc: 'Programme d\'adhésion',              icon: '💳' },
 ] as const;
@@ -1143,30 +1142,34 @@ function ReplaceCardModal({
 
 function PaymentSuccessBanner() {
   const params = useSearchParams();
-  const [visible, setVisible] = useState(false);
+  const [closed, setClosed] = useState(false);
+  const payment = params.get('payment');
+  const pending = payment === 'pending';
+  const failed  = payment === 'error';
 
-  useEffect(() => {
-    if (params.get('payment') === 'success') setVisible(true);
-  }, [params]);
-
-  if (!visible) return null;
+  if (closed || (payment !== 'success' && !pending && !failed)) return null;
+  const tone = failed ? '239,68,68' : pending ? '245,158,11' : '16,185,129';
 
   return (
     <div style={{
-      background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)',
+      background: `rgba(${tone},0.08)`, border: `1px solid rgba(${tone},0.25)`,
       borderRadius: 10, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
     }}>
-      <span style={{ fontSize: 20 }}>✅</span>
+      <span style={{ fontSize: 20 }}>{failed ? '❌' : pending ? '⏳' : '✅'}</span>
       <div>
-        <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: 14, color: '#10B981', marginBottom: 2 }}>
-          Commande confirmée !
+        <p style={{ fontFamily: 'DM Sans, sans-serif', fontWeight: 600, fontSize: 14, color: `rgb(${tone})`, marginBottom: 2 }}>
+          {failed ? 'Paiement non abouti' : pending ? 'Paiement en cours de confirmation' : 'Commande confirmée !'}
         </p>
         <p style={{ color: 'var(--t-text-muted)', fontSize: 12, fontFamily: 'DM Sans, sans-serif' }}>
-          Ta carte est en cours de préparation. Tu recevras une notification à chaque étape.
+          {failed
+            ? 'Le paiement a été annulé ou refusé. Aucun montant n’a été débité pour cette commande ; tu peux réessayer.'
+            : pending
+              ? 'Ta commande apparaîtra ici dès que FedaPay aura validé le paiement (quelques minutes).'
+              : 'Ta carte est en cours de préparation. Tu recevras une notification à chaque étape.'}
         </p>
       </div>
       <button
-        onClick={() => setVisible(false)}
+        onClick={() => setClosed(true)}
         style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--t-text-muted)', fontSize: 18, flexShrink: 0 }}
       >
         ✕

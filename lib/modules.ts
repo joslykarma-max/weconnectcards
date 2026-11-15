@@ -6,7 +6,7 @@ export const PROFILE_MODULE = 'profile';
 
 // Modules with a public page (/m/{username}/{type}) a card tap can open directly
 export const TAP_MODULES = new Set([
-  'loyalty', 'menu', 'review', 'portfolio', 'event', 'certificate', 'member', 'access', 'medical',
+  'loyalty', 'menu', 'review', 'portfolio', 'certificate', 'member', 'access', 'medical',
 ]);
 
 export function isProfileModuleActive(doc: ModuleDoc | undefined): boolean {

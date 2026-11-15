@@ -5,7 +5,7 @@ import type { OverviewProps }   from '../OverviewClient';
 import type {
   ScanDoc, ProfileDoc,
   ModuleDoc, MenuCategory,
-  LoyaltyCardDoc, EventRegistration,
+  LoyaltyCardDoc,
   AccessLog, MemberCardDoc,
 } from '@/lib/types';
 
@@ -40,13 +40,10 @@ async function getDashboardData(uid: string): Promise<OverviewProps> {
   const hasModule = (t: string) => activeModules.includes(t);
 
   const [
-    loyaltySnap, eventSnap, accessSnap, memberSnap,
+    loyaltySnap, accessSnap, memberSnap,
   ] = await Promise.all([
     hasModule('loyalty')
       ? adminDb.collection('loyaltyCards').where('profileId', '==', uid).get()
-      : Promise.resolve(null),
-    hasModule('event')
-      ? adminDb.collection('eventRegistrations').where('profileId', '==', uid).get()
       : Promise.resolve(null),
     hasModule('access')
       ? adminDb.collection('accessLogs').where('profileId', '==', uid).get()
@@ -95,26 +92,6 @@ async function getDashboardData(uid: string): Promise<OverviewProps> {
         phone:       c.phone,
         stamps:      c.stamps,
         lastStampAt: c.lastStampAt,
-      })),
-    };
-  }
-
-  /* ── event stats ─────────────────────────────────────────────────────── */
-  let eventStats: OverviewProps['eventStats'] = null;
-  if (eventSnap) {
-    const regs = eventSnap.docs.map(d => d.data() as EventRegistration);
-    const sorted = [...regs].sort((a, b) => b.registeredAt.localeCompare(a.registeredAt));
-    const eventDoc = modules.find(m => m.type === 'event');
-    const currency = (eventDoc?.config as { currency?: string } | undefined)?.currency ?? 'FCFA';
-    eventStats = {
-      totalRegistrations: regs.length,
-      totalRevenue:       regs.reduce((s, r) => s + (r.ticketPrice ?? 0), 0),
-      currency,
-      recent: sorted.slice(0, 8).map(r => ({
-        name:           r.name,
-        ticketTypeName: r.ticketTypeName,
-        registeredAt:   r.registeredAt,
-        ticketPrice:    r.ticketPrice,
       })),
     };
   }
@@ -170,7 +147,6 @@ async function getDashboardData(uid: string): Promise<OverviewProps> {
     activeModules,
     menuStats,
     loyaltyStats,
-    eventStats,
     accessStats,
     memberStats,
   };
@@ -188,7 +164,7 @@ export default async function DashboardPage() {
     data = {
       profile: null, totalScans: 0, totalClicks: 0, totalContacts: 0,
       recentScans: [], activeModules: [],
-      menuStats: null, loyaltyStats: null, eventStats: null,
+      menuStats: null, loyaltyStats: null,
       accessStats: null, memberStats: null,
     };
   }
