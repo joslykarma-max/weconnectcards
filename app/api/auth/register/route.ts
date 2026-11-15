@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { toUsernameSlug, usernameProblem } from '@/lib/usernames';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
@@ -9,10 +10,6 @@ const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
   prestige: 'pro',
 };
 
-function toSlug(raw: string): string {
-  return raw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').replace(/-+/g, '-').replace(/^-|-$/g, '');
-}
 
 export async function POST(req: NextRequest) {
   if (!rateLimit(getClientIp(req), 5, 60_000)) {
@@ -38,10 +35,9 @@ export async function POST(req: NextRequest) {
   }
 
   // Sanitize and validate username server-side
-  const username = toSlug(rawUsername);
-  if (username.length < 3 || username.length > 30) {
-    return NextResponse.json({ error: "Le nom d'utilisateur doit faire entre 3 et 30 caractères." }, { status: 400 });
-  }
+  const username = toUsernameSlug(String(rawUsername ?? ''));
+  const problem  = usernameProblem(username);
+  if (problem) return NextResponse.json({ error: problem }, { status: 400 });
 
   // Reserve username atomically — use a transaction to prevent race conditions
   try {

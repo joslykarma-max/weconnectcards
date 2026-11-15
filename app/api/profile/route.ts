@@ -3,6 +3,7 @@ import { requireAuth } from '@/lib/session';
 import { FieldValue } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { getOwnedProfileId } from '@/lib/profiles';
+import { toUsernameSlug, usernameProblem } from '@/lib/usernames';
 import type { ProfileDoc, LinkDoc } from '@/lib/types';
 
 export async function GET(req: NextRequest) {
@@ -23,15 +24,6 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ ...profile, links });
 }
 
-function toSlug(raw: string): string {
-  return raw
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
-}
 
 export async function PATCH(req: NextRequest) {
   const user      = await requireAuth();
@@ -43,6 +35,12 @@ export async function PATCH(req: NextRequest) {
   delete body.uid;
   delete body.cardId;
 
+  // Username: normalised before anything is saved; an empty value never erases it
+  if ('username' in body) {
+    const slug = toUsernameSlug(typeof body.username === 'string' ? body.username : '');
+    if (slug) body.username = slug; else delete body.username;
+  }
+
   // Switcher name: trimmed, capped; empty → back to the default label
   const updates: Record<string, unknown> = { ...body };
   if ('label' in body) {
@@ -50,31 +48,26 @@ export async function PATCH(req: NextRequest) {
     updates.label = label || FieldValue.delete();
   }
 
-  if (body.username) {
-    body.username = toSlug(body.username);
-  }
+  // Changing the username: valid, not a page of the site, not taken
+  const currentProfile  = body.username ? await adminDb.collection('profiles').doc(profileId).get() : null;
+  const currentUsername = (currentProfile?.data() as ProfileDoc | undefined)?.username;
+  if (body.username && body.username !== currentUsername) {
+    const problem = usernameProblem(body.username);
+    if (problem) return NextResponse.json({ error: problem }, { status: 400 });
 
-  // Check username uniqueness if changing
-  if (body.username) {
     const snap = await adminDb.collection('usernames').doc(body.username).get();
     const owner = snap.exists ? (snap.data() as { uid: string; profileId?: string }) : null;
     if (owner && (owner.profileId ?? owner.uid) !== profileId) {
       return NextResponse.json({ error: "Ce nom d'utilisateur est déjà pris." }, { status: 409 });
     }
 
-    // Get current username to delete old mapping
-    const currentProfile = await adminDb.collection('profiles').doc(profileId).get();
-    const currentUsername = (currentProfile.data() as ProfileDoc | undefined)?.username;
-
-    if (currentUsername && currentUsername !== body.username) {
-      const batch = adminDb.batch();
-      batch.delete(adminDb.collection('usernames').doc(currentUsername));
-      batch.set(
-        adminDb.collection('usernames').doc(body.username),
-        profileId === user.uid ? { uid: user.uid } : { uid: user.uid, profileId },
-      );
-      await batch.commit();
-    }
+    const batch = adminDb.batch();
+    if (currentUsername) batch.delete(adminDb.collection('usernames').doc(currentUsername));
+    batch.set(
+      adminDb.collection('usernames').doc(body.username),
+      profileId === user.uid ? { uid: user.uid } : { uid: user.uid, profileId },
+    );
+    await batch.commit();
   }
 
   await adminDb.collection('profiles').doc(profileId).set(

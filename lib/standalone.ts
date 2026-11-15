@@ -151,9 +151,5 @@ export function slugify(raw: string): string {
     .replace(/-$/, '');
 }
 
-// Top-level routes a public username must never shadow
-export const RESERVED_USERNAMES = new Set([
-  'admin', 'api', 'activate', 'annuaire', 'carte-perdue', 'comment-ca-marche', 'contact',
-  'dashboard', 'features', 'forgot-password', 'login', 'm', 'modules', 'nfc', 'qr',
-  'register', 'tarifs', 'icon', 'favicon', 'robots', 'sitemap', 'ma-carte', 'privacy', 'icons', 'fonts',
-]);
+// Reserved names are shared with sign-up and profile edits
+export { RESERVED_USERNAMES } from './usernames';

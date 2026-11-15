@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { isReservedUsername } from '@/lib/usernames';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import type { CardDoc, ProfileDoc, LinkDoc } from '@/lib/types';
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
   let   username = '';
   for (let i = 2; i < 100; i++) {
     const candidate = `${base}-${i}`;
+    if (isReservedUsername(candidate)) continue;
     if (!(await adminDb.collection('usernames').doc(candidate).get()).exists) { username = candidate; break; }
   }
   if (!username) username = `${base}-${cardId.slice(0, 6).toLowerCase()}`;
