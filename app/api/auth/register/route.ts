@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { toUsernameSlug, usernameProblem } from '@/lib/usernames';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { hit } from '@/lib/attempts';
 
 // Card type → account plan mapping (Pro/Prestige cards auto-grant Pro account)
 const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
@@ -12,7 +13,8 @@ const CARD_TO_ACCOUNT_PLAN: Record<string, 'essentiel' | 'pro'> = {
 
 
 export async function POST(req: NextRequest) {
-  if (!rateLimit(getClientIp(req), 5, 60_000)) {
+  // Per-instance filter, then a limit shared by every instance (generous: shared Wi-Fi at a stand)
+  if (!rateLimit(getClientIp(req), 5, 60_000) || !(await hit(`register:${getClientIp(req)}`, 20, 10 * 60_000))) {
     return NextResponse.json({ error: 'Trop de tentatives. Réessaie dans une minute.' }, { status: 429 });
   }
 

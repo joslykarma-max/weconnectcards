@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import { PROFILE_MODULE } from '@/lib/modules';
+import { ConfigError, prepareConfig } from '@/lib/module-config';
 import type { ModuleDoc, UserDoc } from '@/lib/types';
 
 // Max active modules per account plan / card type
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
     profileId: user.uid,
     type,
     isActive,
-    ...(config !== undefined && { config }),
+    ...(config !== undefined && { config: prepareConfig(type, config) }),
     updatedAt: now,
   }, { merge: true });
   await batch.commit();
@@ -82,11 +83,19 @@ export async function PATCH(req: NextRequest) {
     config: Record<string, unknown>;
   };
 
+  let clean: Record<string, unknown>;
+  try {
+    clean = prepareConfig(type, config ?? {});
+  } catch (err) {
+    if (err instanceof ConfigError) return NextResponse.json({ error: err.message }, { status: 400 });
+    throw err;
+  }
+
   const docId = `${user.uid}_${type}`;
   await adminDb.collection('modules').doc(docId).set({
     profileId: user.uid,
     type,
-    config,
+    config: clean,
     updatedAt: new Date().toISOString(),
   }, { merge: true });
 

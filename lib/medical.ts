@@ -21,8 +21,17 @@ function pick(config: Record<string, unknown>, keys: readonly string[]): Record<
   return out;
 }
 
+/** A PIN is set: salted hash (`pinHash`), or a clear `pin` left by the old version (upgraded on first unlock). */
 export function medicalHasPin(config: Record<string, unknown>): boolean {
-  return typeof config.pin === 'string' && config.pin.length > 0;
+  return (typeof config.pinHash === 'string' && config.pinHash.length > 0)
+      || (typeof config.pin === 'string' && config.pin.length > 0);
+}
+
+/** What the owner's settings form receives: every field, never the PIN itself. */
+export function ownerMedicalConfig(config: Record<string, unknown>): Record<string, unknown> {
+  const { pin: _pin, pinHash: _hash, ...rest } = config;
+  void _pin; void _hash;
+  return { ...rest, hasPin: medicalHasPin(config) };
 }
 
 /** What the public page may receive: never the PIN, and the protected record only if no PIN is set. */

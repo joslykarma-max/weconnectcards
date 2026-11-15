@@ -779,7 +779,7 @@ function MemberModule({ config, username, memberCard }: { config: Record<string,
 
 // ─── ACCESS ──────────────────────────────────────────────────────────────────
 // ─── ACCESS HELPERS ──────────────────────────────────────────────────────────
-type AZone = { id: string; name: string; emoji: string; accessType: 'libre' | 'pin' | 'whatsapp'; pinHash?: string; whatsapp?: string; schedule: { days: string[]; startTime: string; endTime: string; allDay: boolean }; afterAccessMessage?: string; emergencyContact?: string };
+type AZone = { id: string; name: string; emoji: string; accessType: 'libre' | 'pin' | 'whatsapp'; hasPin?: boolean; whatsapp?: string; schedule: { days: string[]; startTime: string; endTime: string; allDay: boolean }; afterAccessMessage?: string; emergencyContact?: string };
 const DAY_MAP: Record<number, string> = { 1: 'lun', 2: 'mar', 3: 'mer', 4: 'jeu', 5: 'ven', 6: 'sam', 0: 'dim' };
 
 function zoneIsOpen(z: AZone): boolean {

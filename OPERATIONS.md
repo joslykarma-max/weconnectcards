@@ -108,6 +108,20 @@ Mode « Guichet » : scanner le QR du billet (ou saisir son numéro) puis l'asso
 
 ---
 
+## Sécurité — codes et tentatives
+
+- **Codes jamais exposés** : la page publique d'un module (`lib/module-public.ts`) retire le code
+  tampon fidélité, le PIN des zones d'accès et le dossier médical protégé ; ils sont vérifiés côté serveur.
+- **PIN médical** : enregistré chiffré (scrypt + sel, `lib/pin.ts`) ; le propriétaire ne le revoit pas,
+  il peut le changer ou le retirer.
+- **Tentatives** : compteurs partagés entre serveurs dans Firestore `rateLimits` (`lib/attempts.ts`) —
+  code tampon (10 erreurs / 15 min par appareil, 100 / h par commerce), inscription (20 / 10 min par IP),
+  contacts (30 / 10 min par IP). Le PIN médical (5 erreurs → 15 min) et les zones d'accès ont leurs propres verrous.
+- **Nettoyage conseillé** : Firebase Console → Firestore → Rétention (TTL) → collection `rateLimits`,
+  champ `expireAt`, pour supprimer automatiquement les vieux compteurs.
+
+---
+
 ## Administration
 
 ### Accéder au panel admin

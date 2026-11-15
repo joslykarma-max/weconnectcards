@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { getDeviceFromUA } from '@/lib/utils';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { hit } from '@/lib/attempts';
 
 export async function POST(req: NextRequest) {
-  if (!rateLimit(getClientIp(req), 5, 60_000)) {
+  // Per-instance filter, then a limit shared by every instance
+  if (!rateLimit(getClientIp(req), 5, 60_000) || !(await hit(`contact:${getClientIp(req)}`, 30, 10 * 60_000))) {
     return NextResponse.json({ error: 'Trop de requêtes.' }, { status: 429 });
   }
 

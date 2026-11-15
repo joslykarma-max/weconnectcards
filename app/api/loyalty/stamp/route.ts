@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { hit, isBlocked } from '@/lib/attempts';
 import type { LoyaltyCardDoc, ModuleDoc, RewardTier } from '@/lib/types';
 
 // POST /api/loyalty/stamp — add one stamp after code validation
@@ -31,7 +32,15 @@ export async function POST(req: NextRequest) {
   if (!stampCode) {
     return NextResponse.json({ error: 'Le gérant n\'a pas encore configuré de code tampon.' }, { status: 400 });
   }
+
+  // Guessing the code: 10 wrong codes / 15 min per device and shop, 100 / hour per shop (all instances)
+  const ipKey   = `stamp-fail:${profileId}:${getClientIp(req)}`;
+  const shopKey = `stamp-fail:${profileId}`;
+  if (await isBlocked(ipKey, 10) || await isBlocked(shopKey, 100)) {
+    return NextResponse.json({ error: 'Trop de codes incorrects. Demandez le code au commerçant et réessayez plus tard.' }, { status: 429 });
+  }
   if (code.trim() !== stampCode.trim()) {
+    await Promise.all([hit(ipKey, 10, 15 * 60_000), hit(shopKey, 100, 60 * 60_000)]);
     return NextResponse.json({ error: 'Code incorrect.' }, { status: 403 });
   }
 

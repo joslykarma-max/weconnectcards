@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { FieldValue } from 'firebase-admin/firestore';
+import { hashPin, verifyPin } from '@/lib/pin';
 import { adminDb } from '@/lib/firebase-admin';
 import { getClientIp, rateLimit } from '@/lib/rate-limit';
 import { medicalHasPin, protectedMedicalFields } from '@/lib/medical';
@@ -48,9 +50,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Trop de codes incorrects. Réessayez dans ${minutes} min.`, lockedMinutes: minutes }, { status: 429 });
   }
 
-  const ok = timingSafeEqual(digest(pin), digest(String(config.pin)));
+  // Salted hash; an old clear PIN is accepted once and replaced by its hash
+  const legacy = typeof config.pinHash !== 'string' && typeof config.pin === 'string';
+  const ok = legacy ? timingSafeEqual(digest(pin), digest(String(config.pin))) : verifyPin(pin, config.pinHash);
   if (ok) {
     if (attempt) await attemptRef.delete();
+    if (legacy) {
+      await moduleSnap.ref.set({ config: { pinHash: hashPin(pin), pin: FieldValue.delete() } }, { merge: true });
+    }
     return NextResponse.json({ fields: protectedMedicalFields(config) });
   }
 

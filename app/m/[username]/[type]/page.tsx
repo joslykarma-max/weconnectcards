@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { adminDb } from '@/lib/firebase-admin';
 import ModulePublicClient from './ModulePublicClient';
-import { publicMedicalConfig } from '@/lib/medical';
+import { publicModuleConfig } from '@/lib/module-public';
 import type { ModuleDoc, AccessCardDoc, MemberCardDoc, AgentCardDoc } from '@/lib/types';
 
 interface Props {
@@ -70,7 +70,7 @@ export default async function ModulePublicPage({ params, searchParams }: Props) 
       username={username}
       profileId={uid}
       // Medical: never send the PIN or the protected record to the browser
-      config={type === 'medical' ? publicMedicalConfig((moduleData.config ?? {}) as Record<string, unknown>) : (moduleData.config ?? {})}
+      config={publicModuleConfig(type, (moduleData.config ?? {}) as Record<string, unknown>)}
       holderCard={holderCard}
       memberCard={memberCard}
       tableNumber={tableNumber}
