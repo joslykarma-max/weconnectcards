@@ -1,0 +1,100 @@
+/* Login — « Clair » by default, dark when <html data-auth-theme="dark"> */
+.root {
+  --bg: radial-gradient(45% 35% at 10% 5%, rgba(99, 102, 241, 0.12) 0%, transparent 70%),
+        radial-gradient(40% 32% at 95% 20%, rgba(6, 182, 212, 0.12) 0%, transparent 70%), #F4F7FB;
+  --card: #FFFFFF;
+  --card-border: #EDF1F6;
+  --card-shadow: 0 24px 60px -24px rgba(15, 42, 68, 0.28);
+  --text: #0F172A;
+  --muted: #64748B;
+  --field: #FFFFFF;
+  --field-border: #E3E8EF;
+  --chip: #FFFFFF;
+  --chip-border: #EDF1F6;
+  --link: #4F46E5;
+  --bubbles: 1;
+
+  position: fixed; inset: 0; z-index: 10; overflow-y: auto;
+  display: flex; flex-direction: column;
+  background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif;
+  transition: background-color 250ms ease, color 250ms ease;
+}
+:global(html[data-auth-theme="dark"]) .root {
+  --bg: radial-gradient(50% 40% at 50% 0%, rgba(99, 102, 241, 0.16) 0%, transparent 70%), #08090C;
+  --card: #12141C;
+  --card-border: rgba(255, 255, 255, 0.08);
+  --card-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
+  --text: #F8F9FC;
+  --muted: #9CA3AF;
+  --field: rgba(255, 255, 255, 0.04);
+  --field-border: rgba(255, 255, 255, 0.12);
+  --chip: rgba(255, 255, 255, 0.06);
+  --chip-border: rgba(255, 255, 255, 0.1);
+  --link: #A5B4FC;
+  --bubbles: 0.35;
+}
+
+.bubbles { opacity: var(--bubbles); transition: opacity 250ms ease; }
+
+.top {
+  position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: max(14px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+}
+.logo { display: inline-flex; align-items: center; min-height: 44px; padding: 6px 12px; border-radius: 14px; background: #FFFFFF; box-shadow: 0 4px 14px -6px rgba(15, 42, 68, 0.25); }
+.logo img { display: block; height: 24px; width: auto; }
+.themeBtn {
+  width: 44px; height: 44px; border-radius: 14px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--chip); border: 1px solid var(--chip-border); color: var(--text);
+  box-shadow: 0 3px 0 rgba(15, 42, 68, 0.08);
+}
+
+.main { position: relative; z-index: 1; flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+.box { width: 100%; max-width: 420px; }
+.title { margin: 0; text-align: center; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: clamp(28px, 8vw, 36px); letter-spacing: -0.03em; color: var(--text); }
+.sub { margin: 6px 0 22px; text-align: center; font-size: 15px; color: var(--muted); }
+
+.card {
+  display: flex; flex-direction: column; gap: 16px; padding: 24px 20px;
+  border-radius: 26px; background: var(--card); border: 1px solid var(--card-border); box-shadow: var(--card-shadow);
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > span:first-child { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.field input {
+  width: 100%; box-sizing: border-box; min-height: 50px; padding: 0 16px; border-radius: 14px;
+  border: 1px solid var(--field-border); background: var(--field); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 16px; outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.field input::placeholder { color: var(--muted); opacity: 0.7; }
+.field input:focus { border-color: #818CF8; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18); }
+.pwd { position: relative; display: block; }
+.pwd input { padding-right: 52px; }
+.eye { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border: none; background: none; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.remember { position: relative; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-size: 14.5px; color: var(--text); user-select: none; }
+.remember input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.check {
+  width: 22px; height: 22px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  border: 1.5px solid var(--field-border); background: var(--field); color: transparent;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+.remember input:checked + .check { background: #6366F1; border-color: #6366F1; color: #FFFFFF; }
+.remember input:focus-visible + .check { outline: 2px solid #6366F1; outline-offset: 2px; }
+.forgot { display: inline-flex; align-items: center; min-height: 44px; font-size: 14px; color: var(--link); text-decoration: none; }
+
+.error { margin: 0; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; color: #DC2626; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.22); }
+.submit {
+  min-height: 54px; border-radius: 999px; border: none; cursor: pointer; color: #FFFFFF;
+  font-family: 'DM Sans', sans-serif; font-weight: 700; font-size: 16px;
+  background: linear-gradient(135deg, #6366F1, #06B6D4); box-shadow: 0 4px 0 #4338CA, 0 14px 28px -12px rgba(99, 102, 241, 0.8);
+}
+.submit:active { transform: translateY(3px); box-shadow: 0 1px 0 #4338CA; }
+.submit:disabled { opacity: 0.65; cursor: progress; }
+.signup { margin: 4px 0 0; padding-top: 16px; border-top: 1px solid var(--card-border); text-align: center; font-size: 14px; color: var(--muted); }
+.signup a { color: var(--link); font-weight: 600; text-decoration: none; }
+
+.themeBtn:focus-visible, .forgot:focus-visible, .submit:focus-visible, .eye:focus-visible, .logo:focus-visible, .signup a:focus-visible { outline: 2px solid #6366F1; outline-offset: 2px; }
+@media (min-width: 640px) { .card { padding: 30px 28px; } }
+@media (prefers-reduced-motion: reduce) { .root, .check, .bubbles { transition: none; } }

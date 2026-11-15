@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import LogoHorizontal from '@/components/logo/LogoHorizontal';
 
+// The login page is light by default; a saved dark choice is applied before paint (no flash)
+const AUTH_THEME_INIT = "try{if(localStorage.getItem('wc-auth-theme')==='dark')document.documentElement.dataset.authTheme='dark'}catch(e){}";
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <div style={{
@@ -11,6 +14,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       position: 'relative',
       overflow: 'hidden',
     }}>
+      <script dangerouslySetInnerHTML={{ __html: AUTH_THEME_INIT }} />
       {/* Grid */}
       <div
         style={{
