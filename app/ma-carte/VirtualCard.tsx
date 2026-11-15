@@ -167,7 +167,7 @@ export default function VirtualCard({ profiles }: { profiles: VirtualProfile[] }
     nfcAbort.current = ctrl;
     setNfc({ step: 'waiting' });
     try {
-      await new Reader().write({ records: [{ recordType: 'url', data: current.url }] }, { signal: ctrl.signal });
+      await new Reader().write({ records: [{ recordType: 'url', data: `${current.url}?src=nfc` }] }, { signal: ctrl.signal });
       setNfc({ step: 'done' });
       navigator.vibrate?.(80);
     } catch (err) {

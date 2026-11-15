@@ -4,6 +4,8 @@ import { adminDb } from '@/lib/firebase-admin';
 import { resolveUsername } from '@/lib/profiles';
 import ProfilePublic from '@/components/profile/ProfilePublic';
 import { getDeviceFromUA } from '@/lib/utils';
+import { isBotUA, scanSource } from '@/lib/scans';
+import { getSession } from '@/lib/session';
 import { headers } from 'next/headers';
 import type { ProfileDoc, LinkDoc, ModuleDoc } from '@/lib/types';
 import { isDisplayMode, resolveDisplayMode } from '@/lib/display-mode';
@@ -22,7 +24,7 @@ const MODULE_META: Record<string, { emoji: string; name: string }> = {
 
 interface Props {
   params:       Promise<{ username: string }>;
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; src?: string; preview?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -49,7 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProfilePage({ params, searchParams }: Props) {
   const { username } = await params;
-  const { mode } = await searchParams;
+  const { mode, src, preview } = await searchParams;
   const previewMode = isDisplayMode(mode) ? mode : null;
 
   const resolved = await resolveUsername(username);
@@ -85,19 +87,19 @@ export default async function ProfilePage({ params, searchParams }: Props) {
         .map((t) => ({ type: t, ...MODULE_META[t] }))
     : [];
 
-  // Log the visit (fire-and-forget) — skip for preview mode
-  if (!previewMode) {
-    const headersList = await headers();
-    const ua     = headersList.get('user-agent') ?? '';
-    const device = getDeviceFromUA(ua);
-
-    adminDb.collection('scans').add({
-      userId:    uid,
-      ...(profileId !== uid ? { profileId } : {}),
-      device,
-      userAgent: ua.slice(0, 512),
-      scannedAt: new Date().toISOString(),
-    }).catch(() => {});
+  // Count the visit (fire-and-forget) — not the dashboard preview, bots / link previews, or the owner
+  if (!previewMode && preview !== '1') {
+    const ua = (await headers()).get('user-agent') ?? '';
+    if (!isBotUA(ua) && (await getSession())?.uid !== uid) {
+      adminDb.collection('scans').add({
+        userId:    uid,
+        ...(profileId !== uid ? { profileId } : {}),
+        device:    getDeviceFromUA(ua),
+        source:    scanSource(src),
+        userAgent: ua.slice(0, 512),
+        scannedAt: new Date().toISOString(),
+      }).catch(() => {});
+    }
   }
 
   const profile = {

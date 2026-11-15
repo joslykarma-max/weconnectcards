@@ -1,5 +1,6 @@
 import { requireAuth }  from '@/lib/session';
 import { adminDb }      from '@/lib/firebase-admin';
+import { cleanScans }   from '@/lib/scans';
 import OverviewClient   from '../OverviewClient';
 import type { OverviewProps }   from '../OverviewClient';
 import type {
@@ -29,7 +30,7 @@ async function getDashboardData(uid: string): Promise<OverviewProps> {
       adminDb.collection('modules').where('profileId', '==', uid).get(),
     ]);
 
-  const allScans   = scansSnap.docs.map(d => d.data() as ScanDoc);
+  const allScans   = cleanScans(scansSnap.docs.map(d => d.data() as ScanDoc));
   const profile    = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
   const sortedScans = [...allScans].sort((a, b) => b.scannedAt.localeCompare(a.scannedAt));
 
@@ -143,7 +144,7 @@ async function getDashboardData(uid: string): Promise<OverviewProps> {
     totalScans,
     totalClicks,
     totalContacts: contactsSnap.size,
-    recentScans:   sortedScans.slice(0, 6).map(s => ({ device: s.device ?? '', scannedAt: s.scannedAt })),
+    recentScans:   sortedScans.slice(0, 6).map(s => ({ device: s.device, source: s.source, scannedAt: s.scannedAt })),
     activeModules,
     menuStats,
     loyaltyStats,

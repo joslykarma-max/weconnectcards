@@ -1,6 +1,7 @@
 import { requireAuth } from '@/lib/session';
 import { adminDb } from '@/lib/firebase-admin';
 import AnalyticsClient from './AnalyticsClient';
+import { cleanScans, SOURCE_LABELS } from '@/lib/scans';
 import type { ScanDoc, LinkClickDoc, ProfileDoc, LinkDoc } from '@/lib/types';
 
 async function getAnalyticsData(uid: string) {
@@ -13,7 +14,7 @@ async function getAnalyticsData(uid: string) {
     adminDb.collection('profiles').doc(uid).collection('links').get(),
   ]);
 
-  const scans  = scansSnap.docs.map((d) => d.data() as ScanDoc).sort((a, b) => a.scannedAt.localeCompare(b.scannedAt));
+  const scans  = cleanScans(scansSnap.docs.map((d) => d.data() as ScanDoc));   // no bots, one visit per NFC tap
   const clicks = clicksSnap.docs.map((d) => d.data() as LinkClickDoc);
   const profile = profileSnap.exists ? (profileSnap.data() as ProfileDoc) : null;
   const linksById = Object.fromEntries(
@@ -26,10 +27,14 @@ async function getAnalyticsData(uid: string) {
     scansByDay[day] = (scansByDay[day] ?? 0) + 1;
   });
 
+  const DEVICE_LABELS: Record<string, string> = { iOS: 'iPhone', Android: 'Android', Other: 'Ordinateur / autre' };
   const devices: Record<string, number> = {};
+  const sources: Record<string, number> = {};
   scans.forEach((s) => {
-    const d = s.device ?? 'Other';
+    const d = DEVICE_LABELS[s.device] ?? 'Ordinateur / autre';
     devices[d] = (devices[d] ?? 0) + 1;
+    const src = SOURCE_LABELS[s.source];
+    sources[src] = (sources[src] ?? 0) + 1;
   });
 
   const linkCountMap: Record<string, { label: string; type: string; count: number }> = {};
@@ -57,6 +62,7 @@ async function getAnalyticsData(uid: string) {
   return {
     scansByDay,
     devices,
+    sources,
     topLinks,
     totalScans:   scans.length,
     totalClicks:  clicks.length,

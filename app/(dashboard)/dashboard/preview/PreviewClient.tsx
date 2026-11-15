@@ -37,7 +37,7 @@ export default function PreviewClient({
     setToggling(false);
   }
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&bgcolor=0D0E14&color=818CF8&data=${encodeURIComponent(publicUrl)}`;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&bgcolor=0D0E14&color=818CF8&data=${encodeURIComponent(`${publicUrl}?src=qr`)}`;
 
   if (!username) {
     return (
@@ -94,7 +94,7 @@ export default function PreviewClient({
               <a href={publicUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, fontWeight: 600, color: '#4F46E5', textDecoration: 'none' }}>Ouvrir ↗</a>
             </div>
             {isPublic ? (
-              <iframe src={`/${username}`} title="Aperçu du profil public" style={{ flex: 1, minHeight: 360, width: '100%', border: 'none', borderRadius: 14, display: 'block', background: '#fff' }} />
+              <iframe src={`/${username}?preview=1`} title="Aperçu du profil public" style={{ flex: 1, minHeight: 360, width: '100%', border: 'none', borderRadius: 14, display: 'block', background: '#fff' }} />
             ) : (
               <p className={cx.empty}>🔒 Activez le profil public pour voir l’aperçu.</p>
             )}

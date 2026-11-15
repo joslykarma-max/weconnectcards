@@ -45,7 +45,7 @@ export default async function MaCartePage() {
       editionName: edition.name,
       cardBg:      edition.card.bg,
       accent:      edition.card.accent,
-      qrSvg:       await QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#0F172A', light: '#FFFFFF' } }),
+      qrSvg:       await QRCode.toString(`${url}?src=qr`, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#0F172A', light: '#FFFFFF' } }),
     };
   }));
 

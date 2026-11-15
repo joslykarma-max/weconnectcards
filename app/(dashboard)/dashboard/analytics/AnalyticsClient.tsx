@@ -7,6 +7,7 @@ import cx from '@/components/dashboard/shell/compact.module.css';
 interface AnalyticsData {
   scansByDay:  Record<string, number>;
   devices:     Record<string, number>;
+  sources:     Record<string, number>;
   topLinks:    Array<{ label: string; type: string; count: number }>;
   totalScans:  number;
   totalClicks: number;
@@ -57,7 +58,7 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
       </div>
 
       <div className={cx.tabs} role="tablist" aria-label="Statistiques">
-        {([['scans', 'Scans · 30 j'], ['liens', 'Liens cliqués'], ['appareils', 'Appareils']] as const).map(([k, label]) => (
+        {([['scans', 'Scans · 30 j'], ['liens', 'Liens cliqués'], ['appareils', 'Provenance']] as const).map(([k, label]) => (
           <button key={k} type="button" role="tab" aria-selected={tab === k} className={`${cx.tab} ${tab === k ? cx.tabOn : ''}`} onClick={() => setTab(k)}>{label}</button>
         ))}
       </div>
@@ -101,7 +102,20 @@ export default function AnalyticsClient({ data }: { data: AnalyticsData }) {
 
         {tab === 'appareils' && (
           <div className={cx.card}>
-            <p className={cx.cardTitle}>Appareils des visiteurs</p>
+            <p className={cx.cardTitle}>D’où viennent vos visiteurs</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8, marginBottom: 10 }}>
+              {['Tap NFC', 'QR code', 'Lien partagé'].map((label) => {
+                const n = data.sources[label] ?? 0;
+                const pct = data.totalScans ? Math.round((n / data.totalScans) * 100) : 0;
+                return (
+                  <div key={label} style={{ padding: '10px 8px', borderRadius: 14, background: '#F8FAFC', border: '1px solid #EDF1F6', textAlign: 'center' }}>
+                    <div style={{ fontFamily: 'Plus Jakarta Sans, sans-serif', fontWeight: 800, fontSize: 20, color: '#0F172A' }}>{n}</div>
+                    <div style={{ fontSize: 11.5, color: '#64748B' }}>{label} · {pct}%</div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className={cx.cardTitle}>Appareils</p>
             {deviceData.length > 0 ? (
               <div className={cx.chart}>
                 <ResponsiveContainer width="100%" height="100%">

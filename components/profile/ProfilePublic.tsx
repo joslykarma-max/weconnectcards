@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import LogoStacked from '@/components/logo/LogoStacked';
 import { generateVCard } from '@/lib/utils';
@@ -754,6 +754,14 @@ function LayoutLight({ profile, saveContactProps }: {
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProfilePublic({ profile }: { profile: Profile }) {
+  // ?src=nfc / ?src=qr only tell the server where the visit came from: keep shared links clean
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has('src')) return;
+    url.searchParams.delete('src');
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+  }, []);
+
   const [saving, setSaving]     = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [submitted, setSubmitted] = useState(false);

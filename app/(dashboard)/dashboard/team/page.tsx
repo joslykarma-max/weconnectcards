@@ -3,6 +3,8 @@ import { adminDb } from '@/lib/firebase-admin';
 import TeamClient from './TeamClient';
 import type { TeamDoc, TeamMemberDoc, UserDoc, AgentCardDoc, AgentEventDoc } from '@/lib/types';
 import { getUserSnap } from '@/lib/user-doc';
+import { cleanScans } from '@/lib/scans';
+import type { ScanDoc } from '@/lib/types';
 
 export default async function TeamPage() {
   const user = await requireAuth();
@@ -40,12 +42,13 @@ export default async function TeamPage() {
           adminDb.collection('scans').where('userId', '==', m.uid!).get(),
           adminDb.collection('linkClicks').where('profileId', '==', m.uid!).get(),
         ]);
-        memberStats[m.id] = { scans: s.size, clicks: c.size };
+        memberStats[m.id] = { scans: cleanScans(s.docs.map((d) => d.data() as ScanDoc)).length, clicks: c.size };
       }),
     );
   }
 
-  const totalScans  = ownerScansSnap.size  + Object.values(memberStats).reduce((a, s) => a + s.scans, 0);
+  const ownerScans  = cleanScans(ownerScansSnap.docs.map((d) => d.data() as ScanDoc)).length;
+  const totalScans  = ownerScans + Object.values(memberStats).reduce((a, s) => a + s.scans, 0);
   const totalClicks = ownerClicksSnap.size + Object.values(memberStats).reduce((a, s) => a + s.clicks, 0);
 
   // ── Agents ──────────────────────────────────────────────────────────────────
@@ -77,7 +80,7 @@ export default async function TeamPage() {
         joinedAt:    m.joinedAt,
         stats:       memberStats[m.id] ?? null,
       }))}
-      ownerStats={{ scans: ownerScansSnap.size, clicks: ownerClicksSnap.size }}
+      ownerStats={{ scans: ownerScans, clicks: ownerClicksSnap.size }}
       totalStats={{ scans: totalScans, clicks: totalClicks }}
       ownerEmail={user.email ?? ''}
       isPro={isPro}

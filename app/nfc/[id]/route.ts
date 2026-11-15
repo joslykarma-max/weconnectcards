@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { PROFILE_MODULE, TAP_MODULES, isProfileModuleActive } from '@/lib/modules';
 import { standaloneUid } from '@/lib/standalone';
+import { getDeviceFromUA } from '@/lib/utils';
+import { isBotUA } from '@/lib/scans';
 import type { CardDoc, ProfileDoc, AccessCardDoc, MemberCardDoc, ModuleDoc, UserDoc } from '@/lib/types';
 
 export async function GET(
@@ -10,6 +12,11 @@ export async function GET(
 ) {
   const { id } = await params;
   const base   = new URL(req.url).origin;
+  const ua     = req.headers.get('user-agent') ?? '';
+  // A tap that does not open the profile page is counted here (the profile page counts its own visits)
+  const tapRecord = (userId: string, extra: Record<string, string> = {}) => (isBotUA(ua) ? null : {
+    userId, nfcId: id, ...extra, device: getDeviceFromUA(ua), source: 'nfc', userAgent: ua.slice(0, 512), scannedAt: new Date().toISOString(),
+  });
 
   const snap = await adminDb.collection('cards').where('nfcId', '==', id).limit(1).get();
 
@@ -27,13 +34,8 @@ export async function GET(
 
     // Direct link: the tap opens it straight away
     if (card.redirectUrl) {
-      adminDb.collection('scans').add({
-        userId:    standaloneUid(snap.docs[0].id),
-        nfcId:     id,
-        device:    'nfc',
-        userAgent: req.headers.get('user-agent')?.slice(0, 512) ?? '',
-        scannedAt: new Date().toISOString(),
-      }).catch(() => {});
+      const rec = tapRecord(standaloneUid(snap.docs[0].id));
+      if (rec) adminDb.collection('scans').add(rec).catch(() => {});
       return NextResponse.redirect(card.redirectUrl);
     }
 
@@ -43,7 +45,7 @@ export async function GET(
       : null;
     const sp = standaloneProfile?.exists ? (standaloneProfile.data() as ProfileDoc) : null;
     if (sp?.username && sp.isPublic) {
-      return NextResponse.redirect(`${base}/${sp.username}`);
+      return NextResponse.redirect(`${base}/${sp.username}?src=nfc`);
     }
     return NextResponse.redirect(base);
   }
@@ -68,14 +70,10 @@ export async function GET(
     return NextResponse.redirect(`${base}/dashboard`);
   }
 
-  const logScan = () => adminDb.collection('scans').add({
-    userId:    card.userId,
-    nfcId:     id,
-    ...(card.profileId && card.profileId !== card.userId ? { profileId: card.profileId } : {}),
-    device:    'nfc',
-    userAgent: req.headers.get('user-agent')?.slice(0, 512) ?? '',
-    scannedAt: new Date().toISOString(),
-  }).catch(() => {});
+  const logScan = () => {
+    const rec = tapRecord(card.userId!, card.profileId && card.profileId !== card.userId ? { profileId: card.profileId } : {});
+    if (rec) adminDb.collection('scans').add(rec).catch(() => {});
+  };
 
   // If this card is linked to an access porteur, redirect to their badge page
   if (card.accessCardId) {
@@ -124,6 +122,6 @@ export async function GET(
     return NextResponse.redirect(`${base}/m/${profile.username}/${tapModules[0].type}`);
   }
 
-  logScan();
-  return NextResponse.redirect(`${base}/${profile.username}`);
+  // Counted once, by the profile page (source « nfc »)
+  return NextResponse.redirect(`${base}/${profile.username}?src=nfc`);
 }

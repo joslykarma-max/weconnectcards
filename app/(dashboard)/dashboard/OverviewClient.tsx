@@ -5,7 +5,9 @@ import cx from '@/components/dashboard/shell/compact.module.css';
 import Link from 'next/link';
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
-type Scan          = { device: string; scannedAt: string };
+type Scan          = { device: string; source?: 'nfc' | 'qr' | 'link'; scannedAt: string };
+const DEVICE_NAMES: Record<string, string> = { iOS: 'iPhone', Android: 'Android', Other: 'Ordinateur' };
+const SOURCE_NAMES = { nfc: 'Tap NFC', qr: 'QR code', link: 'Lien partagé' } as const;
 type LoyaltyEntry  = { phone: string; stamps: number; lastStampAt?: string };
 type AccessEntry   = { zoneName: string; holderName?: string; status: 'granted' | 'denied'; timestamp: string };
 type MemberEntry   = { memberName: string; level: string; isActive: boolean };
@@ -87,7 +89,7 @@ function NfcDashboard({ recentScans, profile }: { recentScans: Scan[]; profile: 
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px', background: 'var(--t-row)', borderRadius: 6 }}>
                 <span style={{ fontSize: 18 }}>{scan.device === 'iOS' ? '🍎' : scan.device === 'Android' ? '🤖' : '💻'}</span>
                 <div style={{ flex: 1 }}>
-                  <p style={{ color: 'var(--t-text)', fontSize: 13 }}>{scan.device ?? 'Appareil inconnu'}</p>
+                  <p style={{ color: 'var(--t-text)', fontSize: 13 }}>{DEVICE_NAMES[scan.device] ?? 'Appareil inconnu'}{scan.source ? ` · ${SOURCE_NAMES[scan.source]}` : ''}</p>
                   <p style={{ color: 'var(--t-text-muted)', fontSize: 11, fontFamily: 'Space Mono, monospace' }}>
                     {new Date(scan.scannedAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </p>

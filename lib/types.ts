@@ -47,7 +47,10 @@ export interface LinkDoc {
 // Collection: scans/{scanId}
 export interface ScanDoc {
   userId:    string;
-  device:    string;
+  profileId?: string;                 // card profile (absent = main profile)
+  nfcId?:    string;
+  source?:   'nfc' | 'qr' | 'link';   // absent on records before 2026-11-15
+  device:    string;                  // iOS | Android | Other ('nfc' on old tap records)
   country?:  string;
   userAgent: string;
   scannedAt: string; // ISO date
