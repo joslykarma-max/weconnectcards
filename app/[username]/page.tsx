@@ -37,15 +37,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!profileSnap.exists) return { title: 'Profil introuvable — We Connect' };
 
   const profile = profileSnap.data() as ProfileDoc;
+  const role    = [profile.title, profile.company].filter(Boolean).join(' · ');
+  const description = (profile.tagline || profile.bio || role || `Carte de visite digitale de ${profile.displayName} sur We Connect.`).slice(0, 200);
 
+  // The share picture comes from ./opengraph-image.tsx (name, role, edition colours)
   return {
-    title:       `${profile.displayName} — We Connect`,
-    description: profile.bio ?? `${profile.title ?? ''} ${profile.company ? `@ ${profile.company}` : ''}`.trim(),
+    title: `${profile.displayName} — We Connect`,
+    description,
+    alternates: { canonical: `/${profile.username}` },
     openGraph: {
-      title:       profile.displayName,
-      description: profile.bio ?? undefined,
-      images:      profile.avatar ? [profile.avatar] : undefined,
+      type: 'profile', siteName: 'We Connect', locale: 'fr_FR',
+      url: `/${profile.username}`,
+      title: role ? `${profile.displayName} — ${role}` : profile.displayName,
+      description,
     },
+    twitter: { card: 'summary_large_image', title: profile.displayName, description },
   };
 }
 

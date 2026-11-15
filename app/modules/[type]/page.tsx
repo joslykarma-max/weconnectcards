@@ -286,6 +286,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${mod.name} — Modules We Connect`,
     description: mod.desc,
+    openGraph: { title: `${mod.name} — ${mod.tagline}`, description: mod.desc, siteName: 'We Connect', locale: 'fr_FR', type: 'website' },
   };
 }
 

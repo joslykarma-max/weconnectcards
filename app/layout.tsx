@@ -8,16 +8,19 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'We Connect — Your Identity. One Touch.',
+  metadataBase: new URL('https://www.weconnect.cards'),
+  title: 'We Connect — Cartes de visite NFC premium',
   description: 'La plateforme NFC premium pour partager votre identité professionnelle en un geste. Carte intelligente + dashboard temps réel.',
   keywords: ['NFC', 'carte de visite digitale', 'profil professionnel', 'We Connect', 'technologie NFC'],
   authors: [{ name: 'We Connect' }],
   openGraph: {
-    title: 'We Connect — Your Identity. One Touch.',
-    description: 'Partagez votre identité professionnelle en un geste avec la carte NFC premium.',
+    title: 'We Connect — Votre identité professionnelle, en un geste',
+    description: 'Cartes de visite NFC premium, profil digital et outils NFC pour vos événements. Conçu au Bénin.',
     type: 'website',
     locale: 'fr_FR',
+    siteName: 'We Connect',
   },
+  twitter: { card: 'summary_large_image' },
 };
 
 const themeInitScript = `

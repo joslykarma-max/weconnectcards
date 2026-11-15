@@ -8,7 +8,7 @@ export const RESERVED_USERNAMES = new Set([
   'dashboard', 'features', 'forgot-password', 'login', 'logout', 'm', 'ma-carte', 'modules',
   'nfc', 'p', 'controle', 'privacy', 'qr', 'register', 'reset-password', 'tarifs',
   // technical routes and public folders
-  'api', '_next', 'icon', 'icons', 'favicon', 'fonts', 'robots', 'sitemap', 'manifest',
+  'api', '_next', 'icon', 'icons', 'favicon', 'fonts', 'robots', 'sitemap', 'manifest', 'opengraph-image', 'twitter-image', 'assets',
 ]);
 
 export const USERNAME_MIN = 3;
